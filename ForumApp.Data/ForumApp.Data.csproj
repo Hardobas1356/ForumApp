@@ -17,7 +17,11 @@
 
   <ItemGroup>
     <Folder Include="Data\Migrations\" />
-    <Folder Include="Configurations\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ForumApp.Data.Common\ForumApp.Data.Common.csproj" />
+    <ProjectReference Include="..\ForumApp.Data.Models\ForumApp.Data.Models.csproj" />
   </ItemGroup>
 
 </Project>
