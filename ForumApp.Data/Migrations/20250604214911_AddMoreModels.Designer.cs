@@ -4,6 +4,7 @@ using ForumApp.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ForumApp.Data.Migrations
 {
     [DbContext(typeof(ForumAppDbContext))]
-    partial class ForumAppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250604214911_AddMoreModels")]
+    partial class AddMoreModels
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -66,7 +69,7 @@ namespace ForumApp.Data.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("BoardCategories");
+                    b.ToTable("BoardCategory");
                 });
 
             modelBuilder.Entity("ForumApp.Data.Models.BoardTag", b =>
@@ -83,7 +86,7 @@ namespace ForumApp.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("BoardTags");
+                    b.ToTable("BoardTag");
                 });
 
             modelBuilder.Entity("ForumApp.Data.Models.Category", b =>
@@ -100,7 +103,7 @@ namespace ForumApp.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categories");
+                    b.ToTable("Category");
                 });
 
             modelBuilder.Entity("ForumApp.Data.Models.Post", b =>
@@ -157,7 +160,7 @@ namespace ForumApp.Data.Migrations
 
                     b.HasIndex("PostId");
 
-                    b.ToTable("PostBoardTags");
+                    b.ToTable("PostBoardTag");
                 });
 
             modelBuilder.Entity("ForumApp.Data.Models.Reply", b =>
@@ -184,7 +187,7 @@ namespace ForumApp.Data.Migrations
 
                     b.HasIndex("PostId");
 
-                    b.ToTable("Replies");
+                    b.ToTable("Reply");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>

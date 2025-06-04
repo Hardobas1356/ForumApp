@@ -13,6 +13,11 @@ public class ForumAppDbContext : IdentityDbContext
 
     public virtual DbSet<Board> Boards { get; set; } = null!;
     public virtual DbSet<Post> Posts { get; set; } = null!;
+    public virtual DbSet<BoardCategory> BoardCategories { get; set; } = null!;
+    public virtual DbSet<BoardTag> BoardTags { get; set; } = null!;
+    public virtual DbSet<Category> Categories { get; set; } = null!;
+    public virtual DbSet<Reply> Replies { get; set; } = null!;
+    public virtual DbSet<PostBoardTag> PostBoardTags { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
