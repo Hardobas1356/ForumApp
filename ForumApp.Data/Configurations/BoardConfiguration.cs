@@ -12,6 +12,10 @@ public class BoardConfiguration : IEntityTypeConfiguration<Board>
             .HasKey(b => b.Id);
 
         builder
+            .HasIndex(b => b.Name)
+            .IsUnique();
+
+        builder
             .Property(b => b.Name)
             .IsRequired();
 

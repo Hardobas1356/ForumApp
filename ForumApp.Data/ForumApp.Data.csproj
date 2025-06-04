@@ -16,12 +16,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Data\Migrations\" />
+    <ProjectReference Include="..\ForumApp.Data.Common\ForumApp.Data.Common.csproj" />
+    <ProjectReference Include="..\ForumApp.Data.Models\ForumApp.Data.Models.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ForumApp.Data.Common\ForumApp.Data.Common.csproj" />
-    <ProjectReference Include="..\ForumApp.Data.Models\ForumApp.Data.Models.csproj" />
+    <Folder Include="Migrations\" />
   </ItemGroup>
 
 </Project>
