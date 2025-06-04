@@ -12,6 +12,10 @@ public class Post
 
     public int BoardId { get; set; }
     public virtual Board Board { get; set; } = null!;
+
+    public virtual ICollection<Reply> Replies { get; set; } = new HashSet<Reply>();
+    public virtual ICollection<PostBoardTag> PostTags { get; set; } = new HashSet<PostBoardTag>();
+
 }
 
 //-Post

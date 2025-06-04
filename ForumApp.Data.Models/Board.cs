@@ -8,7 +8,10 @@ public class Board
     public DateTime CreatedAt { get; set; } = DateTime.Now;
     public bool IsDeleted { get; set; } = false;
 
-    public virtual ICollection<Post> Posts { get; set; } = new HashSet<Post>();
+    public virtual ICollection<Post> Posts { get; set; }
+        = new HashSet<Post>();
+    public virtual ICollection<BoardCategory> BoardCategoryCollection { get; set; }
+        = new HashSet<BoardCategory>();
 }
 
 //-Board
