@@ -32,5 +32,11 @@ public class PostConfiguration : IEntityTypeConfiguration<Post>
             .WithMany(b => b.Posts)
             .HasForeignKey(p => p.BoardId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder
+            .HasMany(p => p.Replies)
+            .WithOne(r => r.Post)
+            .HasForeignKey(r => r.PostId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }
