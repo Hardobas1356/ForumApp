@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using ForumApp.Data.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace ForumApp.Data;
@@ -9,6 +10,9 @@ public class ForumAppDbContext : IdentityDbContext
         : base(options)
     {
     }
+
+    public virtual DbSet<Board> Boards { get; set; } = null!;
+    public virtual DbSet<Post> Posts { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
