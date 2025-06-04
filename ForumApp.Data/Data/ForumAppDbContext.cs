@@ -3,9 +3,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ForumApp.Data;
 
-public class ApplicationDbContext : IdentityDbContext
+public class ForumAppDbContext : IdentityDbContext
 {
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+    public ForumAppDbContext(DbContextOptions<ForumAppDbContext> options)
         : base(options)
     {
     }
