@@ -17,7 +17,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ForumApp.Data\ForumApp.Data.csproj" />
+    <ProjectReference Include="..\ForumApp.GCommon\ForumApp.GCommon.csproj" />
     <ProjectReference Include="..\ForumApp.Services.Core\ForumApp.Services.Core.csproj" />
+    <ProjectReference Include="..\ForumApp.Web.Infrastructure\ForumApp.Web.Infrastructure.csproj" />
+    <ProjectReference Include="..\ForumApp.Web.ViewModels\ForumApp.Web.ViewModels.csproj" />
   </ItemGroup>
 
 </Project>

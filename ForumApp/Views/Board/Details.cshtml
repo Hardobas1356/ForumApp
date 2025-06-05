@@ -1,0 +1,27 @@
+﻿@model ForumApp.Web.ViewModels.Board.BoardDetailsViewModel
+
+@{
+    ViewData["Title"] = Model.Name;
+}
+
+<h2>@Model.Name</h2>
+<p>@Model.Description</p>
+
+<h3>Posts</h3>
+
+@if (!Model.Posts.Any())
+{
+    <p>No posts in this board yet.</p>
+}
+else
+{
+    <ul class="list-group">
+        @foreach (var post in Model.Posts.OrderByDescending(p => p.CreatedAt))
+        {
+            <li class="list-group-item">
+                <strong>@post.Title</strong>
+                <span class="text-muted float-end">@post.CreatedAt</span>
+            </li>
+        }
+    </ul>
+}

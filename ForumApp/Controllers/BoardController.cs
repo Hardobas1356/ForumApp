@@ -19,4 +19,17 @@ public class BoardController : Controller
 
         return View(boards);
     }
+
+    [HttpGet]
+    public async Task<IActionResult> Details(int id)
+    {
+        var board = await boardService.GetBoardDetailsAsync(id);
+
+        if (board == null)
+        {
+            return NotFound();
+        }
+
+        return View(board);
+    }
 }
