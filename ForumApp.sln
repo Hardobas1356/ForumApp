@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36202.13 d17.14
+VisualStudioVersion = 17.14.36202.13
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ForumApp.Web", "ForumApp\ForumApp.Web.csproj", "{8DDA4F04-5505-46CC-BF89-EF3B5C5CE7E3}"
 EndProject
@@ -14,15 +14,18 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ForumApp.Data", "ForumApp.Data\ForumApp.Data.csproj", "{353D8DC3-04D7-4E4B-9998-9EE50C4262BB}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Web", "Web", "{031B2478-83FA-4B6C-AE1C-C73106B71FDB}"
-	ProjectSection(SolutionItems) = preProject
-		ForumApp.Data.Models\Board.cs = ForumApp.Data.Models\Board.cs
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ForumApp.Web.Infrastructure", "ForumApp.Web.Infrastructure\ForumApp.Web.Infrastructure.csproj", "{7E432E9D-A0FE-4889-8DCC-5495EA17F436}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ForumApp.Web.ViewModels", "ForumApp.Web.ViewModels\ForumApp.Web.ViewModels.csproj", "{CAED4FEE-1BFD-4AA2-89AB-45F5EFABB83F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ForumApp.GCommon", "ForumApp.GCommon\ForumApp.GCommon.csproj", "{06CB5D7E-A173-4FF6-9736-E8BA2C6FAADF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{1C2BA873-36DE-4631-B05C-E6144D0F794C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ForumApp.Services.Common", "ForumApp.Services.Common\ForumApp.Services.Common.csproj", "{E666B707-3EE2-4EBC-8CE7-284F14F1E6DA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ForumApp.Services.Core", "ForumApp.Services.Core\ForumApp.Services.Core.csproj", "{FABE71D9-F237-4AC4-8036-A8F4A42E7AA2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -58,6 +61,14 @@ Global
 		{06CB5D7E-A173-4FF6-9736-E8BA2C6FAADF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{06CB5D7E-A173-4FF6-9736-E8BA2C6FAADF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{06CB5D7E-A173-4FF6-9736-E8BA2C6FAADF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E666B707-3EE2-4EBC-8CE7-284F14F1E6DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E666B707-3EE2-4EBC-8CE7-284F14F1E6DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E666B707-3EE2-4EBC-8CE7-284F14F1E6DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E666B707-3EE2-4EBC-8CE7-284F14F1E6DA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FABE71D9-F237-4AC4-8036-A8F4A42E7AA2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FABE71D9-F237-4AC4-8036-A8F4A42E7AA2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FABE71D9-F237-4AC4-8036-A8F4A42E7AA2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FABE71D9-F237-4AC4-8036-A8F4A42E7AA2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -69,6 +80,8 @@ Global
 		{353D8DC3-04D7-4E4B-9998-9EE50C4262BB} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{7E432E9D-A0FE-4889-8DCC-5495EA17F436} = {031B2478-83FA-4B6C-AE1C-C73106B71FDB}
 		{CAED4FEE-1BFD-4AA2-89AB-45F5EFABB83F} = {031B2478-83FA-4B6C-AE1C-C73106B71FDB}
+		{E666B707-3EE2-4EBC-8CE7-284F14F1E6DA} = {1C2BA873-36DE-4631-B05C-E6144D0F794C}
+		{FABE71D9-F237-4AC4-8036-A8F4A42E7AA2} = {1C2BA873-36DE-4631-B05C-E6144D0F794C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F66DDD1E-2620-4D04-8A1D-A5D78128D4B0}

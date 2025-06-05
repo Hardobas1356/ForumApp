@@ -1,4 +1,6 @@
 using ForumApp.Data;
+using ForumApp.Services.Core;
+using ForumApp.Services.Core.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,6 +15,8 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<ForumAppDbContext>();
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddScoped<IBoardService, BoardService>();
 
 var app = builder.Build();
 
