@@ -14,13 +14,17 @@ public class BoardCategoryConfiguration : IEntityTypeConfiguration<BoardCategory
         builder
             .HasOne(bc => bc.Board)
             .WithMany(b => b.BoardCategoryCollection)
-            .HasForeignKey(b => b.BoardId)
+            .HasForeignKey(bc => bc.BoardId)
             .OnDelete(DeleteBehavior.Cascade);
 
         builder
             .HasOne(bc => bc.Category)
             .WithMany(c => c.BoardCategoryCollection)
-            .HasForeignKey(c => c.CategoryId)
+            .HasForeignKey(bc => bc.CategoryId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasData(
+            new BoardCategory { BoardId = 1, CategoryId = 1 },
+            new BoardCategory { BoardId = 2, CategoryId = 2 });
     }
 }

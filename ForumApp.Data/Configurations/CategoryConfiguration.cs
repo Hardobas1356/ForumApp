@@ -14,5 +14,9 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
         builder
             .Property(c => c.Name)
             .IsRequired();
+
+        builder.HasData(
+            new Category { Id = 1, Name = "Community" },
+            new Category { Id = 2, Name = "Support" });
     }
 }

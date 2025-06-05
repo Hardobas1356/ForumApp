@@ -38,5 +38,27 @@ public class PostConfiguration : IEntityTypeConfiguration<Post>
             .WithOne(r => r.Post)
             .HasForeignKey(r => r.PostId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasData(
+            new Post
+            {
+                Id = 1,
+                Title = "Welcome to the Forum!",
+                Content = "Introduce yourself here.",
+                BoardId = 1,
+                CreatedAt = DateTime.UtcNow,
+                ModifiedAt = DateTime.UtcNow
+            },
+            new Post
+            {
+                Id = 2,
+                Title = "Site Rules",
+                Content = "Please read before posting.",
+                BoardId = 2,
+                IsPinned = true,
+                CreatedAt = DateTime.UtcNow,
+                ModifiedAt = DateTime.UtcNow
+            }
+        );
     }
 }

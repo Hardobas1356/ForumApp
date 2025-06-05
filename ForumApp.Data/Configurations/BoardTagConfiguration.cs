@@ -14,5 +14,10 @@ public class BoardTagConfiguration : IEntityTypeConfiguration<BoardTag>
         builder
             .Property(bt => bt.Name)
             .IsRequired();
+
+        builder.HasData(
+            new BoardTag { Id = 1, Name = "Sticky" },
+            new BoardTag { Id = 2, Name = "Question" },
+            new BoardTag { Id = 3, Name = "Resolved" });
     }
 }

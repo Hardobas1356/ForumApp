@@ -22,5 +22,11 @@ public class PostBoardTagConfiguration : IEntityTypeConfiguration<PostBoardTag>
             .WithMany(p=>p.PostTags)
             .HasForeignKey(pbt => pbt.PostId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasData(
+            new PostBoardTag { PostId = 1, BoardTagId = 1 },
+            new PostBoardTag { PostId = 1, BoardTagId = 2 },
+            new PostBoardTag { PostId = 2, BoardTagId = 1 },
+            new PostBoardTag { PostId = 2, BoardTagId = 3 });
     }
 }

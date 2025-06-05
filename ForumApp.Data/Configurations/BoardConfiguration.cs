@@ -27,5 +27,10 @@ public class BoardConfiguration : IEntityTypeConfiguration<Board>
             .Property(b => b.CreatedAt)
             .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
+        builder.HasData(
+            new Board { Id = 1, Name = "General", Description = "General discussion board" },
+            new Board { Id = 2, Name = "Announcements", Description = "Official announcements" }
+        );
+
     }
 }
