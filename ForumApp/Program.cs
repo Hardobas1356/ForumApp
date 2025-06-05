@@ -17,6 +17,7 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.Requ
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddScoped<IBoardService, BoardService>();
+builder.Services.AddScoped<IPostService, PostService>();
 
 var app = builder.Build();
 

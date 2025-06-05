@@ -1,0 +1,23 @@
+﻿@model ForumApp.Web.ViewModels.Post.PostDetailsViewModel
+
+<h2>@Model.Title</h2>
+<p><em>@Model.CreatedAt</em></p>
+<div>
+	@Model.Content
+</div>
+@if (!Model.Replies.Any())
+{
+	<p>No replies in this post yet.</p>
+}
+else
+{
+	<ul class="list-group">
+		@foreach (var reply in Model.Replies.OrderByDescending(p => p.CreatedAt))
+		{
+			<li class="list-group-item d-flex justify-content-between align-items-center">
+				@reply.Content
+				<span class="text-muted">@reply.CreatedAt</span>
+			</li>
+		}
+	</ul>
+}
