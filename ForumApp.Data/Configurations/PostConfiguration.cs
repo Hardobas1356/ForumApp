@@ -2,6 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
+using static ForumApp.Data.Common.PostConstants;
+
 namespace ForumApp.Data.Configurations;
 
 public class PostConfiguration : IEntityTypeConfiguration<Post>
@@ -13,11 +15,13 @@ public class PostConfiguration : IEntityTypeConfiguration<Post>
 
         builder
             .Property(p => p.Content)
-            .IsRequired();
+            .IsRequired()
+            .HasMaxLength(ContentMaximumLength);
 
         builder
             .Property(p => p.Title)
-            .IsRequired();
+            .IsRequired()
+            .HasMaxLength(TitleMaximumLength);
 
         builder
             .Property(p => p.CreatedAt)

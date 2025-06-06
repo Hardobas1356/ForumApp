@@ -2,6 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
+using static ForumApp.Data.Common.CategoryConstants;
+
 namespace ForumApp.Data.Configurations;
 
 public class CategoryConfiguration : IEntityTypeConfiguration<Category>
@@ -13,7 +15,8 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
 
         builder
             .Property(c => c.Name)
-            .IsRequired();
+            .IsRequired()
+            .HasMaxLength(NameMaxLength);
 
         builder.HasData(
             new Category { Id = 1, Name = "Community" },

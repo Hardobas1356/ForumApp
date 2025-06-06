@@ -2,6 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
+using static ForumApp.Data.Common.BoardTagConstants;
+
 namespace ForumApp.Data.Configurations;
 
 public class BoardTagConfiguration : IEntityTypeConfiguration<BoardTag>
@@ -13,7 +15,8 @@ public class BoardTagConfiguration : IEntityTypeConfiguration<BoardTag>
 
         builder
             .Property(bt => bt.Name)
-            .IsRequired();
+            .IsRequired()
+            .HasMaxLength(NameMaxLength);
 
         builder.HasData(
             new BoardTag { Id = 1, Name = "Sticky" },

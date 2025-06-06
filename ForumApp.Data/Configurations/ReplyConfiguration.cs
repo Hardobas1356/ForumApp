@@ -2,6 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
+using static ForumApp.Data.Common.ReplyConstants;
+
 namespace ForumApp.Data.Configurations;
 
 public class ReplyConfiguration : IEntityTypeConfiguration<Reply>
@@ -13,7 +15,12 @@ public class ReplyConfiguration : IEntityTypeConfiguration<Reply>
 
         builder
             .Property(r => r.Content)
-            .IsRequired();
+            .IsRequired()
+            .HasMaxLength(ContentMaxLength);
+
+        builder
+            .Property(r => r.IsDeleted)
+            .HasDefaultValue(false);
 
         builder
             .Property(r => r.CreatedAt)
