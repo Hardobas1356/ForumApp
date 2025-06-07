@@ -1,16 +1,20 @@
-﻿namespace ForumApp.Data.Models;
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace ForumApp.Data.Models;
 
 public class Category
 {
+    [Comment("Id of category")]
     public int Id { get; set; }
-	public string Name { get; set; } = null!;
+    [Comment("Name of category")]
+    public string Name { get; set; } = null!;
 
-    public virtual ICollection<BoardCategory> BoardCategoryCollection { get; set; }
+    public virtual ICollection<BoardCategory> BoardCategories { get; set; }
     = new HashSet<BoardCategory>();
 }
 
-	//-Category
-	//	-ID
-	//	-Name
+//-Category
+//	-ID
+//	-Name
 
-	//	-BoardCollection
+//	-BoardCollection

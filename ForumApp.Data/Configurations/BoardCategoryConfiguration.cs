@@ -13,13 +13,13 @@ public class BoardCategoryConfiguration : IEntityTypeConfiguration<BoardCategory
 
         builder
             .HasOne(bc => bc.Board)
-            .WithMany(b => b.BoardCategoryCollection)
+            .WithMany(b => b.BoardCategories)
             .HasForeignKey(bc => bc.BoardId)
             .OnDelete(DeleteBehavior.Cascade);
 
         builder
             .HasOne(bc => bc.Category)
-            .WithMany(c => c.BoardCategoryCollection)
+            .WithMany(c => c.BoardCategories)
             .HasForeignKey(bc => bc.CategoryId)
             .OnDelete(DeleteBehavior.Cascade);
 

@@ -13,13 +13,13 @@ public class PostBoardTagConfiguration : IEntityTypeConfiguration<PostBoardTag>
 
         builder
             .HasOne(pbt => pbt.BoardTag)
-            .WithMany(bt => bt.PostTags)
+            .WithMany(bt => bt.PostBoardTags)
             .HasForeignKey(pbt => pbt.BoardTagId)
             .OnDelete(DeleteBehavior.Cascade);
 
         builder
             .HasOne(pbt=>pbt.Post)
-            .WithMany(p=>p.PostTags)
+            .WithMany(p=>p.PostBoardTags)
             .HasForeignKey(pbt => pbt.PostId)
             .OnDelete(DeleteBehavior.Cascade);
 
