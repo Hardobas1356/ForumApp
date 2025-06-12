@@ -7,9 +7,13 @@ public class EditPostViewModel
 {
     public int Id { get; set; }
 
-    [Required]
+    [Required(ErrorMessage = TitleRequiredErrorMessage)]
+    [MaxLength(TitleMaximumLength, ErrorMessage = TitleInvalidLengthErrorMessage)]
+    [MinLength(TitleMinimumLength, ErrorMessage = TitleInvalidLengthErrorMessage)]
     public string Title { get; set; } = null!;
 
-    [Required]
+    [Required(ErrorMessage = ContentInvalidLengthErrorMessage)]
+    [MaxLength(ContentMaximumLength, ErrorMessage = ContentInvalidLengthErrorMessage)]
+    [MinLength(ContentMinimumLength, ErrorMessage = ContentInvalidLengthErrorMessage)]
     public string Content { get; set; } = null!;
 }
