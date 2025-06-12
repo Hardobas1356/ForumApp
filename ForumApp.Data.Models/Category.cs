@@ -5,7 +5,8 @@ namespace ForumApp.Data.Models;
 public class Category
 {
     [Comment("Id of category")]
-    public int Id { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
+
     [Comment("Name of category")]
     public string Name { get; set; } = null!;
 

@@ -14,6 +14,10 @@ public class BoardConfiguration : IEntityTypeConfiguration<Board>
             .HasKey(b => b.Id);
 
         builder
+            .Property(b => b.Id)
+            .ValueGeneratedNever();
+
+        builder
             .HasIndex(b => b.Name)
             .IsUnique();
 
@@ -30,11 +34,6 @@ public class BoardConfiguration : IEntityTypeConfiguration<Board>
         builder
             .Property(b => b.CreatedAt)
             .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-        builder.HasData(
-            new Board { Id = 1, Name = "General", Description = "General discussion board" },
-            new Board { Id = 2, Name = "Announcements", Description = "Official announcements" }
-        );
 
     }
 }

@@ -14,12 +14,12 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
             .HasKey(c => c.Id);
 
         builder
+            .Property(c => c.Id)
+            .ValueGeneratedNever();
+
+        builder
             .Property(c => c.Name)
             .IsRequired()
             .HasMaxLength(NameMaxLength);
-
-        builder.HasData(
-            new Category { Id = 1, Name = "Community" },
-            new Category { Id = 2, Name = "Support" });
     }
 }

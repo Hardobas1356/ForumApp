@@ -5,7 +5,7 @@ using static ForumApp.Data.Common.PostConstants;
 
 public class EditPostViewModel
 {
-    public int Id { get; set; }
+    public string Id { get; set; } = null!;
 
     [Required(ErrorMessage = TitleRequiredErrorMessage)]
     [MaxLength(TitleMaximumLength, ErrorMessage = TitleInvalidLengthErrorMessage)]

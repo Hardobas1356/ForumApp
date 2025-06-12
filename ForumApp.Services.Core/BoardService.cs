@@ -33,15 +33,20 @@ public class BoardService : IBoardService
         return boards;
     }
 
-    public async Task<BoardDetailsViewModel?> GetBoardDetailsAsync(int boardId)
+    public async Task<BoardDetailsViewModel?> GetBoardDetailsAsync(string boardId)
     {
+        if (Guid.TryParse(boardId, out Guid id))
+        {
+            return null;
+        }
+
         var boardDetails = await dbContext
             .Boards
             .AsNoTracking()
-            .Where(b => !b.IsDeleted && b.Id == boardId)
+            .Where(b => !b.IsDeleted && b.Id == id)
             .Select(b => new BoardDetailsViewModel
             {
-                Id = (int)b.Id,
+                Id = b.Id.ToString(),
                 Name = b.Name,
                 Description = b.Description,
                 Posts = b.Posts
@@ -49,7 +54,7 @@ public class BoardService : IBoardService
                             .OrderByDescending(p => p.IsPinned)
                             .Select(p => new BoardPostViewModel
                             {
-                                Id = (int)p.Id,
+                                Id = p.Id.ToString(),
                                 Title = p.Title,
                                 CreatedAt = p.CreatedAt.ToString(DateTimeFormat),
                             })

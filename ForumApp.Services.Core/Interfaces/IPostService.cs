@@ -4,8 +4,8 @@ namespace ForumApp.Services.Core.Interfaces;
 
 public interface IPostService
 {
-    Task<PostDetailsViewModel?> GetPostDetailsAsync(int id);
+    Task<PostDetailsViewModel?> GetPostDetailsAsync(string id);
 
-    Task<EditPostViewModel?> GetPostForEditAsync(int id);
+    Task<EditPostViewModel?> GetPostForEditAsync(string id);
     Task<bool> EditPostAsync(EditPostViewModel model);
 }

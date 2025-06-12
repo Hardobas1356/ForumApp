@@ -22,9 +22,5 @@ public class BoardCategoryConfiguration : IEntityTypeConfiguration<BoardCategory
             .WithMany(c => c.BoardCategories)
             .HasForeignKey(bc => bc.CategoryId)
             .OnDelete(DeleteBehavior.Cascade);
-
-        builder.HasData(
-            new BoardCategory { BoardId = 1, CategoryId = 1 },
-            new BoardCategory { BoardId = 2, CategoryId = 2 });
     }
 }

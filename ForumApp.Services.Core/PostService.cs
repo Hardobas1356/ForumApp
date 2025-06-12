@@ -19,9 +19,14 @@ public class PostService : IPostService
 
     public async Task<bool> EditPostAsync(EditPostViewModel model)
     {
+        if (!Guid.TryParse(model.Id, out Guid id))
+        {
+            return false;
+        }
+
         var post = await dbContext
             .Posts
-            .Where(p => p.Id == model.Id && !p.IsDeleted)
+            .Where(p => p.Id == id && !p.IsDeleted)
             .FirstOrDefaultAsync();
 
         if (post == null)
@@ -37,16 +42,21 @@ public class PostService : IPostService
         return true;
     }
 
-    public async Task<EditPostViewModel?> GetPostForEditAsync(int id)
+    public async Task<EditPostViewModel?> GetPostForEditAsync(string id)
     {
         EditPostViewModel? model = null;
 
+        if (!Guid.TryParse(id, out Guid guidId))
+        {
+            return model;
+        }
+
         model = await dbContext
             .Posts
-            .Where(p => !p.IsDeleted && p.Id == id)
+            .Where(p => !p.IsDeleted && p.Id == guidId)
             .Select(p => new EditPostViewModel
             {
-                Id = p.Id,
+                Id = id,
                 Title = p.Title,
                 Content = p.Content,
             })
@@ -55,19 +65,24 @@ public class PostService : IPostService
         return model;
     }
 
-    public async Task<PostDetailsViewModel?> GetPostDetailsAsync(int id)
+    public async Task<PostDetailsViewModel?> GetPostDetailsAsync(string id)
     {
+        if (!Guid.TryParse(id, out Guid guidId))
+        {
+            return null;
+        }
+
         var post = await dbContext
             .Posts
             .AsNoTracking()
-            .Where(p => p.Id == id && !p.IsDeleted)
+            .Where(p => p.Id == guidId && !p.IsDeleted)
             .Select(p => new PostDetailsViewModel
             {
-                Id = p.Id,
+                Id = id,
                 Title = p.Title,
                 Content = p.Content,
                 CreatedAt = p.CreatedAt.ToString(DateTimeFormat),
-                BoardId = p.BoardId,
+                BoardId = p.BoardId.ToString(),
                 BoardName = dbContext
                                 .Boards
                                 .AsNoTracking()
@@ -78,7 +93,7 @@ public class PostService : IPostService
                                 .Replies
                                 .Select(r => new ReplyDetailForPostDetailViewModel
                                 {
-                                    Id = r.Id,
+                                    Id = r.Id.ToString(),
                                     Content = r.Content,
                                     CreatedAt = r.CreatedAt.ToString(DateTimeFormat)
                                 })

@@ -5,7 +5,8 @@ namespace ForumApp.Data.Models;
 public class BoardTag
 {
     [Comment("Id of tag which can be used in posts on a board")]
-    public int Id { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
+
     [Comment("Name of tag")]
     public string Name { get; set; } = null!;
 
