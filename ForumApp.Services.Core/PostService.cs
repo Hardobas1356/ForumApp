@@ -17,6 +17,44 @@ public class PostService : IPostService
         this.dbContext = dbContext;
     }
 
+    public async Task<bool> EditPostAsync(EditPostViewModel model)
+    {
+        var post = await dbContext
+            .Posts
+            .Where(p => p.Id == model.Id && !p.IsDeleted)
+            .FirstOrDefaultAsync();
+
+        if (post == null)
+        {
+            return false;
+        }
+
+        post.Title = model.Title;
+        post.Content = model.Content;
+        post.ModifiedAt = DateTime.Now;
+
+        await dbContext.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<EditPostViewModel?> GetPostForEditAsync(int id)
+    {
+        EditPostViewModel? model = null;
+
+        model = await dbContext
+            .Posts
+            .Where(p => !p.IsDeleted && p.Id == id)
+            .Select(p => new EditPostViewModel
+            {
+                Id = p.Id,
+                Title = p.Title,
+                Content = p.Content,
+            })
+            .FirstOrDefaultAsync();
+
+        return model;
+    }
+
     public async Task<PostDetailsViewModel?> GetPostDetailsAsync(int id)
     {
         var post = await dbContext

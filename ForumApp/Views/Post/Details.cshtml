@@ -4,6 +4,7 @@
 <p><em>@Model.CreatedAt</em></p>
 <div>
 	@Model.Content
+	<a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Edit</a>
 </div>
 @if (!Model.Replies.Any())
 {
