@@ -24,27 +24,31 @@ namespace ForumApp.Data.Migrations
 
             modelBuilder.Entity("ForumApp.Data.Models.Board", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier")
+                        .HasComment("Board Id");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                        .HasComment("Board creation date");
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(600)
+                        .HasColumnType("nvarchar(600)")
+                        .HasComment("Short description of the board");
 
                     b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasComment("Represents whether the board is deleted or not");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(130)
+                        .HasColumnType("nvarchar(130)")
+                        .HasComment("Name of board");
 
                     b.HasKey("Id");
 
@@ -52,260 +56,158 @@ namespace ForumApp.Data.Migrations
                         .IsUnique();
 
                     b.ToTable("Boards");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            CreatedAt = new DateTime(2025, 6, 5, 14, 48, 47, 297, DateTimeKind.Local).AddTicks(1278),
-                            Description = "General discussion board",
-                            IsDeleted = false,
-                            Name = "General"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            CreatedAt = new DateTime(2025, 6, 5, 14, 48, 47, 297, DateTimeKind.Local).AddTicks(1336),
-                            Description = "Official announcements",
-                            IsDeleted = false,
-                            Name = "Announcements"
-                        });
                 });
 
             modelBuilder.Entity("ForumApp.Data.Models.BoardCategory", b =>
                 {
-                    b.Property<int>("BoardId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("BoardId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasComment("Id of board");
 
-                    b.Property<int>("CategoryId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("CategoryId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasComment("Id of category to apply to board");
 
                     b.HasKey("BoardId", "CategoryId");
 
                     b.HasIndex("CategoryId");
 
                     b.ToTable("BoardCategories");
-
-                    b.HasData(
-                        new
-                        {
-                            BoardId = 1,
-                            CategoryId = 1
-                        },
-                        new
-                        {
-                            BoardId = 2,
-                            CategoryId = 2
-                        });
                 });
 
             modelBuilder.Entity("ForumApp.Data.Models.BoardTag", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier")
+                        .HasComment("Id of tag which can be used in posts on a board");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)")
+                        .HasComment("Name of tag");
 
                     b.HasKey("Id");
 
                     b.ToTable("BoardTags");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Name = "Sticky"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Name = "Question"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Name = "Resolved"
-                        });
                 });
 
             modelBuilder.Entity("ForumApp.Data.Models.Category", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier")
+                        .HasComment("Id of category");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(130)
+                        .HasColumnType("nvarchar(130)")
+                        .HasComment("Name of category");
 
                     b.HasKey("Id");
 
                     b.ToTable("Categories");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Name = "Community"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Name = "Support"
-                        });
                 });
 
             modelBuilder.Entity("ForumApp.Data.Models.Post", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier")
+                        .HasComment("Id of post");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("BoardId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("BoardId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasComment("Id of board to which the post belongs to");
 
                     b.Property<string>("Content")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20000)
+                        .HasColumnType("nvarchar(max)")
+                        .HasComment("Content of the post");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                        .HasComment("Date when the post was created in UTC time");
 
                     b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasComment("Shows whether the post was deleted by moderator");
 
                     b.Property<bool>("IsPinned")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasComment("Shows whether the post is pinned moderator");
 
                     b.Property<DateTime>("ModifiedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                        .HasComment("Last date the post was modified in UTC time");
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)")
+                        .HasComment("Title pf the post");
 
                     b.HasKey("Id");
 
                     b.HasIndex("BoardId");
 
                     b.ToTable("Posts");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            BoardId = 1,
-                            Content = "Introduce yourself here.",
-                            CreatedAt = new DateTime(2025, 6, 5, 11, 48, 47, 298, DateTimeKind.Utc).AddTicks(2056),
-                            IsDeleted = false,
-                            IsPinned = false,
-                            ModifiedAt = new DateTime(2025, 6, 5, 11, 48, 47, 298, DateTimeKind.Utc).AddTicks(2056),
-                            Title = "Welcome to the Forum!"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            BoardId = 2,
-                            Content = "Please read before posting.",
-                            CreatedAt = new DateTime(2025, 6, 5, 11, 48, 47, 298, DateTimeKind.Utc).AddTicks(2061),
-                            IsDeleted = false,
-                            IsPinned = true,
-                            ModifiedAt = new DateTime(2025, 6, 5, 11, 48, 47, 298, DateTimeKind.Utc).AddTicks(2061),
-                            Title = "Site Rules"
-                        });
                 });
 
             modelBuilder.Entity("ForumApp.Data.Models.PostBoardTag", b =>
                 {
-                    b.Property<int>("BoardTagId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("BoardTagId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasComment("Id of the tag which applied to the post");
 
-                    b.Property<int>("PostId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("PostId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasComment("Id of the post");
 
                     b.HasKey("BoardTagId", "PostId");
 
                     b.HasIndex("PostId");
 
                     b.ToTable("PostBoardTags");
-
-                    b.HasData(
-                        new
-                        {
-                            BoardTagId = 1,
-                            PostId = 1
-                        },
-                        new
-                        {
-                            BoardTagId = 2,
-                            PostId = 1
-                        },
-                        new
-                        {
-                            BoardTagId = 1,
-                            PostId = 2
-                        },
-                        new
-                        {
-                            BoardTagId = 3,
-                            PostId = 2
-                        });
                 });
 
             modelBuilder.Entity("ForumApp.Data.Models.Reply", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier")
+                        .HasComment("Id of reply");
 
                     b.Property<string>("Content")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)")
+                        .HasComment("Comment of reply");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                        .HasComment("Date when the reply was created in UTC time");
 
-                    b.Property<int>("PostId")
-                        .HasColumnType("int");
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false)
+                        .HasComment("Shows whether the reply was deleted by moderator");
+
+                    b.Property<Guid>("PostId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasComment("Id of the post to which the reply belongs to");
 
                     b.HasKey("Id");
 
                     b.HasIndex("PostId");
 
                     b.ToTable("Replies");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Content = "Hello everyone!",
-                            CreatedAt = new DateTime(2025, 6, 5, 11, 48, 47, 298, DateTimeKind.Utc).AddTicks(3760),
-                            PostId = 1
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Content = "Thanks for the heads-up.",
-                            CreatedAt = new DateTime(2025, 6, 5, 11, 48, 47, 298, DateTimeKind.Utc).AddTicks(3761),
-                            PostId = 2
-                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -513,13 +415,13 @@ namespace ForumApp.Data.Migrations
             modelBuilder.Entity("ForumApp.Data.Models.BoardCategory", b =>
                 {
                     b.HasOne("ForumApp.Data.Models.Board", "Board")
-                        .WithMany("BoardCategoryCollection")
+                        .WithMany("BoardCategories")
                         .HasForeignKey("BoardId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("ForumApp.Data.Models.Category", "Category")
-                        .WithMany("BoardCategoryCollection")
+                        .WithMany("BoardCategories")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -543,13 +445,13 @@ namespace ForumApp.Data.Migrations
             modelBuilder.Entity("ForumApp.Data.Models.PostBoardTag", b =>
                 {
                     b.HasOne("ForumApp.Data.Models.BoardTag", "BoardTag")
-                        .WithMany("PostTags")
+                        .WithMany("PostBoardTags")
                         .HasForeignKey("BoardTagId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("ForumApp.Data.Models.Post", "Post")
-                        .WithMany("PostTags")
+                        .WithMany("PostBoardTags")
                         .HasForeignKey("PostId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -623,24 +525,24 @@ namespace ForumApp.Data.Migrations
 
             modelBuilder.Entity("ForumApp.Data.Models.Board", b =>
                 {
-                    b.Navigation("BoardCategoryCollection");
+                    b.Navigation("BoardCategories");
 
                     b.Navigation("Posts");
                 });
 
             modelBuilder.Entity("ForumApp.Data.Models.BoardTag", b =>
                 {
-                    b.Navigation("PostTags");
+                    b.Navigation("PostBoardTags");
                 });
 
             modelBuilder.Entity("ForumApp.Data.Models.Category", b =>
                 {
-                    b.Navigation("BoardCategoryCollection");
+                    b.Navigation("BoardCategories");
                 });
 
             modelBuilder.Entity("ForumApp.Data.Models.Post", b =>
                 {
-                    b.Navigation("PostTags");
+                    b.Navigation("PostBoardTags");
 
                     b.Navigation("Replies");
                 });

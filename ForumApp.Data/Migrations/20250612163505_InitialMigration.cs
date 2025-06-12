@@ -54,16 +54,39 @@ namespace ForumApp.Data.Migrations
                 name: "Boards",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, comment: "Board Id"),
+                    Name = table.Column<string>(type: "nvarchar(130)", maxLength: 130, nullable: false, comment: "Name of board"),
+                    Description = table.Column<string>(type: "nvarchar(600)", maxLength: 600, nullable: false, comment: "Short description of the board"),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP", comment: "Board creation date"),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false, comment: "Represents whether the board is deleted or not")
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Boards", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "BoardTags",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, comment: "Id of tag which can be used in posts on a board"),
+                    Name = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false, comment: "Name of tag")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BoardTags", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Categories",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, comment: "Id of category"),
+                    Name = table.Column<string>(type: "nvarchar(130)", maxLength: 130, nullable: false, comment: "Name of category")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Categories", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -176,15 +199,14 @@ namespace ForumApp.Data.Migrations
                 name: "Posts",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Content = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
-                    ModifiedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
-                    IsPinned = table.Column<bool>(type: "bit", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    BoardId = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, comment: "Id of post"),
+                    Title = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false, comment: "Title pf the post"),
+                    Content = table.Column<string>(type: "nvarchar(max)", maxLength: 20000, nullable: false, comment: "Content of the post"),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP", comment: "Date when the post was created in UTC time"),
+                    ModifiedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP", comment: "Last date the post was modified in UTC time"),
+                    IsPinned = table.Column<bool>(type: "bit", nullable: false, comment: "Shows whether the post is pinned moderator"),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false, comment: "Shows whether the post was deleted by moderator"),
+                    BoardId = table.Column<Guid>(type: "uniqueidentifier", nullable: false, comment: "Id of board to which the post belongs to")
                 },
                 constraints: table =>
                 {
@@ -193,6 +215,75 @@ namespace ForumApp.Data.Migrations
                         name: "FK_Posts_Boards_BoardId",
                         column: x => x.BoardId,
                         principalTable: "Boards",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "BoardCategories",
+                columns: table => new
+                {
+                    BoardId = table.Column<Guid>(type: "uniqueidentifier", nullable: false, comment: "Id of board"),
+                    CategoryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false, comment: "Id of category to apply to board")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BoardCategories", x => new { x.BoardId, x.CategoryId });
+                    table.ForeignKey(
+                        name: "FK_BoardCategories_Boards_BoardId",
+                        column: x => x.BoardId,
+                        principalTable: "Boards",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_BoardCategories_Categories_CategoryId",
+                        column: x => x.CategoryId,
+                        principalTable: "Categories",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PostBoardTags",
+                columns: table => new
+                {
+                    PostId = table.Column<Guid>(type: "uniqueidentifier", nullable: false, comment: "Id of the post"),
+                    BoardTagId = table.Column<Guid>(type: "uniqueidentifier", nullable: false, comment: "Id of the tag which applied to the post")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PostBoardTags", x => new { x.BoardTagId, x.PostId });
+                    table.ForeignKey(
+                        name: "FK_PostBoardTags_BoardTags_BoardTagId",
+                        column: x => x.BoardTagId,
+                        principalTable: "BoardTags",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_PostBoardTags_Posts_PostId",
+                        column: x => x.PostId,
+                        principalTable: "Posts",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Replies",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, comment: "Id of reply"),
+                    Content = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false, comment: "Comment of reply"),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP", comment: "Date when the reply was created in UTC time"),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false, defaultValue: false, comment: "Shows whether the reply was deleted by moderator"),
+                    PostId = table.Column<Guid>(type: "uniqueidentifier", nullable: false, comment: "Id of the post to which the reply belongs to")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Replies", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Replies_Posts_PostId",
+                        column: x => x.PostId,
+                        principalTable: "Posts",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -237,15 +328,30 @@ namespace ForumApp.Data.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
+                name: "IX_BoardCategories_CategoryId",
+                table: "BoardCategories",
+                column: "CategoryId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Boards_Name",
                 table: "Boards",
                 column: "Name",
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_PostBoardTags_PostId",
+                table: "PostBoardTags",
+                column: "PostId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Posts_BoardId",
                 table: "Posts",
                 column: "BoardId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Replies_PostId",
+                table: "Replies",
+                column: "PostId");
         }
 
         /// <inheritdoc />
@@ -267,13 +373,28 @@ namespace ForumApp.Data.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "Posts");
+                name: "BoardCategories");
+
+            migrationBuilder.DropTable(
+                name: "PostBoardTags");
+
+            migrationBuilder.DropTable(
+                name: "Replies");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "Categories");
+
+            migrationBuilder.DropTable(
+                name: "BoardTags");
+
+            migrationBuilder.DropTable(
+                name: "Posts");
 
             migrationBuilder.DropTable(
                 name: "Boards");

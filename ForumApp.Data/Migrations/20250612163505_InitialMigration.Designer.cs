@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ForumApp.Data.Migrations
 {
     [DbContext(typeof(ForumAppDbContext))]
-    [Migration("20250604152828_InitialMigration")]
+    [Migration("20250612163505_InitialMigration")]
     partial class InitialMigration
     {
         /// <inheritdoc />
@@ -27,27 +27,31 @@ namespace ForumApp.Data.Migrations
 
             modelBuilder.Entity("ForumApp.Data.Models.Board", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier")
+                        .HasComment("Board Id");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                        .HasComment("Board creation date");
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(600)
+                        .HasColumnType("nvarchar(600)")
+                        .HasComment("Short description of the board");
 
                     b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasComment("Represents whether the board is deleted or not");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(130)
+                        .HasColumnType("nvarchar(130)")
+                        .HasComment("Name of board");
 
                     b.HasKey("Id");
 
@@ -57,46 +61,156 @@ namespace ForumApp.Data.Migrations
                     b.ToTable("Boards");
                 });
 
+            modelBuilder.Entity("ForumApp.Data.Models.BoardCategory", b =>
+                {
+                    b.Property<Guid>("BoardId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasComment("Id of board");
+
+                    b.Property<Guid>("CategoryId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasComment("Id of category to apply to board");
+
+                    b.HasKey("BoardId", "CategoryId");
+
+                    b.HasIndex("CategoryId");
+
+                    b.ToTable("BoardCategories");
+                });
+
+            modelBuilder.Entity("ForumApp.Data.Models.BoardTag", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier")
+                        .HasComment("Id of tag which can be used in posts on a board");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)")
+                        .HasComment("Name of tag");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("BoardTags");
+                });
+
+            modelBuilder.Entity("ForumApp.Data.Models.Category", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier")
+                        .HasComment("Id of category");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(130)
+                        .HasColumnType("nvarchar(130)")
+                        .HasComment("Name of category");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Categories");
+                });
+
             modelBuilder.Entity("ForumApp.Data.Models.Post", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier")
+                        .HasComment("Id of post");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("BoardId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("BoardId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasComment("Id of board to which the post belongs to");
 
                     b.Property<string>("Content")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20000)
+                        .HasColumnType("nvarchar(max)")
+                        .HasComment("Content of the post");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                        .HasComment("Date when the post was created in UTC time");
 
                     b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasComment("Shows whether the post was deleted by moderator");
 
                     b.Property<bool>("IsPinned")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasComment("Shows whether the post is pinned moderator");
 
                     b.Property<DateTime>("ModifiedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                        .HasComment("Last date the post was modified in UTC time");
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)")
+                        .HasComment("Title pf the post");
 
                     b.HasKey("Id");
 
                     b.HasIndex("BoardId");
 
                     b.ToTable("Posts");
+                });
+
+            modelBuilder.Entity("ForumApp.Data.Models.PostBoardTag", b =>
+                {
+                    b.Property<Guid>("BoardTagId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasComment("Id of the tag which applied to the post");
+
+                    b.Property<Guid>("PostId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasComment("Id of the post");
+
+                    b.HasKey("BoardTagId", "PostId");
+
+                    b.HasIndex("PostId");
+
+                    b.ToTable("PostBoardTags");
+                });
+
+            modelBuilder.Entity("ForumApp.Data.Models.Reply", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier")
+                        .HasComment("Id of reply");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)")
+                        .HasComment("Comment of reply");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                        .HasComment("Date when the reply was created in UTC time");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false)
+                        .HasComment("Shows whether the reply was deleted by moderator");
+
+                    b.Property<Guid>("PostId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasComment("Id of the post to which the reply belongs to");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PostId");
+
+                    b.ToTable("Replies");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -301,6 +415,25 @@ namespace ForumApp.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("ForumApp.Data.Models.BoardCategory", b =>
+                {
+                    b.HasOne("ForumApp.Data.Models.Board", "Board")
+                        .WithMany("BoardCategories")
+                        .HasForeignKey("BoardId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ForumApp.Data.Models.Category", "Category")
+                        .WithMany("BoardCategories")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Board");
+
+                    b.Navigation("Category");
+                });
+
             modelBuilder.Entity("ForumApp.Data.Models.Post", b =>
                 {
                     b.HasOne("ForumApp.Data.Models.Board", "Board")
@@ -310,6 +443,36 @@ namespace ForumApp.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Board");
+                });
+
+            modelBuilder.Entity("ForumApp.Data.Models.PostBoardTag", b =>
+                {
+                    b.HasOne("ForumApp.Data.Models.BoardTag", "BoardTag")
+                        .WithMany("PostBoardTags")
+                        .HasForeignKey("BoardTagId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ForumApp.Data.Models.Post", "Post")
+                        .WithMany("PostBoardTags")
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("BoardTag");
+
+                    b.Navigation("Post");
+                });
+
+            modelBuilder.Entity("ForumApp.Data.Models.Reply", b =>
+                {
+                    b.HasOne("ForumApp.Data.Models.Post", "Post")
+                        .WithMany("Replies")
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Post");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -365,7 +528,26 @@ namespace ForumApp.Data.Migrations
 
             modelBuilder.Entity("ForumApp.Data.Models.Board", b =>
                 {
+                    b.Navigation("BoardCategories");
+
                     b.Navigation("Posts");
+                });
+
+            modelBuilder.Entity("ForumApp.Data.Models.BoardTag", b =>
+                {
+                    b.Navigation("PostBoardTags");
+                });
+
+            modelBuilder.Entity("ForumApp.Data.Models.Category", b =>
+                {
+                    b.Navigation("BoardCategories");
+                });
+
+            modelBuilder.Entity("ForumApp.Data.Models.Post", b =>
+                {
+                    b.Navigation("PostBoardTags");
+
+                    b.Navigation("Replies");
                 });
 #pragma warning restore 612, 618
         }
