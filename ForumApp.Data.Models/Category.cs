@@ -13,9 +13,3 @@ public class Category
     public virtual ICollection<BoardCategory> BoardCategories { get; set; }
     = new HashSet<BoardCategory>();
 }
-
-//-Category
-//	-ID
-//	-Name
-
-//	-BoardCollection

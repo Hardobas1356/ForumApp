@@ -17,7 +17,7 @@ public class Board
 
 
     [Comment("Board creation date")]
-    public DateTime CreatedAt { get; set; } = DateTime.Now;
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
 
     [Comment("Represents whether the board is deleted or not")]
@@ -29,13 +29,3 @@ public class Board
     public virtual ICollection<BoardCategory> BoardCategories { get; set; }
         = new HashSet<BoardCategory>();
 }
-
-//-Board
-//		-ID
-//		-Name
-//		-CreatedAt
-//		-IsDeleted = false
-
-//		-BoardCategoryCollection
-//		-PostsCollection
-//		-BoardTags

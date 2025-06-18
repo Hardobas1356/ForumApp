@@ -13,7 +13,3 @@ public class PostTag
     public Guid TagId { get; set; }
     public virtual Tag Tag { get; set; } = null!;
 }
-
-//-PostBoardTag
-//	-PostId
-//	-TagId

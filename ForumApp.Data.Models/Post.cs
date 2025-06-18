@@ -33,16 +33,3 @@ public class Post
     public virtual ICollection<PostTag> PostTags { get; set; } = new HashSet<PostTag>();
 
 }
-
-//-Post
-//		-ID
-//		-Title
-//		-Content
-//		-CreatedAt
-//		-IsPinned = false
-//		-IsDeleted = false
-
-//		-BoardID
-//		-UserID
-//		-RepliesCollection
-//		-PostBoardTagCollection
