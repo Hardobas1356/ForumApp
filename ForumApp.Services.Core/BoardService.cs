@@ -41,7 +41,7 @@ public class BoardService : IBoardService
         var board = await dbContext
                .Boards
                .AsNoTracking()
-               .Where(b => !b.IsDeleted && b.Id == boardId)
+               .Where(b => b.Id == boardId)
                .FirstOrDefaultAsync();
 
         if (board == null)
@@ -49,7 +49,7 @@ public class BoardService : IBoardService
             return null;
         }
 
-        IEnumerable<PostBoardDetailsViewModel>? posts = 
+        IEnumerable<PostBoardDetailsViewModel>? posts =
             await postService.GetPostsForBoardDetailsAsync(boardId);
 
         return new BoardDetailsViewModel

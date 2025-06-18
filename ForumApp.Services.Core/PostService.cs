@@ -45,7 +45,7 @@ public class PostService : IPostService
     {
         var post = await dbContext
             .Posts
-            .Where(p => p.Id == model.Id && !p.IsDeleted)
+            .Where(p => p.Id == model.Id)
             .FirstOrDefaultAsync();
 
         if (post == null)
@@ -67,7 +67,7 @@ public class PostService : IPostService
 
         model = await dbContext
             .Posts
-            .Where(p => !p.IsDeleted && p.Id == id)
+            .Where(p => p.Id == id)
             .Select(p => new PostEditInputModel
             {
                 Id = id,
@@ -84,7 +84,7 @@ public class PostService : IPostService
         var post = await dbContext
             .Posts
             .AsNoTracking()
-            .Where(p => p.Id == id && !p.IsDeleted)
+            .Where(p => p.Id == id)
             .Select(p => new PostDetailsViewModel
             {
                 Id = id,
@@ -92,12 +92,7 @@ public class PostService : IPostService
                 Content = p.Content,
                 CreatedAt = p.CreatedAt.ToString(DateTimeFormat),
                 BoardId = p.BoardId.ToString(),
-                BoardName = dbContext
-                                .Boards
-                                .AsNoTracking()
-                                .Where(b => b.Id == p.BoardId && !b.IsDeleted)
-                                .Select(b => b.Name)
-                                .First(),
+                BoardName = p.Board.Name,
                 Replies = p
                                 .Replies
                                 .Select(r => new ReplyDetailForPostDetailViewModel
