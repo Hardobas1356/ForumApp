@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-using static ForumApp.Data.Common.BoardConstants;
+using static ForumApp.GCommon.ValidationConstants.BoardConstants;
 
 namespace ForumApp.Data.Configurations;
 
@@ -34,6 +34,5 @@ public class BoardConfiguration : IEntityTypeConfiguration<Board>
         builder
             .Property(b => b.CreatedAt)
             .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
     }
 }

@@ -44,7 +44,7 @@ public class PostController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> Edit(EditPostViewModel model)
+    public async Task<IActionResult> Edit(EditPostInputModel model)
     {
         if (!ModelState.IsValid)
         {

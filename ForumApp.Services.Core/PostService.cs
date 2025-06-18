@@ -17,7 +17,7 @@ public class PostService : IPostService
         this.dbContext = dbContext;
     }
 
-    public async Task<bool> EditPostAsync(EditPostViewModel model)
+    public async Task<bool> EditPostAsync(EditPostInputModel model)
     {
         if (!Guid.TryParse(model.Id, out Guid id))
         {
@@ -42,9 +42,9 @@ public class PostService : IPostService
         return true;
     }
 
-    public async Task<EditPostViewModel?> GetPostForEditAsync(string id)
+    public async Task<EditPostInputModel?> GetPostForEditAsync(string id)
     {
-        EditPostViewModel? model = null;
+        EditPostInputModel? model = null;
 
         if (!Guid.TryParse(id, out Guid guidId))
         {
@@ -54,7 +54,7 @@ public class PostService : IPostService
         model = await dbContext
             .Posts
             .Where(p => !p.IsDeleted && p.Id == guidId)
-            .Select(p => new EditPostViewModel
+            .Select(p => new EditPostInputModel
             {
                 Id = id,
                 Title = p.Title,

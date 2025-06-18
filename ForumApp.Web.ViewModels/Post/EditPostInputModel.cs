@@ -1,9 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
 namespace ForumApp.Web.ViewModels.Post;
-using static ForumApp.Data.Common.PostConstants;
+using static ForumApp.GCommon.ValidationConstants.PostConstants;
 
-public class EditPostViewModel
+public class EditPostInputModel
 {
     public string Id { get; set; } = null!;
 

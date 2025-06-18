@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-using static ForumApp.Data.Common.CategoryConstants;
+using static ForumApp.GCommon.ValidationConstants.CategoryConstants;
 
 namespace ForumApp.Data.Configurations;
 

@@ -6,6 +6,6 @@ public interface IPostService
 {
     Task<PostDetailsViewModel?> GetPostDetailsAsync(string id);
 
-    Task<EditPostViewModel?> GetPostForEditAsync(string id);
-    Task<bool> EditPostAsync(EditPostViewModel model);
+    Task<EditPostInputModel?> GetPostForEditAsync(string id);
+    Task<bool> EditPostAsync(EditPostInputModel model);
 }

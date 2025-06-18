@@ -2,7 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-using static ForumApp.Data.Common.BoardTagConstants;
+using static ForumApp.GCommon.ValidationConstants.BoardTagConstants;
+
 
 namespace ForumApp.Data.Configurations;
 
