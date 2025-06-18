@@ -18,7 +18,7 @@ public class PostController : Controller
 
 
     [HttpGet]
-    public async Task<IActionResult> Details(string id)
+    public async Task<IActionResult> Details(Guid id)
     {
         var model = await postService.GetPostDetailsAsync(id);
 
@@ -31,7 +31,7 @@ public class PostController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> Edit(string id)
+    public async Task<IActionResult> Edit(Guid id)
     {
         var model = await postService.GetPostForEditAsync(id);
 
@@ -44,7 +44,7 @@ public class PostController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> Edit(EditPostInputModel model)
+    public async Task<IActionResult> Edit(PostEditInputModel model)
     {
         if (!ModelState.IsValid)
         {

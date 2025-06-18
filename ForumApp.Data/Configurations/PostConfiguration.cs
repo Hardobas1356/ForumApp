@@ -46,5 +46,34 @@ public class PostConfiguration : IEntityTypeConfiguration<Post>
             .WithOne(r => r.Post)
             .HasForeignKey(r => r.PostId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder
+            .HasData(Posts);
     }
+
+    public static List<Post> Posts => new()
+        {
+            new()
+            {
+                Id = Guid.Parse("71d465ed-bd31-4c2c-9700-e1274685ca5d"),
+                Title = "Welcome to the forums!",
+                Content = "We're glad to have you here.",
+                CreatedAt = DateTime.UtcNow,
+                ModifiedAt = DateTime.UtcNow,
+                IsPinned = true,
+                IsDeleted = false,
+                BoardId = Guid.Parse("c5578431-7ae6-4ed9-a402-f1c3401c7100")
+            },
+            new()
+            {
+                Id = Guid.Parse("6523ec54-87f8-4114-b42b-4e6cb75c802a"),
+                Title = "Laptop overheating issue",
+                Content = "My laptop gets very hot when gaming. Any tips?",
+                CreatedAt = DateTime.UtcNow,
+                ModifiedAt = DateTime.UtcNow,
+                IsPinned = false,
+                IsDeleted = false,
+                BoardId = Guid.Parse("f8385f75-481b-4b70-be0e-c975265e98ba")
+            }
+        };
 }

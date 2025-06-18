@@ -1,6 +1,6 @@
 ﻿namespace ForumApp.Web.ViewModels.Board;
 
-public class AllBoardsIndexViewModel
+public class BoardAllIndexViewModel
 {
     public string Id { get; set; } = null!;
     public string Name { get; set; } = null!;

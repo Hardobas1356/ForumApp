@@ -22,5 +22,22 @@ public class BoardCategoryConfiguration : IEntityTypeConfiguration<BoardCategory
             .WithMany(c => c.BoardCategories)
             .HasForeignKey(bc => bc.CategoryId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder
+            .HasData(BoardCategories);
     }
+
+    public static List<BoardCategory> BoardCategories => new()
+        {
+            new()
+            {
+                BoardId = Guid.Parse("c5578431-7ae6-4ed9-a402-f1c3401c7100"),
+                CategoryId = Guid.Parse("67e8a9f8-29d7-444f-bd9b-86225ae41daf")
+            },
+            new()
+            {
+                BoardId = Guid.Parse("f8385f75-481b-4b70-be0e-c975265e98ba"),
+                CategoryId = Guid.Parse("67e8a9f8-29d7-444f-bd9b-86225ae41daf")
+            }
+        };
 }

@@ -1,9 +1,9 @@
 ﻿using ForumApp.Data;
+using ForumApp.Data.Models;
 using ForumApp.Services.Core.Interfaces;
 using ForumApp.Web.ViewModels.Post;
 using ForumApp.Web.ViewModels.Reply;
 using Microsoft.EntityFrameworkCore;
-
 using static ForumApp.GCommon.GlobalConstants;
 
 namespace ForumApp.Services.Core;
@@ -16,17 +16,36 @@ public class PostService : IPostService
     {
         this.dbContext = dbContext;
     }
-
-    public async Task<bool> EditPostAsync(EditPostInputModel model)
+    public async Task<IEnumerable<PostBoardDetailsViewModel>?> GetPostsForBoardDetailsAsync(Guid boardId)
     {
-        if (!Guid.TryParse(model.Id, out Guid id))
+        Board? board = await dbContext
+            .Boards
+            .SingleOrDefaultAsync(b => b.Id == boardId);
+
+        if (board == null)
         {
-            return false;
+            return null;
         }
 
+        IEnumerable<PostBoardDetailsViewModel>? posts = await dbContext
+            .Posts
+            .Include(p => p.Board)
+            .Where(p => p.BoardId == boardId)
+            .Select(p => new PostBoardDetailsViewModel
+            {
+                Id = p.Id,
+                Title = p.Title,
+                CreatedAt = p.CreatedAt.ToString(DateTimeFormat),
+            })
+            .ToArrayAsync();
+
+        return posts;
+    }
+    public async Task<bool> EditPostAsync(PostEditInputModel model)
+    {
         var post = await dbContext
             .Posts
-            .Where(p => p.Id == id && !p.IsDeleted)
+            .Where(p => p.Id == model.Id && !p.IsDeleted)
             .FirstOrDefaultAsync();
 
         if (post == null)
@@ -42,19 +61,14 @@ public class PostService : IPostService
         return true;
     }
 
-    public async Task<EditPostInputModel?> GetPostForEditAsync(string id)
+    public async Task<PostEditInputModel?> GetPostForEditAsync(Guid id)
     {
-        EditPostInputModel? model = null;
-
-        if (!Guid.TryParse(id, out Guid guidId))
-        {
-            return model;
-        }
+        PostEditInputModel? model = null;
 
         model = await dbContext
             .Posts
-            .Where(p => !p.IsDeleted && p.Id == guidId)
-            .Select(p => new EditPostInputModel
+            .Where(p => !p.IsDeleted && p.Id == id)
+            .Select(p => new PostEditInputModel
             {
                 Id = id,
                 Title = p.Title,
@@ -65,17 +79,12 @@ public class PostService : IPostService
         return model;
     }
 
-    public async Task<PostDetailsViewModel?> GetPostDetailsAsync(string id)
+    public async Task<PostDetailsViewModel?> GetPostDetailsAsync(Guid id)
     {
-        if (!Guid.TryParse(id, out Guid guidId))
-        {
-            return null;
-        }
-
         var post = await dbContext
             .Posts
             .AsNoTracking()
-            .Where(p => p.Id == guidId && !p.IsDeleted)
+            .Where(p => p.Id == id && !p.IsDeleted)
             .Select(p => new PostDetailsViewModel
             {
                 Id = id,
@@ -103,4 +112,5 @@ public class PostService : IPostService
 
         return post;
     }
+
 }

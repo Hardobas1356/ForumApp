@@ -3,9 +3,10 @@
 namespace ForumApp.Web.ViewModels.Post;
 using static ForumApp.GCommon.ValidationConstants.PostConstants;
 
-public class EditPostInputModel
+public class PostEditInputModel
 {
-    public string Id { get; set; } = null!;
+    [Required]
+    public Guid Id { get; set; }
 
     [Required(ErrorMessage = TitleRequiredErrorMessage)]
     [MaxLength(TitleMaximumLength, ErrorMessage = TitleInvalidLengthErrorMessage)]

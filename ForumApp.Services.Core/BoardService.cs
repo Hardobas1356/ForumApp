@@ -1,6 +1,7 @@
 ﻿using ForumApp.Data;
 using ForumApp.Services.Core.Interfaces;
 using ForumApp.Web.ViewModels.Board;
+using ForumApp.Web.ViewModels.Post;
 using Microsoft.EntityFrameworkCore;
 
 using static ForumApp.GCommon.GlobalConstants;
@@ -10,19 +11,21 @@ namespace ForumApp.Services.Core;
 public class BoardService : IBoardService
 {
     private readonly ForumAppDbContext dbContext;
+    private readonly IPostService postService;
 
-    public BoardService(ForumAppDbContext dbContext)
+    public BoardService(ForumAppDbContext dbContext, IPostService postService)
     {
         this.dbContext = dbContext;
+        this.postService = postService;
     }
 
-    public async Task<IEnumerable<AllBoardsIndexViewModel>> GetAllBoardsAsync()
+    public async Task<IEnumerable<BoardAllIndexViewModel>> GetAllBoardsAsync()
     {
         var boards = await dbContext
             .Boards
             .AsNoTracking()
             .Where(b => !b.IsDeleted)
-            .Select(b => new AllBoardsIndexViewModel
+            .Select(b => new BoardAllIndexViewModel
             {
                 Id = b.Id.ToString(),
                 Name = b.Name,
@@ -33,35 +36,28 @@ public class BoardService : IBoardService
         return boards;
     }
 
-    public async Task<BoardDetailsViewModel?> GetBoardDetailsAsync(string boardId)
+    public async Task<BoardDetailsViewModel?> GetBoardDetailsAsync(Guid boardId)
     {
-        if (Guid.TryParse(boardId, out Guid id))
+        var board = await dbContext
+               .Boards
+               .AsNoTracking()
+               .Where(b => !b.IsDeleted && b.Id == boardId)
+               .FirstOrDefaultAsync();
+
+        if (board == null)
         {
             return null;
         }
 
-        var boardDetails = await dbContext
-            .Boards
-            .AsNoTracking()
-            .Where(b => !b.IsDeleted && b.Id == id)
-            .Select(b => new BoardDetailsViewModel
-            {
-                Id = b.Id.ToString(),
-                Name = b.Name,
-                Description = b.Description,
-                Posts = b.Posts
-                            .Where(p => !p.IsDeleted)
-                            .OrderByDescending(p => p.IsPinned)
-                            .Select(p => new BoardPostViewModel
-                            {
-                                Id = p.Id.ToString(),
-                                Title = p.Title,
-                                CreatedAt = p.CreatedAt.ToString(DateTimeFormat),
-                            })
-                            .ToHashSet()
-            })
-            .FirstOrDefaultAsync();
+        IEnumerable<PostBoardDetailsViewModel>? posts = 
+            await postService.GetPostsForBoardDetailsAsync(boardId);
 
-        return boardDetails;
+        return new BoardDetailsViewModel
+        {
+            Id = board.Id,
+            Name = board.Name,
+            Description = board.Description,
+            Posts = posts?.ToHashSet()
+        };
     }
 }

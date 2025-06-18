@@ -5,7 +5,7 @@ namespace ForumApp.Web.ViewModels.Post;
 
 public class PostDetailsViewModel
 {
-    public string Id { get; set; } = null!;
+    public Guid Id { get; set; }
     public string Title { get; set; } = null!;
     public string Content { get; set; } = null!;
     public string CreatedAt { get; set; } = null!;

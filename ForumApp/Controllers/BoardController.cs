@@ -21,9 +21,10 @@ public class BoardController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> Details(string id)
+    public async Task<IActionResult> Details(Guid id)
     {
-        var board = await boardService.GetBoardDetailsAsync(id);
+        var board = await boardService
+            .GetBoardDetailsAsync(id);
 
         if (board == null)
         {
