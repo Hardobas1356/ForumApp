@@ -8,4 +8,5 @@ public interface IPostService
     Task<IEnumerable<PostBoardDetailsViewModel>?> GetPostsForBoardDetailsAsync(Guid boardId);
     Task<PostEditInputModel?> GetPostForEditAsync(Guid id);
     Task<bool> EditPostAsync(PostEditInputModel model);
+    Task<bool> AddPostAsync(PostCreateInputModel model);
 }

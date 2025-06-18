@@ -1,4 +1,5 @@
-﻿using ForumApp.Services.Core;
+﻿using ForumApp.Data.Models;
+using ForumApp.Services.Core;
 using ForumApp.Services.Core.Interfaces;
 using ForumApp.Web.ViewModels.Post;
 using Microsoft.AspNetCore.Mvc;
@@ -62,17 +63,72 @@ public class PostController : Controller
     [HttpPost]
     public async Task<IActionResult> Edit(PostEditInputModel model)
     {
-        if (!this.ModelState.IsValid)
+        try
         {
-            ModelState.AddModelError(string.Empty, "Error while editing Post");
-            return this.View(model);
-        }
+            if (!this.ModelState.IsValid)
+            {
+                ModelState.AddModelError(string.Empty, "Error while editing Post");
+                return this.View(model);
+            }
 
-        if (!await postService.EditPostAsync(model))
+            if (!await postService.EditPostAsync(model))
+            {
+                return this.View(model);
+            }
+
+            return RedirectToAction("Details", new { Id = model.Id });
+        }
+        catch (Exception e)
         {
-            return this.View(model);
+            Console.WriteLine(e.Message);
+            return RedirectToAction(nameof(Details), "Board");
         }
+    }
 
-        return RedirectToAction("Details", new { Id = model.Id });
+    [HttpGet]
+    public async Task<IActionResult> Create(Guid id)
+    {
+        try
+        {
+            PostCreateInputModel model = new PostCreateInputModel()
+            {
+                BoardId = id,
+            };
+
+            return View(model);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+            return RedirectToAction(nameof(Details), "Board", new { Id = id });
+        }
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Create(PostCreateInputModel model)
+    {
+        try
+        {
+            if (!this.ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            bool CreateResult = 
+                await postService.AddPostAsync(model);
+
+            if (!CreateResult)
+            {
+                ModelState.AddModelError(String.Empty,"Error occured while adding post to board");
+                return View(model);
+            }
+
+            return RedirectToAction(nameof(Details), "Board", new { Id = model.BoardId });
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+            return RedirectToAction(nameof(Details), "Board", new { Id = model.BoardId });
+        }
     }
 }

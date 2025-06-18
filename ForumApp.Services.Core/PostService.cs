@@ -99,4 +99,30 @@ public class PostService : IPostService
         return post;
     }
 
+    public async Task<bool> AddPostAsync(PostCreateInputModel model)
+    {
+        Board? board = await dbContext
+            .Boards
+            .AsNoTracking()
+            .SingleOrDefaultAsync(b => b.Id == model.BoardId);
+
+        if (board == null)
+        {
+            return false;
+        }
+
+        Post post = new Post()
+        {
+            BoardId = model.BoardId,
+            Title = model.Title,
+            Content = model.Content,
+            CreatedAt = DateTime.UtcNow,
+            ModifiedAt = DateTime.UtcNow,
+        };
+
+        await dbContext.AddAsync(post);
+        await dbContext.SaveChangesAsync();
+
+        return true;
+    }
 }

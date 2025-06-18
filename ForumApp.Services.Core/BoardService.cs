@@ -27,7 +27,7 @@ public class BoardService : IBoardService
             .Where(b => !b.IsDeleted)
             .Select(b => new BoardAllIndexViewModel
             {
-                Id = b.Id.ToString(),
+                Id = b.Id,
                 Name = b.Name,
                 Description = b.Description,
             })
