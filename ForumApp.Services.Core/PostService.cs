@@ -18,15 +18,6 @@ public class PostService : IPostService
     }
     public async Task<IEnumerable<PostBoardDetailsViewModel>?> GetPostsForBoardDetailsAsync(Guid boardId)
     {
-        Board? board = await dbContext
-            .Boards
-            .SingleOrDefaultAsync(b => b.Id == boardId);
-
-        if (board == null)
-        {
-            return null;
-        }
-
         IEnumerable<PostBoardDetailsViewModel>? posts = await dbContext
             .Posts
             .Include(p => p.Board)
@@ -55,7 +46,7 @@ public class PostService : IPostService
 
         post.Title = model.Title;
         post.Content = model.Content;
-        post.ModifiedAt = DateTime.Now;
+        post.ModifiedAt = DateTime.UtcNow;
 
         await dbContext.SaveChangesAsync();
         return true;

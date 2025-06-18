@@ -20,40 +20,57 @@ public class PostController : Controller
     [HttpGet]
     public async Task<IActionResult> Details(Guid id)
     {
-        var model = await postService.GetPostDetailsAsync(id);
-
-        if (model == null)
+        try
         {
-            return NotFound();
-        }
+            var model = await postService.GetPostDetailsAsync(id);
 
-        return View(model);
+            if (model == null)
+            {
+                return RedirectToAction(nameof(Details), "Board");
+            }
+
+            return View(model);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+            return RedirectToAction(nameof(Details), "Board");
+        }
     }
 
     [HttpGet]
     public async Task<IActionResult> Edit(Guid id)
     {
-        var model = await postService.GetPostForEditAsync(id);
-
-        if (model == null)
+        try
         {
-            return NotFound();
-        }
+            var model = await postService.GetPostForEditAsync(id);
 
-        return View(model);
+            if (model == null)
+            {
+                return RedirectToAction(nameof(Details), "Board");
+            }
+
+            return View(model);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+            return RedirectToAction(nameof(Details), "Board");
+        }
     }
 
     [HttpPost]
     public async Task<IActionResult> Edit(PostEditInputModel model)
     {
-        if (!ModelState.IsValid)
+        if (!this.ModelState.IsValid)
         {
-            return View(model);
+            ModelState.AddModelError(string.Empty, "Error while editing Post");
+            return this.View(model);
         }
 
         if (!await postService.EditPostAsync(model))
         {
-            return NotFound();
+            return this.View(model);
         }
 
         return RedirectToAction("Details", new { Id = model.Id });
