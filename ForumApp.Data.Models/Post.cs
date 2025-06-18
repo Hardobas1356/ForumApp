@@ -30,7 +30,7 @@ public class Post
     public virtual Board Board { get; set; } = null!;
 
     public virtual ICollection<Reply> Replies { get; set; } = new HashSet<Reply>();
-    public virtual ICollection<PostBoardTag> PostBoardTags { get; set; } = new HashSet<PostBoardTag>();
+    public virtual ICollection<PostTag> PostTags { get; set; } = new HashSet<PostTag>();
 
 }
 

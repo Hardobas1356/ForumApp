@@ -24,6 +24,9 @@ public class BoardCategoryConfiguration : IEntityTypeConfiguration<BoardCategory
             .OnDelete(DeleteBehavior.Cascade);
 
         builder
+            .HasQueryFilter(bc => !bc.Board.IsDeleted);
+
+        builder
             .HasData(BoardCategories);
     }
 

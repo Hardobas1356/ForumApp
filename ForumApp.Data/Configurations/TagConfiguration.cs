@@ -7,27 +7,27 @@ using static ForumApp.GCommon.ValidationConstants.BoardTagConstants;
 
 namespace ForumApp.Data.Configurations;
 
-public class BoardTagConfiguration : IEntityTypeConfiguration<BoardTag>
+public class TagConfiguration : IEntityTypeConfiguration<Tag>
 {
-    public void Configure(EntityTypeBuilder<BoardTag> builder)
+    public void Configure(EntityTypeBuilder<Tag> builder)
     {
         builder
-            .HasKey(bt => bt.Id);
+            .HasKey(t => t.Id);
 
         builder
-            .Property(bt => bt.Id)
+            .Property(t => t.Id)
             .ValueGeneratedNever();
 
         builder
-            .Property(bt => bt.Name)
+            .Property(t => t.Name)
             .IsRequired()
             .HasMaxLength(NameMaxLength);
 
         builder
-            .HasData(BoardTags);
+            .HasData(Tags);
     }
 
-    public static List<BoardTag> BoardTags => new()
+    public static List<Tag> Tags => new()
         {
             new() { Id = Guid.Parse("b53a915c-c138-4567-9718-d04f7080297d"), Name = "Hot" },
             new() { Id = Guid.Parse("1c326eb8-947a-41e9-a3a9-03a630af7151"), Name = "Discussion" },

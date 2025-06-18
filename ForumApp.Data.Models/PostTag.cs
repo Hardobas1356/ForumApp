@@ -2,7 +2,7 @@
 
 namespace ForumApp.Data.Models;
 
-public class PostBoardTag
+public class PostTag
 {
     [Comment("Id of the post")]
     public Guid PostId { get; set; }
@@ -10,10 +10,10 @@ public class PostBoardTag
 
 
     [Comment("Id of the tag which applied to the post")]
-    public Guid BoardTagId { get; set; }
-    public virtual BoardTag BoardTag { get; set; } = null!;
+    public Guid TagId { get; set; }
+    public virtual Tag Tag { get; set; } = null!;
 }
 
 //-PostBoardTag
 //	-PostId
-//	-BoardTagId
+//	-TagId

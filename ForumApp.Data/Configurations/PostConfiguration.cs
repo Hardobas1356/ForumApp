@@ -48,6 +48,9 @@ public class PostConfiguration : IEntityTypeConfiguration<Post>
             .OnDelete(DeleteBehavior.Restrict);
 
         builder
+            .HasQueryFilter(p => !p.IsDeleted);
+
+        builder
             .HasData(Posts);
     }
 

@@ -35,6 +35,9 @@ public class BoardConfiguration : IEntityTypeConfiguration<Board>
             .Property(b => b.CreatedAt)
             .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
+        builder
+            .HasQueryFilter(b => !b.IsDeleted);
+
         builder.HasData(Boards);
     }
 

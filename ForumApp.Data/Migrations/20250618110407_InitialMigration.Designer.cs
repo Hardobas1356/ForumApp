@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ForumApp.Data.Migrations
 {
     [DbContext(typeof(ForumAppDbContext))]
-    [Migration("20250612163505_InitialMigration")]
+    [Migration("20250618110407_InitialMigration")]
     partial class InitialMigration
     {
         /// <inheritdoc />
@@ -59,6 +59,24 @@ namespace ForumApp.Data.Migrations
                         .IsUnique();
 
                     b.ToTable("Boards");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("c5578431-7ae6-4ed9-a402-f1c3401c7100"),
+                            CreatedAt = new DateTime(2025, 6, 18, 11, 4, 7, 106, DateTimeKind.Utc).AddTicks(7431),
+                            Description = "Talk about anything here.",
+                            IsDeleted = false,
+                            Name = "General Discussion"
+                        },
+                        new
+                        {
+                            Id = new Guid("f8385f75-481b-4b70-be0e-c975265e98ba"),
+                            CreatedAt = new DateTime(2025, 6, 18, 11, 4, 7, 106, DateTimeKind.Utc).AddTicks(7440),
+                            Description = "Get help with your tech problems.",
+                            IsDeleted = false,
+                            Name = "Tech Support"
+                        });
                 });
 
             modelBuilder.Entity("ForumApp.Data.Models.BoardCategory", b =>
@@ -76,23 +94,18 @@ namespace ForumApp.Data.Migrations
                     b.HasIndex("CategoryId");
 
                     b.ToTable("BoardCategories");
-                });
 
-            modelBuilder.Entity("ForumApp.Data.Models.BoardTag", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier")
-                        .HasComment("Id of tag which can be used in posts on a board");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)")
-                        .HasComment("Name of tag");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("BoardTags");
+                    b.HasData(
+                        new
+                        {
+                            BoardId = new Guid("c5578431-7ae6-4ed9-a402-f1c3401c7100"),
+                            CategoryId = new Guid("67e8a9f8-29d7-444f-bd9b-86225ae41daf")
+                        },
+                        new
+                        {
+                            BoardId = new Guid("f8385f75-481b-4b70-be0e-c975265e98ba"),
+                            CategoryId = new Guid("67e8a9f8-29d7-444f-bd9b-86225ae41daf")
+                        });
                 });
 
             modelBuilder.Entity("ForumApp.Data.Models.Category", b =>
@@ -110,6 +123,23 @@ namespace ForumApp.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Categories");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("67e8a9f8-29d7-444f-bd9b-86225ae41daf"),
+                            Name = "Technology"
+                        },
+                        new
+                        {
+                            Id = new Guid("60f51770-93bc-42b4-a27c-8a280abda112"),
+                            Name = "Gaming"
+                        },
+                        new
+                        {
+                            Id = new Guid("5fbd4e2e-a6f9-4d0f-ad91-fa2794d20317"),
+                            Name = "News"
+                        });
                 });
 
             modelBuilder.Entity("ForumApp.Data.Models.Post", b =>
@@ -159,11 +189,35 @@ namespace ForumApp.Data.Migrations
                     b.HasIndex("BoardId");
 
                     b.ToTable("Posts");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("71d465ed-bd31-4c2c-9700-e1274685ca5d"),
+                            BoardId = new Guid("c5578431-7ae6-4ed9-a402-f1c3401c7100"),
+                            Content = "We're glad to have you here.",
+                            CreatedAt = new DateTime(2025, 6, 18, 11, 4, 7, 107, DateTimeKind.Utc).AddTicks(3421),
+                            IsDeleted = false,
+                            IsPinned = true,
+                            ModifiedAt = new DateTime(2025, 6, 18, 11, 4, 7, 107, DateTimeKind.Utc).AddTicks(3421),
+                            Title = "Welcome to the forums!"
+                        },
+                        new
+                        {
+                            Id = new Guid("6523ec54-87f8-4114-b42b-4e6cb75c802a"),
+                            BoardId = new Guid("f8385f75-481b-4b70-be0e-c975265e98ba"),
+                            Content = "My laptop gets very hot when gaming. Any tips?",
+                            CreatedAt = new DateTime(2025, 6, 18, 11, 4, 7, 107, DateTimeKind.Utc).AddTicks(3428),
+                            IsDeleted = false,
+                            IsPinned = false,
+                            ModifiedAt = new DateTime(2025, 6, 18, 11, 4, 7, 107, DateTimeKind.Utc).AddTicks(3429),
+                            Title = "Laptop overheating issue"
+                        });
                 });
 
-            modelBuilder.Entity("ForumApp.Data.Models.PostBoardTag", b =>
+            modelBuilder.Entity("ForumApp.Data.Models.PostTag", b =>
                 {
-                    b.Property<Guid>("BoardTagId")
+                    b.Property<Guid>("TagId")
                         .HasColumnType("uniqueidentifier")
                         .HasComment("Id of the tag which applied to the post");
 
@@ -171,11 +225,23 @@ namespace ForumApp.Data.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasComment("Id of the post");
 
-                    b.HasKey("BoardTagId", "PostId");
+                    b.HasKey("TagId", "PostId");
 
                     b.HasIndex("PostId");
 
-                    b.ToTable("PostBoardTags");
+                    b.ToTable("PostTags");
+
+                    b.HasData(
+                        new
+                        {
+                            TagId = new Guid("3b169889-2b30-47f5-81fc-4f68fb3369ba"),
+                            PostId = new Guid("71d465ed-bd31-4c2c-9700-e1274685ca5d")
+                        },
+                        new
+                        {
+                            TagId = new Guid("1c326eb8-947a-41e9-a3a9-03a630af7151"),
+                            PostId = new Guid("6523ec54-87f8-4114-b42b-4e6cb75c802a")
+                        });
                 });
 
             modelBuilder.Entity("ForumApp.Data.Models.Reply", b =>
@@ -211,6 +277,58 @@ namespace ForumApp.Data.Migrations
                     b.HasIndex("PostId");
 
                     b.ToTable("Replies");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("7bded954-6e81-4e44-a7e3-19234f568f0c"),
+                            Content = "Thanks! Happy to be here.",
+                            CreatedAt = new DateTime(2025, 6, 18, 11, 4, 7, 108, DateTimeKind.Utc).AddTicks(1438),
+                            IsDeleted = false,
+                            PostId = new Guid("71d465ed-bd31-4c2c-9700-e1274685ca5d")
+                        },
+                        new
+                        {
+                            Id = new Guid("9669f2a1-b62d-4a18-8e49-3edabb18d418"),
+                            Content = "Try cleaning the fan and applying new thermal paste.",
+                            CreatedAt = new DateTime(2025, 6, 18, 11, 4, 7, 108, DateTimeKind.Utc).AddTicks(1449),
+                            IsDeleted = false,
+                            PostId = new Guid("6523ec54-87f8-4114-b42b-4e6cb75c802a")
+                        });
+                });
+
+            modelBuilder.Entity("ForumApp.Data.Models.Tag", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier")
+                        .HasComment("Id of tag which can be used in posts on a board");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)")
+                        .HasComment("Name of tag");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Tags");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("b53a915c-c138-4567-9718-d04f7080297d"),
+                            Name = "Hot"
+                        },
+                        new
+                        {
+                            Id = new Guid("1c326eb8-947a-41e9-a3a9-03a630af7151"),
+                            Name = "Discussion"
+                        },
+                        new
+                        {
+                            Id = new Guid("3b169889-2b30-47f5-81fc-4f68fb3369ba"),
+                            Name = "Announcement"
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -445,23 +563,23 @@ namespace ForumApp.Data.Migrations
                     b.Navigation("Board");
                 });
 
-            modelBuilder.Entity("ForumApp.Data.Models.PostBoardTag", b =>
+            modelBuilder.Entity("ForumApp.Data.Models.PostTag", b =>
                 {
-                    b.HasOne("ForumApp.Data.Models.BoardTag", "BoardTag")
-                        .WithMany("PostBoardTags")
-                        .HasForeignKey("BoardTagId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("ForumApp.Data.Models.Post", "Post")
-                        .WithMany("PostBoardTags")
+                        .WithMany("PostTags")
                         .HasForeignKey("PostId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("BoardTag");
+                    b.HasOne("ForumApp.Data.Models.Tag", "Tag")
+                        .WithMany("PostTags")
+                        .HasForeignKey("TagId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Post");
+
+                    b.Navigation("Tag");
                 });
 
             modelBuilder.Entity("ForumApp.Data.Models.Reply", b =>
@@ -533,11 +651,6 @@ namespace ForumApp.Data.Migrations
                     b.Navigation("Posts");
                 });
 
-            modelBuilder.Entity("ForumApp.Data.Models.BoardTag", b =>
-                {
-                    b.Navigation("PostBoardTags");
-                });
-
             modelBuilder.Entity("ForumApp.Data.Models.Category", b =>
                 {
                     b.Navigation("BoardCategories");
@@ -545,9 +658,14 @@ namespace ForumApp.Data.Migrations
 
             modelBuilder.Entity("ForumApp.Data.Models.Post", b =>
                 {
-                    b.Navigation("PostBoardTags");
+                    b.Navigation("PostTags");
 
                     b.Navigation("Replies");
+                });
+
+            modelBuilder.Entity("ForumApp.Data.Models.Tag", b =>
+                {
+                    b.Navigation("PostTags");
                 });
 #pragma warning restore 612, 618
         }

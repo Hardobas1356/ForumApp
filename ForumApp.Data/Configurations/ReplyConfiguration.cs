@@ -31,6 +31,9 @@ public class ReplyConfiguration : IEntityTypeConfiguration<Reply>
             .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
         builder
+            .HasQueryFilter(r => !r.IsDeleted);
+
+        builder
             .HasData(Replies);
     }
 

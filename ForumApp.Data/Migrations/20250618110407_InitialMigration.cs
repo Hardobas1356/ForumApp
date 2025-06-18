@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace ForumApp.Data.Migrations
 {
     /// <inheritdoc />
@@ -66,18 +68,6 @@ namespace ForumApp.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "BoardTags",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, comment: "Id of tag which can be used in posts on a board"),
-                    Name = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false, comment: "Name of tag")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_BoardTags", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Categories",
                 columns: table => new
                 {
@@ -87,6 +77,18 @@ namespace ForumApp.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Categories", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Tags",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, comment: "Id of tag which can be used in posts on a board"),
+                    Name = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false, comment: "Name of tag")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Tags", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -244,25 +246,25 @@ namespace ForumApp.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "PostBoardTags",
+                name: "PostTags",
                 columns: table => new
                 {
                     PostId = table.Column<Guid>(type: "uniqueidentifier", nullable: false, comment: "Id of the post"),
-                    BoardTagId = table.Column<Guid>(type: "uniqueidentifier", nullable: false, comment: "Id of the tag which applied to the post")
+                    TagId = table.Column<Guid>(type: "uniqueidentifier", nullable: false, comment: "Id of the tag which applied to the post")
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PostBoardTags", x => new { x.BoardTagId, x.PostId });
+                    table.PrimaryKey("PK_PostTags", x => new { x.TagId, x.PostId });
                     table.ForeignKey(
-                        name: "FK_PostBoardTags_BoardTags_BoardTagId",
-                        column: x => x.BoardTagId,
-                        principalTable: "BoardTags",
+                        name: "FK_PostTags_Posts_PostId",
+                        column: x => x.PostId,
+                        principalTable: "Posts",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_PostBoardTags_Posts_PostId",
-                        column: x => x.PostId,
-                        principalTable: "Posts",
+                        name: "FK_PostTags_Tags_TagId",
+                        column: x => x.TagId,
+                        principalTable: "Tags",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -286,6 +288,71 @@ namespace ForumApp.Data.Migrations
                         principalTable: "Posts",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.InsertData(
+                table: "Boards",
+                columns: new[] { "Id", "CreatedAt", "Description", "IsDeleted", "Name" },
+                values: new object[,]
+                {
+                    { new Guid("c5578431-7ae6-4ed9-a402-f1c3401c7100"), new DateTime(2025, 6, 18, 11, 4, 7, 106, DateTimeKind.Utc).AddTicks(7431), "Talk about anything here.", false, "General Discussion" },
+                    { new Guid("f8385f75-481b-4b70-be0e-c975265e98ba"), new DateTime(2025, 6, 18, 11, 4, 7, 106, DateTimeKind.Utc).AddTicks(7440), "Get help with your tech problems.", false, "Tech Support" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Categories",
+                columns: new[] { "Id", "Name" },
+                values: new object[,]
+                {
+                    { new Guid("5fbd4e2e-a6f9-4d0f-ad91-fa2794d20317"), "News" },
+                    { new Guid("60f51770-93bc-42b4-a27c-8a280abda112"), "Gaming" },
+                    { new Guid("67e8a9f8-29d7-444f-bd9b-86225ae41daf"), "Technology" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Tags",
+                columns: new[] { "Id", "Name" },
+                values: new object[,]
+                {
+                    { new Guid("1c326eb8-947a-41e9-a3a9-03a630af7151"), "Discussion" },
+                    { new Guid("3b169889-2b30-47f5-81fc-4f68fb3369ba"), "Announcement" },
+                    { new Guid("b53a915c-c138-4567-9718-d04f7080297d"), "Hot" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "BoardCategories",
+                columns: new[] { "BoardId", "CategoryId" },
+                values: new object[,]
+                {
+                    { new Guid("c5578431-7ae6-4ed9-a402-f1c3401c7100"), new Guid("67e8a9f8-29d7-444f-bd9b-86225ae41daf") },
+                    { new Guid("f8385f75-481b-4b70-be0e-c975265e98ba"), new Guid("67e8a9f8-29d7-444f-bd9b-86225ae41daf") }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Posts",
+                columns: new[] { "Id", "BoardId", "Content", "CreatedAt", "IsDeleted", "IsPinned", "ModifiedAt", "Title" },
+                values: new object[,]
+                {
+                    { new Guid("6523ec54-87f8-4114-b42b-4e6cb75c802a"), new Guid("f8385f75-481b-4b70-be0e-c975265e98ba"), "My laptop gets very hot when gaming. Any tips?", new DateTime(2025, 6, 18, 11, 4, 7, 107, DateTimeKind.Utc).AddTicks(3428), false, false, new DateTime(2025, 6, 18, 11, 4, 7, 107, DateTimeKind.Utc).AddTicks(3429), "Laptop overheating issue" },
+                    { new Guid("71d465ed-bd31-4c2c-9700-e1274685ca5d"), new Guid("c5578431-7ae6-4ed9-a402-f1c3401c7100"), "We're glad to have you here.", new DateTime(2025, 6, 18, 11, 4, 7, 107, DateTimeKind.Utc).AddTicks(3421), false, true, new DateTime(2025, 6, 18, 11, 4, 7, 107, DateTimeKind.Utc).AddTicks(3421), "Welcome to the forums!" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "PostTags",
+                columns: new[] { "PostId", "TagId" },
+                values: new object[,]
+                {
+                    { new Guid("6523ec54-87f8-4114-b42b-4e6cb75c802a"), new Guid("1c326eb8-947a-41e9-a3a9-03a630af7151") },
+                    { new Guid("71d465ed-bd31-4c2c-9700-e1274685ca5d"), new Guid("3b169889-2b30-47f5-81fc-4f68fb3369ba") }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Replies",
+                columns: new[] { "Id", "Content", "CreatedAt", "PostId" },
+                values: new object[,]
+                {
+                    { new Guid("7bded954-6e81-4e44-a7e3-19234f568f0c"), "Thanks! Happy to be here.", new DateTime(2025, 6, 18, 11, 4, 7, 108, DateTimeKind.Utc).AddTicks(1438), new Guid("71d465ed-bd31-4c2c-9700-e1274685ca5d") },
+                    { new Guid("9669f2a1-b62d-4a18-8e49-3edabb18d418"), "Try cleaning the fan and applying new thermal paste.", new DateTime(2025, 6, 18, 11, 4, 7, 108, DateTimeKind.Utc).AddTicks(1449), new Guid("6523ec54-87f8-4114-b42b-4e6cb75c802a") }
                 });
 
             migrationBuilder.CreateIndex(
@@ -339,14 +406,14 @@ namespace ForumApp.Data.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_PostBoardTags_PostId",
-                table: "PostBoardTags",
-                column: "PostId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Posts_BoardId",
                 table: "Posts",
                 column: "BoardId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PostTags_PostId",
+                table: "PostTags",
+                column: "PostId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Replies_PostId",
@@ -376,7 +443,7 @@ namespace ForumApp.Data.Migrations
                 name: "BoardCategories");
 
             migrationBuilder.DropTable(
-                name: "PostBoardTags");
+                name: "PostTags");
 
             migrationBuilder.DropTable(
                 name: "Replies");
@@ -391,7 +458,7 @@ namespace ForumApp.Data.Migrations
                 name: "Categories");
 
             migrationBuilder.DropTable(
-                name: "BoardTags");
+                name: "Tags");
 
             migrationBuilder.DropTable(
                 name: "Posts");

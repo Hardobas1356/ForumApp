@@ -2,7 +2,7 @@
 
 namespace ForumApp.Data.Models;
 
-public class BoardTag
+public class Tag
 {
     [Comment("Id of tag which can be used in posts on a board")]
     public Guid Id { get; set; } = Guid.NewGuid();
@@ -10,6 +10,6 @@ public class BoardTag
     [Comment("Name of tag")]
     public string Name { get; set; } = null!;
 
-    public virtual ICollection<PostBoardTag> PostBoardTags { get; set; }
-        = new HashSet<PostBoardTag>();
+    public virtual ICollection<PostTag> PostTags { get; set; }
+        = new HashSet<PostTag>();
 }
