@@ -1,4 +1,5 @@
 using ForumApp.Data;
+using ForumApp.Data.Models;
 using ForumApp.Services.Core;
 using ForumApp.Services.Core.Interfaces;
 using Microsoft.AspNetCore.Identity;
@@ -7,17 +8,46 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-builder.Services.AddDbContext<ForumAppDbContext>(options =>
-    options.UseSqlServer(connectionString));
-builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+var connectionString = builder
+    .Configuration
+    .GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+builder.
+    Services
+    .AddDbContext<ForumAppDbContext>(options =>
+        options
+        .UseSqlServer(connectionString));
+builder
+    .Services
+    .AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-    .AddEntityFrameworkStores<ForumAppDbContext>();
-builder.Services.AddControllersWithViews();
+builder.Services
+    .AddIdentity<ApplicationUser, IdentityRole<Guid>>(options =>
+    {
+        options.SignIn.RequireConfirmedAccount = true;
+        options.Password.RequireDigit = false;
+        options.Password.RequireNonAlphanumeric = false;
+        options.Password.RequiredLength = 5;
+        options.Password.RequireUppercase = false;
+        options.Password.RequireLowercase = false;
+    })
+    .AddEntityFrameworkStores<ForumAppDbContext>()
+    .AddDefaultTokenProviders()
+    .AddDefaultUI();
 
-builder.Services.AddScoped<IBoardService, BoardService>();
-builder.Services.AddScoped<IPostService, PostService>();
+builder
+    .Services
+    .AddControllersWithViews();
+
+builder
+    .Services
+    .AddRazorPages();
+
+builder
+    .Services
+    .AddScoped<IBoardService, BoardService>();
+builder
+    .Services
+    .AddScoped<IPostService, PostService>();
 
 var app = builder.Build();
 
@@ -38,6 +68,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(

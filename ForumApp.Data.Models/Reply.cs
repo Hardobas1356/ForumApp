@@ -20,4 +20,8 @@ public class Reply
     [Comment("Id of the post to which the reply belongs to")]
     public Guid PostId { get; set; }
     public virtual Post Post { get; set; } = null!;
+
+    [Comment("Id of user which posted this reply")]
+    public Guid ApplicationUserId { get; set; }
+    public virtual ApplicationUser ApplicationUser { get; set; } = null!;
 }

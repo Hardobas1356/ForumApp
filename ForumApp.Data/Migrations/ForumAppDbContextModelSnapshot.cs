@@ -22,6 +22,126 @@ namespace ForumApp.Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("ForumApp.Data.Models.ApplicationUser", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)")
+                        .HasComment("Name with which user is displayed in app");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("nvarchar(max)")
+                        .HasComment("Non-mandatory url of profile picture for user");
+
+                    b.Property<DateTime>("JoinDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("getutcdate()")
+                        .HasComment("Join date for user in utc time");
+
+                    b.Property<bool>("LockoutEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("NormalizedEmail")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("NormalizedUserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("PasswordHash")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("PhoneNumberConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("SecurityStamp")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("UserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedEmail")
+                        .HasDatabaseName("EmailIndex");
+
+                    b.HasIndex("NormalizedUserName")
+                        .IsUnique()
+                        .HasDatabaseName("UserNameIndex")
+                        .HasFilter("[NormalizedUserName] IS NOT NULL");
+
+                    b.ToTable("AspNetUsers", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("7d926fd2-1b4e-4ea7-a019-2bcb179db8f9"),
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "ff3a60e2-6fce-40ca-8ba4-a72c0d2df7c9",
+                            DisplayName = "Alice",
+                            Email = "alice@example.com",
+                            EmailConfirmed = true,
+                            JoinDate = new DateTime(2025, 6, 19, 10, 57, 14, 145, DateTimeKind.Utc).AddTicks(8937),
+                            LockoutEnabled = false,
+                            NormalizedEmail = "ALICE@EXAMPLE.COM",
+                            NormalizedUserName = "ALICE@EXAMPLE.COM",
+                            PasswordHash = "AQAAAAIAAYagAAAAEC9bG6Y4LAGgT2Ih3qsFwL2zHcLv4RYK0zPWYtrsi0P6bq31sMQzmxkAghrUYZ9AIQ==",
+                            PhoneNumberConfirmed = false,
+                            SecurityStamp = "f13a7afb-c6a6-4033-895d-0805ca0cef43",
+                            TwoFactorEnabled = false,
+                            UserName = "alice@example.com"
+                        },
+                        new
+                        {
+                            Id = new Guid("e43bb3f7-884a-437b-9a0c-b0d181f07634"),
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "3d12c855-effd-4827-bc5b-3ec1355c8765",
+                            DisplayName = "Bob",
+                            Email = "bob@example.com",
+                            EmailConfirmed = true,
+                            JoinDate = new DateTime(2025, 6, 19, 10, 57, 14, 145, DateTimeKind.Utc).AddTicks(8960),
+                            LockoutEnabled = false,
+                            NormalizedEmail = "BOB@EXAMPLE.COM",
+                            NormalizedUserName = "BOB@EXAMPLE.COM",
+                            PasswordHash = "AQAAAAIAAYagAAAAEC9bG6Y4LAGgT2Ih3qsFwL2zHcLv4RYK0zPWYtrsi0P6bq31sMQzmxkAghrUYZ9AIQ==",
+                            PhoneNumberConfirmed = false,
+                            SecurityStamp = "e890cdaa-ec70-457c-9678-9025d1931b90",
+                            TwoFactorEnabled = false,
+                            UserName = "bob@example.com"
+                        });
+                });
+
             modelBuilder.Entity("ForumApp.Data.Models.Board", b =>
                 {
                     b.Property<Guid>("Id")
@@ -31,7 +151,7 @@ namespace ForumApp.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                        .HasDefaultValueSql("getutcdate()")
                         .HasComment("Board creation date");
 
                     b.Property<string>("Description")
@@ -61,7 +181,7 @@ namespace ForumApp.Data.Migrations
                         new
                         {
                             Id = new Guid("c5578431-7ae6-4ed9-a402-f1c3401c7100"),
-                            CreatedAt = new DateTime(2025, 6, 18, 11, 4, 7, 106, DateTimeKind.Utc).AddTicks(7431),
+                            CreatedAt = new DateTime(2025, 6, 19, 10, 57, 14, 146, DateTimeKind.Utc).AddTicks(7200),
                             Description = "Talk about anything here.",
                             IsDeleted = false,
                             Name = "General Discussion"
@@ -69,7 +189,7 @@ namespace ForumApp.Data.Migrations
                         new
                         {
                             Id = new Guid("f8385f75-481b-4b70-be0e-c975265e98ba"),
-                            CreatedAt = new DateTime(2025, 6, 18, 11, 4, 7, 106, DateTimeKind.Utc).AddTicks(7440),
+                            CreatedAt = new DateTime(2025, 6, 19, 10, 57, 14, 146, DateTimeKind.Utc).AddTicks(7206),
                             Description = "Get help with your tech problems.",
                             IsDeleted = false,
                             Name = "Tech Support"
@@ -145,6 +265,10 @@ namespace ForumApp.Data.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasComment("Id of post");
 
+                    b.Property<Guid>("ApplicationUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasComment("Id of user which posted this post");
+
                     b.Property<Guid>("BoardId")
                         .HasColumnType("uniqueidentifier")
                         .HasComment("Id of board to which the post belongs to");
@@ -158,7 +282,7 @@ namespace ForumApp.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                        .HasDefaultValueSql("getutcdate()")
                         .HasComment("Date when the post was created in UTC time");
 
                     b.Property<bool>("IsDeleted")
@@ -167,21 +291,23 @@ namespace ForumApp.Data.Migrations
 
                     b.Property<bool>("IsPinned")
                         .HasColumnType("bit")
-                        .HasComment("Shows whether the post is pinned moderator");
+                        .HasComment("Shows whether the post is pinned by moderator");
 
                     b.Property<DateTime>("ModifiedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                        .HasDefaultValueSql("getutcdate()")
                         .HasComment("Last date the post was modified in UTC time");
 
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(128)
                         .HasColumnType("nvarchar(128)")
-                        .HasComment("Title pf the post");
+                        .HasComment("Title of the post");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ApplicationUserId");
 
                     b.HasIndex("BoardId");
 
@@ -191,23 +317,25 @@ namespace ForumApp.Data.Migrations
                         new
                         {
                             Id = new Guid("71d465ed-bd31-4c2c-9700-e1274685ca5d"),
+                            ApplicationUserId = new Guid("7d926fd2-1b4e-4ea7-a019-2bcb179db8f9"),
                             BoardId = new Guid("c5578431-7ae6-4ed9-a402-f1c3401c7100"),
                             Content = "We're glad to have you here.",
-                            CreatedAt = new DateTime(2025, 6, 18, 11, 4, 7, 107, DateTimeKind.Utc).AddTicks(3421),
+                            CreatedAt = new DateTime(2025, 6, 19, 10, 57, 14, 147, DateTimeKind.Utc).AddTicks(3561),
                             IsDeleted = false,
                             IsPinned = true,
-                            ModifiedAt = new DateTime(2025, 6, 18, 11, 4, 7, 107, DateTimeKind.Utc).AddTicks(3421),
+                            ModifiedAt = new DateTime(2025, 6, 19, 10, 57, 14, 147, DateTimeKind.Utc).AddTicks(3562),
                             Title = "Welcome to the forums!"
                         },
                         new
                         {
                             Id = new Guid("6523ec54-87f8-4114-b42b-4e6cb75c802a"),
+                            ApplicationUserId = new Guid("e43bb3f7-884a-437b-9a0c-b0d181f07634"),
                             BoardId = new Guid("f8385f75-481b-4b70-be0e-c975265e98ba"),
                             Content = "My laptop gets very hot when gaming. Any tips?",
-                            CreatedAt = new DateTime(2025, 6, 18, 11, 4, 7, 107, DateTimeKind.Utc).AddTicks(3428),
+                            CreatedAt = new DateTime(2025, 6, 19, 10, 57, 14, 147, DateTimeKind.Utc).AddTicks(3569),
                             IsDeleted = false,
                             IsPinned = false,
-                            ModifiedAt = new DateTime(2025, 6, 18, 11, 4, 7, 107, DateTimeKind.Utc).AddTicks(3429),
+                            ModifiedAt = new DateTime(2025, 6, 19, 10, 57, 14, 147, DateTimeKind.Utc).AddTicks(3570),
                             Title = "Laptop overheating issue"
                         });
                 });
@@ -247,6 +375,10 @@ namespace ForumApp.Data.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasComment("Id of reply");
 
+                    b.Property<Guid>("ApplicationUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasComment("Id of user which posted this reply");
+
                     b.Property<string>("Content")
                         .IsRequired()
                         .HasMaxLength(150)
@@ -256,7 +388,7 @@ namespace ForumApp.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                        .HasDefaultValueSql("getutcdate()")
                         .HasComment("Date when the reply was created in UTC time");
 
                     b.Property<bool>("IsDeleted")
@@ -271,6 +403,8 @@ namespace ForumApp.Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ApplicationUserId");
+
                     b.HasIndex("PostId");
 
                     b.ToTable("Replies");
@@ -279,16 +413,18 @@ namespace ForumApp.Data.Migrations
                         new
                         {
                             Id = new Guid("7bded954-6e81-4e44-a7e3-19234f568f0c"),
+                            ApplicationUserId = new Guid("e43bb3f7-884a-437b-9a0c-b0d181f07634"),
                             Content = "Thanks! Happy to be here.",
-                            CreatedAt = new DateTime(2025, 6, 18, 11, 4, 7, 108, DateTimeKind.Utc).AddTicks(1438),
+                            CreatedAt = new DateTime(2025, 6, 19, 10, 57, 14, 148, DateTimeKind.Utc).AddTicks(4091),
                             IsDeleted = false,
                             PostId = new Guid("71d465ed-bd31-4c2c-9700-e1274685ca5d")
                         },
                         new
                         {
                             Id = new Guid("9669f2a1-b62d-4a18-8e49-3edabb18d418"),
+                            ApplicationUserId = new Guid("7d926fd2-1b4e-4ea7-a019-2bcb179db8f9"),
                             Content = "Try cleaning the fan and applying new thermal paste.",
-                            CreatedAt = new DateTime(2025, 6, 18, 11, 4, 7, 108, DateTimeKind.Utc).AddTicks(1449),
+                            CreatedAt = new DateTime(2025, 6, 19, 10, 57, 14, 148, DateTimeKind.Utc).AddTicks(4097),
                             IsDeleted = false,
                             PostId = new Guid("6523ec54-87f8-4114-b42b-4e6cb75c802a")
                         });
@@ -328,10 +464,11 @@ namespace ForumApp.Data.Migrations
                         });
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
@@ -355,7 +492,7 @@ namespace ForumApp.Data.Migrations
                     b.ToTable("AspNetRoles", (string)null);
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -369,9 +506,8 @@ namespace ForumApp.Data.Migrations
                     b.Property<string>("ClaimValue")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("RoleId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
@@ -380,72 +516,7 @@ namespace ForumApp.Data.Migrations
                     b.ToTable("AspNetRoleClaims", (string)null);
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUser", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<int>("AccessFailedCount")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ConcurrencyStamp")
-                        .IsConcurrencyToken()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Email")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<bool>("EmailConfirmed")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("LockoutEnabled")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTimeOffset?>("LockoutEnd")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("NormalizedEmail")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("NormalizedUserName")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("PasswordHash")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PhoneNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("PhoneNumberConfirmed")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("SecurityStamp")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("TwoFactorEnabled")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("UserName")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("NormalizedEmail")
-                        .HasDatabaseName("EmailIndex");
-
-                    b.HasIndex("NormalizedUserName")
-                        .IsUnique()
-                        .HasDatabaseName("UserNameIndex")
-                        .HasFilter("[NormalizedUserName] IS NOT NULL");
-
-                    b.ToTable("AspNetUsers", (string)null);
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -459,9 +530,8 @@ namespace ForumApp.Data.Migrations
                     b.Property<string>("ClaimValue")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
@@ -470,22 +540,19 @@ namespace ForumApp.Data.Migrations
                     b.ToTable("AspNetUserClaims", (string)null);
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
                 {
                     b.Property<string>("LoginProvider")
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("ProviderKey")
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("ProviderDisplayName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("LoginProvider", "ProviderKey");
 
@@ -494,13 +561,13 @@ namespace ForumApp.Data.Migrations
                     b.ToTable("AspNetUserLogins", (string)null);
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
                 {
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("RoleId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("UserId", "RoleId");
 
@@ -509,18 +576,16 @@ namespace ForumApp.Data.Migrations
                     b.ToTable("AspNetUserRoles", (string)null);
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
                 {
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("LoginProvider")
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Name")
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Value")
                         .HasColumnType("nvarchar(max)");
@@ -551,11 +616,19 @@ namespace ForumApp.Data.Migrations
 
             modelBuilder.Entity("ForumApp.Data.Models.Post", b =>
                 {
+                    b.HasOne("ForumApp.Data.Models.ApplicationUser", "ApplicationUser")
+                        .WithMany("Posts")
+                        .HasForeignKey("ApplicationUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("ForumApp.Data.Models.Board", "Board")
                         .WithMany("Posts")
                         .HasForeignKey("BoardId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("ApplicationUser");
 
                     b.Navigation("Board");
                 });
@@ -581,64 +654,79 @@ namespace ForumApp.Data.Migrations
 
             modelBuilder.Entity("ForumApp.Data.Models.Reply", b =>
                 {
+                    b.HasOne("ForumApp.Data.Models.ApplicationUser", "ApplicationUser")
+                        .WithMany("Replies")
+                        .HasForeignKey("ApplicationUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("ForumApp.Data.Models.Post", "Post")
                         .WithMany("Replies")
                         .HasForeignKey("PostId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.Navigation("ApplicationUser");
+
                     b.Navigation("Post");
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
+                    b.HasOne("ForumApp.Data.Models.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
+                    b.HasOne("ForumApp.Data.Models.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
+                    b.HasOne("ForumApp.Data.Models.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
+                    b.HasOne("ForumApp.Data.Models.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("ForumApp.Data.Models.ApplicationUser", b =>
+                {
+                    b.Navigation("Posts");
+
+                    b.Navigation("Replies");
                 });
 
             modelBuilder.Entity("ForumApp.Data.Models.Board", b =>

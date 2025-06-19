@@ -33,7 +33,7 @@ public class BoardConfiguration : IEntityTypeConfiguration<Board>
 
         builder
             .Property(b => b.CreatedAt)
-            .HasDefaultValueSql("CURRENT_TIMESTAMP");
+            .HasDefaultValueSql("getutcdate()");
 
         builder
             .HasQueryFilter(b => !b.IsDeleted);

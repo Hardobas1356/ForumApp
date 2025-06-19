@@ -29,11 +29,11 @@ public class PostConfiguration : IEntityTypeConfiguration<Post>
 
         builder
             .Property(p => p.CreatedAt)
-            .HasDefaultValueSql("CURRENT_TIMESTAMP");
+            .HasDefaultValueSql("getutcdate()");
 
         builder
             .Property(p => p.ModifiedAt)
-            .HasDefaultValueSql("CURRENT_TIMESTAMP");
+            .HasDefaultValueSql("getutcdate()");
 
         builder
             .HasOne(p => p.Board)
@@ -42,9 +42,9 @@ public class PostConfiguration : IEntityTypeConfiguration<Post>
             .OnDelete(DeleteBehavior.Restrict);
 
         builder
-            .HasMany(p => p.Replies)
-            .WithOne(r => r.Post)
-            .HasForeignKey(r => r.PostId)
+            .HasOne(p=>p.ApplicationUser)
+            .WithMany(au=>au.Posts)
+            .HasForeignKey(p => p.ApplicationUserId)
             .OnDelete(DeleteBehavior.Restrict);
 
         builder
@@ -55,28 +55,30 @@ public class PostConfiguration : IEntityTypeConfiguration<Post>
     }
 
     public static List<Post> Posts => new()
+    {
+        new Post
         {
-            new()
-            {
-                Id = Guid.Parse("71d465ed-bd31-4c2c-9700-e1274685ca5d"),
-                Title = "Welcome to the forums!",
-                Content = "We're glad to have you here.",
-                CreatedAt = DateTime.UtcNow,
-                ModifiedAt = DateTime.UtcNow,
-                IsPinned = true,
-                IsDeleted = false,
-                BoardId = Guid.Parse("c5578431-7ae6-4ed9-a402-f1c3401c7100")
-            },
-            new()
-            {
-                Id = Guid.Parse("6523ec54-87f8-4114-b42b-4e6cb75c802a"),
-                Title = "Laptop overheating issue",
-                Content = "My laptop gets very hot when gaming. Any tips?",
-                CreatedAt = DateTime.UtcNow,
-                ModifiedAt = DateTime.UtcNow,
-                IsPinned = false,
-                IsDeleted = false,
-                BoardId = Guid.Parse("f8385f75-481b-4b70-be0e-c975265e98ba")
-            }
-        };
+            Id = Guid.Parse("71d465ed-bd31-4c2c-9700-e1274685ca5d"),
+            Title = "Welcome to the forums!",
+            Content = "We're glad to have you here.",
+            CreatedAt = DateTime.UtcNow,
+            ModifiedAt = DateTime.UtcNow,
+            IsPinned = true,
+            IsDeleted = false,
+            BoardId = Guid.Parse("c5578431-7ae6-4ed9-a402-f1c3401c7100"),
+            ApplicationUserId = Guid.Parse("7d926fd2-1b4e-4ea7-a019-2bcb179db8f9"),
+        },
+        new Post
+        {
+            Id = Guid.Parse("6523ec54-87f8-4114-b42b-4e6cb75c802a"),
+            Title = "Laptop overheating issue",
+            Content = "My laptop gets very hot when gaming. Any tips?",
+            CreatedAt = DateTime.UtcNow,
+            ModifiedAt = DateTime.UtcNow,
+            IsPinned = false,
+            IsDeleted = false,
+            BoardId = Guid.Parse("f8385f75-481b-4b70-be0e-c975265e98ba"),
+            ApplicationUserId = Guid.Parse("e43bb3f7-884a-437b-9a0c-b0d181f07634")
+        }
+    };
 }

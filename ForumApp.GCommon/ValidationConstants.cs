@@ -33,5 +33,11 @@
         {
             public static readonly int ContentMaxLength = 150;
         }
+
+        public static class ApplicationUserConstants
+        {
+            public static readonly int DisplayNameMinLength = 3;
+            public static readonly int DisplayNameMaxLength = 80;
+        }
     }
 }
