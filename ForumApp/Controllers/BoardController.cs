@@ -1,9 +1,10 @@
 ﻿using ForumApp.Services.Core.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ForumApp.Web.Controllers;
 
-public class BoardController : Controller
+public class BoardController : BaseController
 {
     private readonly IBoardService boardService;
 
@@ -13,6 +14,7 @@ public class BoardController : Controller
     }
 
     [HttpGet]
+    [AllowAnonymous]
     public async Task<IActionResult> Index()
     {
         var boards = await boardService.GetAllBoardsAsync();
@@ -21,6 +23,7 @@ public class BoardController : Controller
     }
 
     [HttpGet]
+    [AllowAnonymous]
     public async Task<IActionResult> Details(Guid id)
     {
         var board = await boardService

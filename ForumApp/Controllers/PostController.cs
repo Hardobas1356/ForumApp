@@ -2,13 +2,14 @@
 using ForumApp.Services.Core;
 using ForumApp.Services.Core.Interfaces;
 using ForumApp.Web.ViewModels.Post;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.Threading.Tasks;
 
 namespace ForumApp.Web.Controllers;
 
-public class PostController : Controller
+public class PostController : BaseController
 {
     private readonly IPostService postService;
 
@@ -19,6 +20,7 @@ public class PostController : Controller
 
 
     [HttpGet]
+    [AllowAnonymous]
     public async Task<IActionResult> Details(Guid id)
     {
         try

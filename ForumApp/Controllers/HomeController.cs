@@ -1,10 +1,12 @@
 using System.Diagnostics;
 using ForumApp.Models;
+using ForumApp.Web.Controllers;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ForumApp.Controllers;
 
-public class HomeController : Controller
+public class HomeController : BaseController
 {
     private readonly ILogger<HomeController> _logger;
 
@@ -13,11 +15,15 @@ public class HomeController : Controller
         _logger = logger;
     }
 
+    [HttpGet]
+    [AllowAnonymous]
     public IActionResult Index()
     {
         return View();
     }
 
+    [HttpGet]
+    [AllowAnonymous]
     public IActionResult Privacy()
     {
         return View();
