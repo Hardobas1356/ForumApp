@@ -114,12 +114,12 @@ public class PostController : Controller
                 return View(model);
             }
 
-            bool CreateResult = 
+            bool CreateResult =
                 await postService.AddPostAsync(model);
 
             if (!CreateResult)
             {
-                ModelState.AddModelError(String.Empty,"Error occured while adding post to board");
+                ModelState.AddModelError(String.Empty, "Error occured while adding post to board");
                 return View(model);
             }
 
@@ -129,6 +129,49 @@ public class PostController : Controller
         {
             Console.WriteLine(e.Message);
             return RedirectToAction(nameof(Details), "Board", new { Id = model.BoardId });
+        }
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        try
+        {
+            PostDeleteViewModel? model = await postService
+                .GetPostForDeleteAsync(id);
+            if (model == null)
+            {
+                return RedirectToAction("Index", "Board");
+            }
+
+            return View(model);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+            return RedirectToAction("Index", "Board");
+        }
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Delete(PostDeleteViewModel model)
+    {
+        try
+        {
+            bool postDeletionResult = await postService
+                .DeletePostAsync(model);
+
+            if (!postDeletionResult)
+            {
+                return RedirectToAction("Details", "Board", new { Id = model.BoardId });
+            }
+
+            return RedirectToAction("Index", "Board");
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+            return RedirectToAction("Index", "Board");
         }
     }
 }

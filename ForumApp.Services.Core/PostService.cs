@@ -125,4 +125,47 @@ public class PostService : IPostService
 
         return true;
     }
+
+    public async Task<PostDeleteViewModel?> GetPostForDeleteAsync(Guid id)
+    {
+        PostDeleteViewModel? post = await dbContext
+            .Posts
+            .Where(p => p.Id == id)
+            .AsNoTracking()
+            .Select(p => new PostDeleteViewModel
+            {
+                Id = p.Id,
+                Content = p.Content,
+                Title = p.Title,
+                CreatedAt = p.CreatedAt,
+                BoardId = p.BoardId,
+            })
+            .FirstOrDefaultAsync();
+
+        return post;
+    }
+
+    public async Task<bool> DeletePostAsync(PostDeleteViewModel model)
+    {
+        Post? post = await dbContext
+            .Posts
+            .Where(p => p.Id == model.Id)
+            .SingleOrDefaultAsync();
+
+        Board? board = await dbContext
+            .Boards
+            .Where(b => b.Id == model.BoardId)
+            .SingleOrDefaultAsync();
+
+        if (post == null||board==null)
+        {
+            return false;
+        }
+
+        post.IsDeleted = true;
+
+        await dbContext.SaveChangesAsync();
+
+        return true;
+    }
 }

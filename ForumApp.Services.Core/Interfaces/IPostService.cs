@@ -9,4 +9,6 @@ public interface IPostService
     Task<PostEditInputModel?> GetPostForEditAsync(Guid id);
     Task<bool> EditPostAsync(PostEditInputModel model);
     Task<bool> AddPostAsync(PostCreateInputModel model);
+    Task<PostDeleteViewModel?> GetPostForDeleteAsync(Guid id);
+    Task<bool> DeletePostAsync(PostDeleteViewModel model);
 }

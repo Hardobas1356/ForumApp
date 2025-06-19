@@ -5,6 +5,7 @@
 <div>
 	@Model.Content
 	<a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Edit</a>
+	<a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">Delete</a>
 </div>
 @if (!Model.Replies.Any())
 {

@@ -1,0 +1,25 @@
+﻿@using ForumApp.Web.ViewModels.Post
+@model PostDeleteViewModel
+
+
+@{
+    ViewData["Title"] = "Delete Post";
+}
+
+<h2>Delete Post</h2>
+
+<div class="alert alert-warning">
+    <strong>Are you sure you want to delete this post?</strong>
+</div>
+
+<div class="mb-3">
+    <h4>@Model.Title</h4>
+    <p>@Model.Content</p>
+    <p><em>Created: @Model.CreatedAt</em></p>
+</div>
+
+<form asp-action="Delete" method="post">
+    <input type="hidden" asp-for="Id" />
+    <button type="submit" class="btn btn-danger">Delete</button>
+    <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-secondary">Cancel</a>
+</form>

@@ -4,6 +4,7 @@ using ForumApp.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ForumApp.Data.Migrations
 {
     [DbContext(typeof(ForumAppDbContext))]
-    partial class ForumAppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250619125301_UpdateData")]
+    partial class UpdateData
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -175,7 +178,7 @@ namespace ForumApp.Data.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Boards", (string)null);
+                    b.ToTable("Boards");
 
                     b.HasData(
                         new
@@ -210,7 +213,7 @@ namespace ForumApp.Data.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("BoardCategories", (string)null);
+                    b.ToTable("BoardCategories");
 
                     b.HasData(
                         new
@@ -239,7 +242,7 @@ namespace ForumApp.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categories", (string)null);
+                    b.ToTable("Categories");
 
                     b.HasData(
                         new
@@ -311,7 +314,7 @@ namespace ForumApp.Data.Migrations
 
                     b.HasIndex("BoardId");
 
-                    b.ToTable("Posts", (string)null);
+                    b.ToTable("Posts");
 
                     b.HasData(
                         new
@@ -354,7 +357,7 @@ namespace ForumApp.Data.Migrations
 
                     b.HasIndex("PostId");
 
-                    b.ToTable("PostTags", (string)null);
+                    b.ToTable("PostTags");
 
                     b.HasData(
                         new
@@ -407,7 +410,7 @@ namespace ForumApp.Data.Migrations
 
                     b.HasIndex("PostId");
 
-                    b.ToTable("Replies", (string)null);
+                    b.ToTable("Replies");
 
                     b.HasData(
                         new
@@ -444,7 +447,7 @@ namespace ForumApp.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Tags", (string)null);
+                    b.ToTable("Tags");
 
                     b.HasData(
                         new
