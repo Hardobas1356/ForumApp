@@ -18,18 +18,17 @@ public class PostController : BaseController
         this.postService = postService;
     }
 
-
     [HttpGet]
     [AllowAnonymous]
     public async Task<IActionResult> Details(Guid id)
     {
         try
         {
-            var model = await postService.GetPostDetailsAsync(id);
+            var model = await postService.GetPostDetailsAsync(this.GetUserId(),id);
 
             if (model == null)
             {
-                return RedirectToAction(nameof(Details), "Board");
+                return RedirectToAction("Index", "Board");
             }
 
             return View(model);
@@ -37,7 +36,7 @@ public class PostController : BaseController
         catch (Exception e)
         {
             Console.WriteLine(e.Message);
-            return RedirectToAction(nameof(Details), "Board");
+            return RedirectToAction("Index" , "Board");
         }
     }
 
@@ -46,11 +45,12 @@ public class PostController : BaseController
     {
         try
         {
-            var model = await postService.GetPostForEditAsync(id);
+            var model = await postService
+                .GetPostForEditAsync((Guid)this.GetUserId()!, id);
 
             if (model == null)
             {
-                return RedirectToAction(nameof(Details), "Board");
+                return RedirectToAction("Index", "Board");
             }
 
             return View(model);
@@ -58,7 +58,7 @@ public class PostController : BaseController
         catch (Exception e)
         {
             Console.WriteLine(e.Message);
-            return RedirectToAction(nameof(Details), "Board");
+            return RedirectToAction("Index", "Board");
         }
     }
 
@@ -73,7 +73,7 @@ public class PostController : BaseController
                 return this.View(model);
             }
 
-            if (!await postService.EditPostAsync(model))
+            if (!await postService.EditPostAsync((Guid)this.GetUserId()!, model))
             {
                 return this.View(model);
             }
@@ -117,7 +117,7 @@ public class PostController : BaseController
             }
 
             bool CreateResult =
-                await postService.AddPostAsync(model);
+                await postService.AddPostAsync((Guid)this.GetUserId()!,model);
 
             if (!CreateResult)
             {
@@ -140,7 +140,8 @@ public class PostController : BaseController
         try
         {
             PostDeleteViewModel? model = await postService
-                .GetPostForDeleteAsync(id);
+                .GetPostForDeleteAsync((Guid)this.GetUserId()!, id);
+            
             if (model == null)
             {
                 return RedirectToAction("Index", "Board");
@@ -161,7 +162,7 @@ public class PostController : BaseController
         try
         {
             bool postDeletionResult = await postService
-                .DeletePostAsync(model);
+                .DeletePostAsync((Guid)this.GetUserId()!, model);
 
             if (!postDeletionResult)
             {

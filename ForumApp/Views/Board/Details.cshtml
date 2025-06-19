@@ -4,9 +4,18 @@
 	ViewData["Title"] = Model.Name;
 }
 
-<h2>@Model.Name</h2>
-<p>@Model.Description</p>
-<a asp-controller="Post" asp-action="Create" class="btn btn-success" asp-route-id="@Model.Id">Create post</a>
+<p>
+	<h2>@Model.Name</h2>
+	@if (User?.Identity?.IsAuthenticated == true)
+	{
+		<a asp-controller="Post" asp-action="Create" class="btn btn-success" asp-route-id="@Model.Id">Create post</a>
+	}
+</p>
+<p>
+	@Model.Description
+
+</p>
+
 
 <h3>Posts</h3>
 

@@ -3,6 +3,7 @@ using ForumApp.Data.Models;
 using ForumApp.Services.Core.Interfaces;
 using ForumApp.Web.ViewModels.Post;
 using ForumApp.Web.ViewModels.Reply;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using static ForumApp.GCommon.GlobalConstants;
 
@@ -11,11 +12,14 @@ namespace ForumApp.Services.Core;
 public class PostService : IPostService
 {
     private readonly ForumAppDbContext dbContext;
+    private readonly UserManager<ApplicationUser> userManager;
 
-    public PostService(ForumAppDbContext dbContext)
+    public PostService(ForumAppDbContext dbContext, UserManager<ApplicationUser> userManager)
     {
         this.dbContext = dbContext;
+        this.userManager = userManager;
     }
+
     public async Task<IEnumerable<PostBoardDetailsViewModel>?> GetPostsForBoardDetailsAsync(Guid boardId)
     {
         IEnumerable<PostBoardDetailsViewModel>? posts = await dbContext
@@ -32,14 +36,36 @@ public class PostService : IPostService
 
         return posts;
     }
-    public async Task<bool> EditPostAsync(PostEditInputModel model)
+    public async Task<PostEditInputModel?> GetPostForEditAsync(Guid userId, Guid id)
     {
-        var post = await dbContext
+        PostEditInputModel? model = null;
+
+        Post? post = await dbContext
+            .Posts
+            .SingleOrDefaultAsync(p => p.Id == id && p.ApplicationUserId == userId);
+
+        if (post == null)
+        {
+            return model;
+        }
+
+        model = new PostEditInputModel
+        {
+            Id = id,
+            Title = post.Title,
+            Content = post.Content,
+        };
+
+        return model;
+    }
+    public async Task<bool> EditPostAsync(Guid userId, PostEditInputModel model)
+    {
+        Post? post = await dbContext
             .Posts
             .Where(p => p.Id == model.Id)
             .FirstOrDefaultAsync();
 
-        if (post == null)
+        if (post == null || post.ApplicationUserId != userId)
         {
             return false;
         }
@@ -51,26 +77,7 @@ public class PostService : IPostService
         await dbContext.SaveChangesAsync();
         return true;
     }
-
-    public async Task<PostEditInputModel?> GetPostForEditAsync(Guid id)
-    {
-        PostEditInputModel? model = null;
-
-        model = await dbContext
-            .Posts
-            .Where(p => p.Id == id)
-            .Select(p => new PostEditInputModel
-            {
-                Id = id,
-                Title = p.Title,
-                Content = p.Content,
-            })
-            .FirstOrDefaultAsync();
-
-        return model;
-    }
-
-    public async Task<PostDetailsViewModel?> GetPostDetailsAsync(Guid id)
+    public async Task<PostDetailsViewModel?> GetPostDetailsAsync(Guid? userId, Guid id)
     {
         var post = await dbContext
             .Posts
@@ -84,6 +91,7 @@ public class PostService : IPostService
                 CreatedAt = p.CreatedAt.ToString(DateTimeFormat),
                 BoardId = p.BoardId.ToString(),
                 BoardName = p.Board.Name,
+                IsPublisher = userId != null && p.ApplicationUserId == userId,
                 Replies = p
                                 .Replies
                                 .Select(r => new ReplyDetailForPostDetailViewModel
@@ -98,8 +106,7 @@ public class PostService : IPostService
 
         return post;
     }
-
-    public async Task<bool> AddPostAsync(PostCreateInputModel model)
+    public async Task<bool> AddPostAsync(Guid userId, PostCreateInputModel model)
     {
         Board? board = await dbContext
             .Boards
@@ -118,6 +125,7 @@ public class PostService : IPostService
             Content = model.Content,
             CreatedAt = DateTime.UtcNow,
             ModifiedAt = DateTime.UtcNow,
+            ApplicationUserId = userId,
         };
 
         await dbContext.AddAsync(post);
@@ -125,12 +133,11 @@ public class PostService : IPostService
 
         return true;
     }
-
-    public async Task<PostDeleteViewModel?> GetPostForDeleteAsync(Guid id)
+    public async Task<PostDeleteViewModel?> GetPostForDeleteAsync(Guid userId, Guid id)
     {
         PostDeleteViewModel? post = await dbContext
             .Posts
-            .Where(p => p.Id == id)
+            .Where(p => p.Id == id && p.ApplicationUserId == userId)
             .AsNoTracking()
             .Select(p => new PostDeleteViewModel
             {
@@ -145,19 +152,24 @@ public class PostService : IPostService
         return post;
     }
 
-    public async Task<bool> DeletePostAsync(PostDeleteViewModel model)
+    public async Task<bool> DeletePostAsync(Guid userId, PostDeleteViewModel model)
     {
         Post? post = await dbContext
             .Posts
-            .Where(p => p.Id == model.Id)
+            .Where(p => p.Id == model.Id && p.ApplicationUserId == userId)
             .SingleOrDefaultAsync();
 
-        Board? board = await dbContext
+        if (post == null)
+        {
+            return false;
+        }
+
+        bool boardExists =
+            await dbContext
             .Boards
-            .Where(b => b.Id == model.BoardId)
-            .SingleOrDefaultAsync();
+            .AnyAsync(b => b.Id == model.BoardId);
 
-        if (post == null||board==null)
+        if (!boardExists)
         {
             return false;
         }

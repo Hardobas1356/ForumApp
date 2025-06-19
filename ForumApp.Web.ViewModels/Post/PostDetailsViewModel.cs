@@ -11,6 +11,7 @@ public class PostDetailsViewModel
     public string CreatedAt { get; set; } = null!;
     public string BoardId { get; set; } = null!;
     public string BoardName { get; set; } = null!;
+    public bool IsPublisher { get; set; } = false;
     public ICollection<ReplyDetailForPostDetailViewModel> Replies { get; set; }
         = new HashSet<ReplyDetailForPostDetailViewModel>();
 }
