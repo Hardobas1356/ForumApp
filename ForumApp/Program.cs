@@ -48,6 +48,9 @@ builder
 builder
     .Services
     .AddScoped<IPostService, PostService>();
+builder
+    .Services
+    .AddScoped<IReplyService, ReplyService>();
 
 var app = builder.Build();
 

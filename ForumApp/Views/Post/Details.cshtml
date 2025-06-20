@@ -10,6 +10,18 @@
 		<a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">Delete</a>
 	}
 </div>
+
+<hr/>
+
+<div>
+	<h3>Replies</h3>
+	@if (User?.Identity?.IsAuthenticated == true)
+	{
+		<div class="mt-2">
+			<a asp-controller="Reply" asp-action="Create" asp-route-postId="@Model.Id" class="btn btn-primary">Add Reply</a>
+		</div>
+	}
+</div>
 @if (!Model.Replies.Any())
 {
 	<p>No replies in this post yet.</p>

@@ -1,0 +1,17 @@
+﻿@using ForumApp.Web.ViewModels.Reply
+@model ReplyCreateInputModel
+
+<h2>Add Reply</h2>
+
+<form asp-action="Create" method="post">
+    @Html.HiddenFor(m => m.PostId)
+
+    <div class="form-group mb-3">
+        <label for="Content">Your reply:</label>
+        <textarea asp-for="Content" class="form-control"></textarea>
+        <span asp-validation-for="Content" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Post Reply</button>
+    <a asp-controller="Post" asp-action="Details" asp-route-id="@Model.PostId" class="btn btn-secondary">Cancel</a>
+</form>
