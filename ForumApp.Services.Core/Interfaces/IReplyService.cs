@@ -8,4 +8,6 @@ public interface IReplyService
     Task<ICollection<ReplyDetailForPostDetailViewModel>?> GetRepliesForPostDetailsAsync(Guid? userId, Guid postId);
     Task<ReplyDeleteViewModel?> GetReplyForDeleteAsync(Guid userId, Guid postId, Guid id);
     Task<bool> SoftDeleteReplyAsync(Guid userId, ReplyDeleteViewModel model);
+    Task<ReplyEditInputModel?> GetReplyForEditAsync(Guid userId, Guid postId, Guid id);
+    Task<bool> EditReplyAsync(Guid userId, ReplyEditInputModel model);
 }

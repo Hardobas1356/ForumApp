@@ -91,13 +91,12 @@ public class ReplyService : IReplyService
 
         return model;
     }
-
     public async Task<bool> SoftDeleteReplyAsync(Guid userId, ReplyDeleteViewModel model)
     {
         Reply? reply = await dbContext
             .Replies
-            .SingleOrDefaultAsync(r => r.Id == model.Id 
-                && r.PostId == model.PostId && r.ApplicationUserId==userId);
+            .SingleOrDefaultAsync(r => r.Id == model.Id
+                && r.PostId == model.PostId && r.ApplicationUserId == userId);
 
         if (reply == null)
         {
@@ -108,6 +107,45 @@ public class ReplyService : IReplyService
 
         await dbContext.SaveChangesAsync();
 
+        return true;
+    }
+    public async Task<ReplyEditInputModel?> GetReplyForEditAsync(Guid userId, Guid postId, Guid id)
+    {
+        Reply? reply = await dbContext
+            .Replies
+            .AsNoTracking()
+            .SingleOrDefaultAsync(r => r.Id == id
+                && r.PostId == postId && r.ApplicationUserId == userId);
+
+        if (reply == null)
+        {
+            return null;
+        }
+
+        ReplyEditInputModel model = new ReplyEditInputModel()
+        {
+            Id = reply.Id,
+            PostId = reply.PostId,
+            Content = reply.Content,
+        };
+
+        return model;
+    }
+
+    public async Task<bool> EditReplyAsync(Guid userId, ReplyEditInputModel model)
+    {
+        Reply? reply = await dbContext
+            .Replies
+            .SingleOrDefaultAsync(r => r.ApplicationUserId == userId && r.Id == model.Id);
+
+        if (reply == null)
+        {
+            return false;
+        }
+
+        reply.Content = model.Content;
+        
+        await dbContext.SaveChangesAsync(); 
         return true;
     }
 }

@@ -63,12 +63,12 @@ public class ReplyController : BaseController
     }
 
     [HttpGet]
-    public async Task<IActionResult> Delete(Guid id, Guid postId)
+    public async Task<IActionResult> Delete(Guid postId, Guid id)
     {
         try
         {
             ReplyDeleteViewModel? model = await replyService
-                .GetReplyForDeleteAsync((Guid)this.GetUserId()!,postId,id);
+                .GetReplyForDeleteAsync((Guid)this.GetUserId()!, postId, id);
 
             if (model == null)
             {
@@ -89,11 +89,62 @@ public class ReplyController : BaseController
     {
         try
         {
-            bool deleteResult = await replyService.SoftDeleteReplyAsync((Guid)this.GetUserId()!,model);
+            bool deleteResult = await replyService.SoftDeleteReplyAsync((Guid)this.GetUserId()!, model);
             if (!deleteResult)
             {
-                ModelState.AddModelError(string.Empty,"Error while deleting reply!");
+                ModelState.AddModelError(string.Empty, "Error while deleting reply!");
                 return RedirectToAction("Details", "Post", new { id = model.PostId });
+            }
+
+            return RedirectToAction("Details", "Post", new { id = model.PostId });
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+            return RedirectToAction("Details", "Post", new { id = model.PostId });
+        }
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Edit(Guid postId, Guid id)
+    {
+        try
+        {
+            ReplyEditInputModel? model = await replyService
+                .GetReplyForEditAsync((Guid)this.GetUserId()!, postId, id);
+
+            if (model == null)
+            {
+                return RedirectToAction("Details", "Post", new { id = postId });
+            }
+
+            return View(model);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+            return RedirectToAction("Details", "Post", new { id = postId });
+        }
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Edit(ReplyEditInputModel model)
+    {
+        try
+        {
+            if (!ModelState.IsValid)
+            {
+                ModelState.AddModelError(String.Empty,"Error while creating reply");
+                return View(model);
+            }
+
+            bool editResult = await replyService
+                .EditReplyAsync((Guid)this.GetUserId()!,model);
+
+            if (!editResult)
+            {
+                ModelState.AddModelError(String.Empty, "Error while creating reply");
+                return View(model);
             }
 
             return RedirectToAction("Details", "Post", new { id = model.PostId });
