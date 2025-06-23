@@ -49,7 +49,7 @@ public class BoardService : IBoardService
             return null;
         }
 
-        IEnumerable<PostBoardDetailsViewModel>? posts =
+        IEnumerable<PostForBoardDetailsViewModel>? posts =
             await postService.GetPostsForBoardDetailsAsync(boardId);
 
         return new BoardDetailsViewModel

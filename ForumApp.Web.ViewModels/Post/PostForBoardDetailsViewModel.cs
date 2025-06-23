@@ -1,6 +1,6 @@
 ﻿namespace ForumApp.Web.ViewModels.Post;
 
-public class PostBoardDetailsViewModel
+public class PostForBoardDetailsViewModel
 {
     public Guid Id { get; set; }
     public string Title { get; set; } = null!;

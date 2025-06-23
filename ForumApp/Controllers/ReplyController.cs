@@ -35,7 +35,7 @@ public class ReplyController : BaseController
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create( ReplyCreateInputModel model)
+    public async Task<IActionResult> Create(ReplyCreateInputModel model)
     {
         try
         {
@@ -45,12 +45,55 @@ public class ReplyController : BaseController
             }
 
             bool createResult = await replyService
-                .CreateReplyForPost((Guid)GetUserId()!, model);
+                .CreateReplyForPostAsync((Guid)GetUserId()!, model);
 
             if (!createResult)
             {
-                ModelState.AddModelError(String.Empty,"Fatal error while adding reply to post");
+                ModelState.AddModelError(String.Empty, "Fatal error while adding reply to post");
                 return NotFound();
+            }
+
+            return RedirectToAction("Details", "Post", new { id = model.PostId });
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+            return RedirectToAction("Details", "Post", new { id = model.PostId });
+        }
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Delete(Guid id, Guid postId)
+    {
+        try
+        {
+            ReplyDeleteViewModel? model = await replyService
+                .GetReplyForDeleteAsync((Guid)this.GetUserId()!,postId,id);
+
+            if (model == null)
+            {
+                return RedirectToAction("Details", "Post", new { id = postId });
+            }
+
+            return View(model);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+            return RedirectToAction("Details", "Post", new { id = postId });
+        }
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Delete(ReplyDeleteViewModel model)
+    {
+        try
+        {
+            bool deleteResult = await replyService.SoftDeleteReplyAsync((Guid)this.GetUserId()!,model);
+            if (!deleteResult)
+            {
+                ModelState.AddModelError(string.Empty,"Error while deleting reply!");
+                return RedirectToAction("Details", "Post", new { id = model.PostId });
             }
 
             return RedirectToAction("Details", "Post", new { id = model.PostId });

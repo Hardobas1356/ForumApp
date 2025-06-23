@@ -9,9 +9,10 @@ public class PostDetailsViewModel
     public string Title { get; set; } = null!;
     public string Content { get; set; } = null!;
     public string CreatedAt { get; set; } = null!;
-    public string BoardId { get; set; } = null!;
+    public string Author { get; set; } = null!;
+    public Guid BoardId { get; set; }
     public string BoardName { get; set; } = null!;
     public bool IsPublisher { get; set; } = false;
-    public ICollection<ReplyDetailForPostDetailViewModel> Replies { get; set; }
+    public ICollection<ReplyDetailForPostDetailViewModel>? Replies { get; set; }
         = new HashSet<ReplyDetailForPostDetailViewModel>();
 }

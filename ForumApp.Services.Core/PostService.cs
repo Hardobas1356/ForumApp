@@ -13,20 +13,22 @@ public class PostService : IPostService
 {
     private readonly ForumAppDbContext dbContext;
     private readonly UserManager<ApplicationUser> userManager;
+    private readonly IReplyService replyService;
 
-    public PostService(ForumAppDbContext dbContext, UserManager<ApplicationUser> userManager)
+    public PostService(ForumAppDbContext dbContext, UserManager<ApplicationUser> userManager, IReplyService replyService)
     {
         this.dbContext = dbContext;
         this.userManager = userManager;
+        this.replyService = replyService;
     }
 
-    public async Task<IEnumerable<PostBoardDetailsViewModel>?> GetPostsForBoardDetailsAsync(Guid boardId)
+    public async Task<IEnumerable<PostForBoardDetailsViewModel>?> GetPostsForBoardDetailsAsync(Guid boardId)
     {
-        IEnumerable<PostBoardDetailsViewModel>? posts = await dbContext
+        IEnumerable<PostForBoardDetailsViewModel>? posts = await dbContext
             .Posts
             .Include(p => p.Board)
             .Where(p => p.BoardId == boardId)
-            .Select(p => new PostBoardDetailsViewModel
+            .Select(p => new PostForBoardDetailsViewModel
             {
                 Id = p.Id,
                 Title = p.Title,
@@ -79,30 +81,31 @@ public class PostService : IPostService
     }
     public async Task<PostDetailsViewModel?> GetPostDetailsAsync(Guid? userId, Guid id)
     {
-        var post = await dbContext
+        PostDetailsViewModel? post = await dbContext
             .Posts
+            .Include(p => p.Board)
+            .Include(p => p.ApplicationUser)
             .AsNoTracking()
             .Where(p => p.Id == id)
             .Select(p => new PostDetailsViewModel
             {
-                Id = id,
+                Id = p.Id,
                 Title = p.Title,
                 Content = p.Content,
                 CreatedAt = p.CreatedAt.ToString(DateTimeFormat),
-                BoardId = p.BoardId.ToString(),
+                Author = p.ApplicationUser.DisplayName,
+                BoardId = p.BoardId,
                 BoardName = p.Board.Name,
                 IsPublisher = userId != null && p.ApplicationUserId == userId,
-                Replies = p
-                                .Replies
-                                .Select(r => new ReplyDetailForPostDetailViewModel
-                                {
-                                    Id = r.Id.ToString(),
-                                    Content = r.Content,
-                                    CreatedAt = r.CreatedAt.ToString(DateTimeFormat)
-                                })
-                                .ToList()
             })
             .FirstOrDefaultAsync();
+
+        if (post != null)
+        {
+            post.Replies = await replyService
+                .GetRepliesForPostDetailsAsync(userId,post.Id);
+        }
+
 
         return post;
     }

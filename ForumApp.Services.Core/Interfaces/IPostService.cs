@@ -5,7 +5,7 @@ namespace ForumApp.Services.Core.Interfaces;
 public interface IPostService
 {
     Task<PostDetailsViewModel?> GetPostDetailsAsync(Guid? userId, Guid id);
-    Task<IEnumerable<PostBoardDetailsViewModel>?> GetPostsForBoardDetailsAsync(Guid boardId);
+    Task<IEnumerable<PostForBoardDetailsViewModel>?> GetPostsForBoardDetailsAsync(Guid boardId);
     Task<PostEditInputModel?> GetPostForEditAsync(Guid userId, Guid id);
     Task<bool> EditPostAsync(Guid userId, PostEditInputModel model);
     Task<bool> AddPostAsync(Guid userId, PostCreateInputModel model);

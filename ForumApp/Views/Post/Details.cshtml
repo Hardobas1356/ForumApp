@@ -1,40 +1,58 @@
-﻿@model ForumApp.Web.ViewModels.Post.PostDetailsViewModel
+﻿@using ForumApp.Web.ViewModels.Post
+@model PostDetailsViewModel
 
-<h2>@Model.Title</h2>
-<p><em>@Model.CreatedAt</em></p>
-<div>
-	@Model.Content
-	@if (User?.Identity?.IsAuthenticated == true && Model.IsPublisher == true)
-	{
-		<a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Edit</a>
-		<a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">Delete</a>
-	}
+<div class="container mt-4">
+    <h2 class="mb-3">@Model.Title</h2>
+    <h5 class="text-muted">Created by @Model.Author</h5>
+    <p class="text-muted"><em>@Model.CreatedAt</em></p>
+
+    <div class="border rounded p-3 mb-4 bg-light">
+        <p class="text-break mb-0">@Model.Content</p>
+    </div>
+
+    @if (User?.Identity?.IsAuthenticated == true && Model.IsPublisher)
+    {
+        <div class="mb-4">
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning me-2">Edit</a>
+            <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">Delete</a>
+        </div>
+    }
+
+    <hr />
+
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <h4 class="mb-0">Replies</h4>
+        @if (User?.Identity?.IsAuthenticated == true)
+        {
+            <a asp-controller="Reply" asp-action="Create" asp-route-postId="@Model.Id" class="btn btn-primary">Add Reply</a>
+        }
+    </div>
+
+    @if (!Model.Replies.Any())
+    {
+        <p class="fst-italic">No replies in this post yet.</p>
+    }
+    else
+    {
+        <ul class="list-group">
+            @foreach (var reply in Model.Replies.OrderByDescending(r => r.CreatedAt))
+            {
+                <li class="list-group-item">
+                    <div class="d-flex justify-content-between align-items-start flex-wrap">
+                        <div class="me-2">
+                            <div>@reply.Content</div>
+                            <small class="text-muted">By @reply.Author at @reply.CreatedAt</small>
+                        </div>
+                        @if (User?.Identity?.IsAuthenticated == true && reply.IsPublisher == true)
+                        {
+                            <div class="btn-group" role="group">
+                                <a asp-controller="Reply" asp-action="Edit" asp-route-id="@reply.Id" asp-route-postId="@Model.Id" class="btn btn-sm btn-warning">Edit</a>
+                                <a asp-controller="Reply" asp-action="Delete" asp-route-id="@reply.Id" asp-route-postId="@Model.Id" class="btn btn-sm btn-danger">Delete</a>
+                            </div>
+                        }
+                    </div>
+                </li>
+            }
+        </ul>
+    }
 </div>
-
-<hr/>
-
-<div>
-	<h3>Replies</h3>
-	@if (User?.Identity?.IsAuthenticated == true)
-	{
-		<div class="mt-2">
-			<a asp-controller="Reply" asp-action="Create" asp-route-postId="@Model.Id" class="btn btn-primary">Add Reply</a>
-		</div>
-	}
-</div>
-@if (!Model.Replies.Any())
-{
-	<p>No replies in this post yet.</p>
-}
-else
-{
-	<ul class="list-group">
-		@foreach (var reply in Model.Replies.OrderByDescending(p => p.CreatedAt))
-		{
-			<li class="list-group-item d-flex justify-content-between align-items-center">
-				@reply.Content
-				<span class="text-muted">@reply.CreatedAt</span>
-			</li>
-		}
-	</ul>
-}
