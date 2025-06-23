@@ -1,39 +1,43 @@
-﻿@model ForumApp.Web.ViewModels.Board.BoardDetailsViewModel
+﻿@using ForumApp.Web.ViewModels.Board
+@model BoardDetailsViewModel
 
 @{
-	ViewData["Title"] = Model.Name;
+    ViewData["Title"] = Model.Name;
 }
 
-<p>
-	<h2>@Model.Name</h2>
-	@if (User?.Identity?.IsAuthenticated == true)
-	{
-		<a asp-controller="Post" asp-action="Create" class="btn btn-success" asp-route-id="@Model.Id">Create post</a>
-	}
-</p>
-<p>
-	@Model.Description
+<div class="container py-4">
 
-</p>
+    <div class="mb-4">
+        <h2 class="fw-bold">@Model.Name</h2>
+        <p class="text-muted">@Model.Description</p>
 
+        @if (User?.Identity?.IsAuthenticated == true)
+        {
+            <a asp-controller="Post" asp-action="Create" asp-route-id="@Model.Id" class="btn btn-success mt-2">Create Post</a>
+        }
+    </div>
 
-<h3>Posts</h3>
+    <div>
+        <h3 class="mb-3">Posts</h3>
 
-@if (Model.Posts == null || !Model.Posts.Any())
-{
-	<p>No posts in this board yet.</p>
-}
-else
-{
-	<ul class="list-group">
-		@foreach (var post in Model.Posts.OrderByDescending(p => p.CreatedAt))
-		{
-			<li class="list-group-item d-flex justify-content-between align-items-center">
-				<a asp-controller="Post" asp-action="Details" asp-route-id="@post.Id">
-					@post.Title
-				</a>
-				<span class="text-muted">@post.CreatedAt</span>
-			</li>
-		}
-	</ul>
-}
+        @if (Model.Posts == null || !Model.Posts.Any())
+        {
+            <p class="text-muted">No posts in this board yet.</p>
+        }
+        else
+        {
+            <div class="list-group">
+                @foreach (var post in Model.Posts.OrderByDescending(p => p.CreatedAt))
+                {
+                    <a asp-controller="Post" asp-action="Details" asp-route-id="@post.Id"
+                       class="list-group-item list-group-item-action mb-2 p-3 shadow-sm rounded border-0 text-dark text-decoration-none">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="fw-semibold">@post.Title</div>
+                            <small class="text-muted">@post.CreatedAt</small>
+                        </div>
+                    </a>
+                }
+            </div>
+        }
+    </div>
+</div>
