@@ -128,6 +128,7 @@ public class PostService : IPostService
             Content = model.Content,
             CreatedAt = DateTime.UtcNow,
             ModifiedAt = DateTime.UtcNow,
+            ImageUrl = model.ImageUrl,
             ApplicationUserId = userId,
         };
 
@@ -154,7 +155,6 @@ public class PostService : IPostService
 
         return post;
     }
-
     public async Task<bool> DeletePostAsync(Guid userId, PostDeleteViewModel model)
     {
         Post? post = await dbContext

@@ -17,4 +17,5 @@ public class PostCreateInputModel
     [MaxLength(ContentMaximumLength)]
     public string Content { get; set; } = null!;
 
+    public string? ImageUrl { get; set; }
 }
