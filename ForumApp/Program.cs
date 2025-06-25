@@ -51,6 +51,9 @@ builder
 builder
     .Services
     .AddScoped<IReplyService, ReplyService>();
+builder
+    .Services
+    .AddScoped<ICategoryService, CategoryService>();
 
 var app = builder.Build();
 

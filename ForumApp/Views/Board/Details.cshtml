@@ -20,6 +20,22 @@
 
     <p class="text-muted">@Model.Description</p>
 
+    @if (Model.Categories != null && Model.Categories.Any())
+    {
+        <div class="mb-3">
+            <h5>Categories</h5>
+            <div>
+                @foreach (var category in Model.Categories)
+                {
+                    <span class="badge me-2 mb-1"
+                          style="background-color: @category.ColorHex; color: white; font-weight: 600;">
+                        @category.Name
+                    </span>
+                }
+            </div>
+        </div>
+    }
+
     @if (User?.Identity?.IsAuthenticated == true)
     {
         <a asp-controller="Post" asp-action="Create" asp-route-id="@Model.Id" class="btn btn-success mt-2">Create Post</a>

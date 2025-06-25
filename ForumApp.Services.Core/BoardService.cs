@@ -1,6 +1,7 @@
 ﻿using ForumApp.Data;
 using ForumApp.Services.Core.Interfaces;
 using ForumApp.Web.ViewModels.Board;
+using ForumApp.Web.ViewModels.Category;
 using ForumApp.Web.ViewModels.Post;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,11 +13,13 @@ public class BoardService : IBoardService
 {
     private readonly ForumAppDbContext dbContext;
     private readonly IPostService postService;
+    private readonly ICategoryService categoryService;
 
-    public BoardService(ForumAppDbContext dbContext, IPostService postService)
+    public BoardService(ForumAppDbContext dbContext, IPostService postService, ICategoryService categoryService)
     {
         this.dbContext = dbContext;
         this.postService = postService;
+        this.categoryService = categoryService;
     }
 
     public async Task<IEnumerable<BoardAllIndexViewModel>> GetAllBoardsAsync()
@@ -53,13 +56,17 @@ public class BoardService : IBoardService
         IEnumerable<PostForBoardDetailsViewModel>? posts =
             await postService.GetPostsForBoardDetailsAsync(boardId);
 
+        ICollection<CategoryViewModel>? categories =
+            await categoryService.GetCategoriesAsyncByBoardId(boardId);
+
         return new BoardDetailsViewModel
         {
             Id = board.Id,
             Name = board.Name,
             ImageUrl = board.ImageUrl,
             Description = board.Description,
-            Posts = posts?.ToHashSet()
+            Posts = posts?.ToHashSet(),
+            Categories = categories?.ToHashSet(),
         };
     }
 }
