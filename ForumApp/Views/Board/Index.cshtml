@@ -24,8 +24,19 @@ else
                    asp-route-id="@board.Id"
                    class="list-group-item list-group-item-action mb-3 p-3 shadow rounded border-0 text-dark text-decoration-none"
                    style="transition: background-color 0.2s;">
-                    <h4 class="mb-1">@board.Name</h4>
-                    <p class="mb-0 text-muted">@board.Description</p>
+                    <div class="d-flex align-items-center">
+                        @if (!string.IsNullOrWhiteSpace(board.ImageUrl))
+                        {
+                            <img src="@board.ImageUrl"
+                                 alt="Board image"
+                                 class="me-2"
+                                 style="width: 40px; height: 40px; object-fit: cover; border-radius: 6px; box-shadow: 0 0 3px rgba(0,0,0,0.2);" />
+                        }
+                        <div>
+                            <h4 class="mb-1">@board.Name</h4>
+                            <p class="mb-0 text-muted">@board.Description</p>
+                        </div>
+                    </div>
                 </a>
             }
         </div>

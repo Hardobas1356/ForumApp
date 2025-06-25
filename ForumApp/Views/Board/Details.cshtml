@@ -7,15 +7,23 @@
 
 <div class="container py-4">
 
-    <div class="mb-4">
-        <h2 class="fw-bold">@Model.Name</h2>
-        <p class="text-muted">@Model.Description</p>
-
-        @if (User?.Identity?.IsAuthenticated == true)
+    <div class="mb-4 d-flex align-items-center">
+        @if (!string.IsNullOrWhiteSpace(Model.ImageUrl))
         {
-            <a asp-controller="Post" asp-action="Create" asp-route-id="@Model.Id" class="btn btn-success mt-2">Create Post</a>
+            <img src="@Model.ImageUrl"
+                 alt="Board image"
+                 class="me-2"
+                 style="width: 48px; height: 48px; object-fit: cover; border-radius: 8px; box-shadow: 0 0 4px rgba(0,0,0,0.2);" />
         }
+        <h2 class="fw-bold mb-0">@Model.Name</h2>
     </div>
+
+    <p class="text-muted">@Model.Description</p>
+
+    @if (User?.Identity?.IsAuthenticated == true)
+    {
+        <a asp-controller="Post" asp-action="Create" asp-route-id="@Model.Id" class="btn btn-success mt-2">Create Post</a>
+    }
 
     <div>
         <h3 class="mb-3">Posts</h3>
