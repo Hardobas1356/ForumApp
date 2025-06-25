@@ -26,6 +26,8 @@ public class BoardService : IBoardService
     {
         var boards = await dbContext
             .Boards
+            .Include(b=>b.BoardCategories)
+            .ThenInclude(bc=>bc.Category)
             .AsNoTracking()
             .Where(b => !b.IsDeleted)
             .Select(b => new BoardAllIndexViewModel
@@ -34,8 +36,16 @@ public class BoardService : IBoardService
                 Name = b.Name,
                 ImageUrl = b.ImageUrl,
                 Description = b.Description,
+                Categories = b.BoardCategories
+                    .Select(bc => new CategoryViewModel
+                    {
+                        Id = bc.CategoryId,
+                        Name = bc.Category.Name,
+                        ColorHex = bc.Category.ColorHex,
+                    })
+                    .ToArray(),
             })
-            .ToListAsync();
+            .ToArrayAsync();
 
         return boards;
     }

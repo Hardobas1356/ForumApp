@@ -1,4 +1,6 @@
-﻿namespace ForumApp.Web.ViewModels.Board;
+﻿using ForumApp.Web.ViewModels.Category;
+
+namespace ForumApp.Web.ViewModels.Board;
 
 public class BoardAllIndexViewModel
 {
@@ -6,4 +8,6 @@ public class BoardAllIndexViewModel
     public string? ImageUrl { get; set; }
     public string Name { get; set; } = null!;
     public string Description { get; set; } = null!;
+    public ICollection<CategoryViewModel>? Categories { get; set; }
+        = new HashSet<CategoryViewModel>();
 }
