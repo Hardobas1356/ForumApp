@@ -23,13 +23,35 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
             .HasMaxLength(NameMaxLength);
 
         builder
+            .Property(c => c.ColorHex)
+            .IsRequired()
+            .HasMaxLength(ColorHexLength)
+            .IsFixedLength()
+            .HasDefaultValue(ColorHexDefaultValue);
+
+        builder
             .HasData(Categories);
     }
 
     public static List<Category> Categories => new()
+    {
+        new()
         {
-            new() { Id = Guid.Parse("67e8a9f8-29d7-444f-bd9b-86225ae41daf"), Name = "Technology" },
-            new() { Id = Guid.Parse("60f51770-93bc-42b4-a27c-8a280abda112"), Name = "Gaming" },
-            new() { Id = Guid.Parse("5fbd4e2e-a6f9-4d0f-ad91-fa2794d20317"), Name = "News" }
-        };
+            Id = Guid.Parse("67e8a9f8-29d7-444f-bd9b-86225ae41daf"),
+            Name = "Technology",
+            ColorHex = "#FF5733"
+        },
+        new()
+        {
+            Id = Guid.Parse("60f51770-93bc-42b4-a27c-8a280abda112"),
+            Name = "Gaming",
+            ColorHex = "#33C1FF"
+        },
+        new()
+        {
+            Id = Guid.Parse("5fbd4e2e-a6f9-4d0f-ad91-fa2794d20317"),
+            Name = "News",
+            ColorHex = "#28A745"
+        }
+    };
 }

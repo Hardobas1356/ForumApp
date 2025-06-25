@@ -13,7 +13,11 @@
         }
         public static class CategoryConstants
         {
-            public static readonly int NameMaxLength = 130;
+            public const int NameMaxLength = 130;
+            public const int ColorHexLength = 7;
+            public const string ColorHexRegexValidation = "^#([0-9A-Fa-f]{6})$";
+            public const string ColorHexDefaultValue = "#FFFFFF";
+            public const string ColorHexError = "Color must be a valid hex code.";
         }
         public static class PostConstants
         {
