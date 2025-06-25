@@ -13,6 +13,9 @@ public class Post
     [Comment("Content of the post")]
     public string Content { get; set; } = null!;
 
+    [Comment("Url for optional picture")]
+    public string? ImageUrl { get; set; }
+
     [Comment("Date when the post was created in UTC time")]
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

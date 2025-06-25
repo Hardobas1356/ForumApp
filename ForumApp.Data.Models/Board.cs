@@ -19,6 +19,9 @@ public class Board
     [Comment("Board creation date")]
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+    [Comment("Url for board icon")]
+    public string? ImageUrl{ get; set; }
+
 
     [Comment("Represents whether the board is deleted or not")]
     public bool IsDeleted { get; set; } = false;
