@@ -29,6 +29,7 @@ public class BoardService : IBoardService
             {
                 Id = b.Id,
                 Name = b.Name,
+                ImageUrl = b.ImageUrl,
                 Description = b.Description,
             })
             .ToListAsync();
@@ -56,6 +57,7 @@ public class BoardService : IBoardService
         {
             Id = board.Id,
             Name = board.Name,
+            ImageUrl = board.ImageUrl,
             Description = board.Description,
             Posts = posts?.ToHashSet()
         };
