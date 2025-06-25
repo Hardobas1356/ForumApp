@@ -152,6 +152,7 @@ public class PostService : IPostService
                 Content = p.Content,
                 Title = p.Title,
                 CreatedAt = p.CreatedAt,
+                ImageUrl= p.ImageUrl,
                 BoardId = p.BoardId,
             })
             .FirstOrDefaultAsync();
