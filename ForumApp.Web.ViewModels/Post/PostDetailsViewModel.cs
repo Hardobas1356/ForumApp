@@ -10,6 +10,7 @@ public class PostDetailsViewModel
     public string Content { get; set; } = null!;
     public string CreatedAt { get; set; } = null!;
     public string Author { get; set; } = null!;
+    public string? ImageUrl { get; set; }
     public Guid BoardId { get; set; }
     public string BoardName { get; set; } = null!;
     public bool IsPublisher { get; set; } = false;

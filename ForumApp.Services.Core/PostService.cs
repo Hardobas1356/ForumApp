@@ -94,6 +94,7 @@ public class PostService : IPostService
                 Content = p.Content,
                 CreatedAt = p.CreatedAt.ToString(DateTimeFormat),
                 Author = p.ApplicationUser.DisplayName,
+                ImageUrl = p.ImageUrl,
                 BoardId = p.BoardId,
                 BoardName = p.Board.Name,
                 IsPublisher = userId != null && p.ApplicationUserId == userId,
@@ -103,7 +104,7 @@ public class PostService : IPostService
         if (post != null)
         {
             post.Replies = await replyService
-                .GetRepliesForPostDetailsAsync(userId,post.Id);
+                .GetRepliesForPostDetailsAsync(userId, post.Id);
         }
 
 
