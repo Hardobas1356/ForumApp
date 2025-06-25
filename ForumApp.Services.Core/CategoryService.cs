@@ -21,6 +21,7 @@ public class CategoryService : ICategoryService
             .AsNoTracking()
             .Select(c => new CategoryViewModel
             {
+                Id = c.Id,
                 Name = c.Name,
                 ColorHex = c.ColorHex,
             })
@@ -33,10 +34,12 @@ public class CategoryService : ICategoryService
     {
         ICollection<CategoryViewModel> categories = await dbContext
             .BoardCategories
+            .Include(bc => bc.Category)
             .AsNoTracking()
-            .Where(bc=>bc.BoardId==boardId)
+            .Where(bc => bc.BoardId == boardId)
             .Select(bc => new CategoryViewModel
             {
+                Id = bc.Category.Id,
                 Name = bc.Category.Name,
                 ColorHex = bc.Category.ColorHex,
             })
