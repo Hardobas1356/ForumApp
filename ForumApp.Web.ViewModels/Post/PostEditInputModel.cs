@@ -17,4 +17,6 @@ public class PostEditInputModel
     [MaxLength(ContentMaximumLength, ErrorMessage = ContentInvalidLengthErrorMessage)]
     [MinLength(ContentMinimumLength, ErrorMessage = ContentInvalidLengthErrorMessage)]
     public string Content { get; set; } = null!;
+
+    public string? ImageUrl { get; set; }
 }

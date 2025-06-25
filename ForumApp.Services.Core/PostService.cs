@@ -56,6 +56,7 @@ public class PostService : IPostService
             Id = id,
             Title = post.Title,
             Content = post.Content,
+            ImageUrl = post.ImageUrl,
         };
 
         return model;
@@ -75,6 +76,7 @@ public class PostService : IPostService
         post.Title = model.Title;
         post.Content = model.Content;
         post.ModifiedAt = DateTime.UtcNow;
+        post.ImageUrl = model.ImageUrl;
 
         await dbContext.SaveChangesAsync();
         return true;
