@@ -86,7 +86,7 @@ public class PostService : IPostService
                 })
                 .ToHashSet(),
             TagIds = post.PostTags
-                .Select(pt=>pt.TagId)  
+                .Select(pt => pt.TagId)
                 .ToHashSet(),
         };
 
@@ -96,6 +96,8 @@ public class PostService : IPostService
     {
         Post? post = await dbContext
             .Posts
+            .Include(p => p.PostTags)
+            .ThenInclude(pt => pt.Tag)
             .Where(p => p.Id == model.Id)
             .FirstOrDefaultAsync();
 
@@ -104,10 +106,25 @@ public class PostService : IPostService
             return false;
         }
 
+
         post.Title = model.Title;
         post.Content = model.Content;
         post.ModifiedAt = DateTime.UtcNow;
         post.ImageUrl = model.ImageUrl;
+
+        dbContext.PostTags.RemoveRange(post.PostTags);
+
+        if (model.TagIds != null)
+        {
+            foreach (Guid tagId in model.TagIds)
+            {
+                post.PostTags.Add(new PostTag
+                {
+                    PostId = post.Id,
+                    TagId = tagId
+                });
+            }
+        }
 
         await dbContext.SaveChangesAsync();
         return true;

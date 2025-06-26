@@ -1,21 +1,19 @@
-﻿using ForumApp.Data.Models;
-using ForumApp.Services.Core;
-using ForumApp.Services.Core.Interfaces;
+﻿using ForumApp.Services.Core.Interfaces;
 using ForumApp.Web.ViewModels.Post;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using System.Threading.Tasks;
 
 namespace ForumApp.Web.Controllers;
 
 public class PostController : BaseController
 {
     private readonly IPostService postService;
+    private readonly ITagService tagService;
 
-    public PostController(IPostService postService)
+    public PostController(IPostService postService, ITagService tagService)
     {
         this.postService = postService;
+        this.tagService = tagService;
     }
 
     [HttpGet]
@@ -69,12 +67,16 @@ public class PostController : BaseController
         {
             if (!this.ModelState.IsValid)
             {
+                model.AvailableTags = await tagService
+                    .GetTagsAsync();
                 ModelState.AddModelError(string.Empty, "Error while editing Post");
                 return this.View(model);
             }
 
             if (!await postService.EditPostAsync((Guid)this.GetUserId()!, model))
             {
+                model.AvailableTags = await tagService
+                    .GetTagsAsync();
                 return this.View(model);
             }
 
@@ -83,7 +85,7 @@ public class PostController : BaseController
         catch (Exception e)
         {
             Console.WriteLine(e.Message);
-            return RedirectToAction(nameof(Details), "Board");
+            return RedirectToAction("Index", "Board");
         }
     }
 
