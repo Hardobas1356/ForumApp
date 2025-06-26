@@ -2,7 +2,21 @@
 @model PostDetailsViewModel
 
 <div class="container mt-4">
-    <h2 class="mb-3">@Model.Title</h2>
+    <h2 class="mb-1">@Model.Title</h2>
+
+    @if (Model.Tags != null && Model.Tags.Any())
+    {
+        <div class="mb-2">
+            @foreach (var tag in Model.Tags)
+            {
+                <span class="badge me-1"
+                      style="background-color:@tag.ColorHex; color:@(tag.ColorHex.ToLower() == "#ffffff" ? "#000" : "#fff");">
+                    @tag.Name
+                </span>
+            }
+        </div>
+    }
+
     <h5 class="text-muted">Created by @Model.Author</h5>
     <p class="text-muted"><em>@Model.CreatedAt</em></p>
 

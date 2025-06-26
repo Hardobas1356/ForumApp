@@ -3,6 +3,7 @@ using ForumApp.Data.Models;
 using ForumApp.Services.Core.Interfaces;
 using ForumApp.Web.ViewModels.Post;
 using ForumApp.Web.ViewModels.Reply;
+using ForumApp.Web.ViewModels.Tag;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using static ForumApp.GCommon.GlobalConstants;
@@ -87,6 +88,8 @@ public class PostService : IPostService
             .Posts
             .Include(p => p.Board)
             .Include(p => p.ApplicationUser)
+            .Include(p => p.PostTags)
+            .ThenInclude(pt => pt.Tag)
             .AsNoTracking()
             .Where(p => p.Id == id)
             .Select(p => new PostDetailsViewModel
@@ -100,6 +103,14 @@ public class PostService : IPostService
                 BoardId = p.BoardId,
                 BoardName = p.Board.Name,
                 IsPublisher = userId != null && p.ApplicationUserId == userId,
+                Tags = p.PostTags
+                    .Select(pt => new TagViewModel
+                    {
+                        Id = pt.Tag.Id,
+                        Name = pt.Tag.Name,
+                        ColorHex = pt.Tag.ColorHex,
+                    })
+                    .ToArray()
             })
             .FirstOrDefaultAsync();
 
@@ -108,7 +119,6 @@ public class PostService : IPostService
             post.Replies = await replyService
                 .GetRepliesForPostDetailsAsync(userId, post.Id);
         }
-
 
         return post;
     }
@@ -152,7 +162,7 @@ public class PostService : IPostService
                 Content = p.Content,
                 Title = p.Title,
                 CreatedAt = p.CreatedAt,
-                ImageUrl= p.ImageUrl,
+                ImageUrl = p.ImageUrl,
                 BoardId = p.BoardId,
             })
             .FirstOrDefaultAsync();

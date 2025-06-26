@@ -1,4 +1,5 @@
 ﻿using ForumApp.Web.ViewModels.Reply;
+using ForumApp.Web.ViewModels.Tag;
 using System.Collections;
 
 namespace ForumApp.Web.ViewModels.Post;
@@ -16,4 +17,6 @@ public class PostDetailsViewModel
     public bool IsPublisher { get; set; } = false;
     public ICollection<ReplyDetailForPostDetailViewModel>? Replies { get; set; }
         = new HashSet<ReplyDetailForPostDetailViewModel>();
+    public ICollection<TagViewModel>? Tags { get; set; }
+        = new HashSet<TagViewModel>();
 }
