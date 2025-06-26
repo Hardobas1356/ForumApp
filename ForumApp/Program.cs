@@ -54,6 +54,9 @@ builder
 builder
     .Services
     .AddScoped<ICategoryService, CategoryService>();
+builder
+    .Services
+    .AddScoped<ITagService, TagService>();
 
 var app = builder.Build();
 
