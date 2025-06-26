@@ -1,67 +1,74 @@
 ﻿@using ForumApp.Web.ViewModels.Board
 @model BoardDetailsViewModel
-
 @{
     ViewData["Title"] = Model.Name;
 }
-
 <div class="container py-4">
-
     <div class="mb-4 d-flex align-items-center">
         @if (!string.IsNullOrWhiteSpace(Model.ImageUrl))
         {
             <img src="@Model.ImageUrl"
                  alt="Board image"
                  class="me-2"
-                 style="width: 48px; height: 48px; object-fit: cover; border-radius: 8px; box-shadow: 0 0 4px rgba(0,0,0,0.2);" />
+                 style="width: 48px; height: 48px; object-fit: cover; border-radius: 8px; box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);" />
         }
-        <h2 class="fw-bold mb-0">@Model.Name</h2>
+        <div>
+            <h2 class="fw-bold mb-0">@Model.Name</h2>
+            @if (Model.Categories != null && Model.Categories.Any())
+            {
+                <div class="mt-2">
+                    @foreach (var category in Model.Categories)
+                    {
+                        <span class="badge me-2 mb-1"
+                              style="background-color: @category.ColorHex; color: #ffffff; font-weight: 600;">
+                            @category.Name
+                        </span>
+                    }
+                </div>
+            }
+        </div>
     </div>
-
     <p class="text-muted">@Model.Description</p>
-
-    @if (Model.Categories != null && Model.Categories.Any())
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="mb-0">Posts</h3>
+        @if (User?.Identity?.IsAuthenticated == true)
+        {
+            <a asp-controller="Post" asp-action="Create" asp-route-id="@Model.Id" class="btn btn-success">
+                <i class="fas fa-plus me-1"></i>Create Post
+            </a>
+        }
+    </div>
+    @if (Model.Posts == null || !Model.Posts.Any())
     {
-        <div class="mb-3">
-            <h5>Categories</h5>
-            <div>
-                @foreach (var category in Model.Categories)
-                {
-                    <span class="badge me-2 mb-1"
-                          style="background-color: @category.ColorHex; color: white; font-weight: 600;">
-                        @category.Name
-                    </span>
-                }
-            </div>
+        <p class="text-muted">No posts in this board yet.</p>
+    }
+    else
+    {
+        <div class="list-group">
+            @foreach (var post in Model.Posts.OrderByDescending(p => p.CreatedAt))
+            {
+                <a asp-controller="Post" asp-action="Details" asp-route-id="@post.Id"
+                   class="list-group-item list-group-item-action mb-2 p-3 shadow-sm rounded border-0 text-dark text-decoration-none">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="flex-grow-1">
+                            <div class="fw-semibold">@post.Title</div>
+                            @if (post.Tags != null && post.Tags.Any())
+                            {
+                                <div class="mt-2">
+                                    @foreach (var tag in post.Tags)
+                                    {
+                                        <span class="badge me-1"
+                                              style="background-color: @tag.ColorHex; color: @(tag.ColorHex.ToLower() == "#ffffff" ? "#000000" : "#ffffff");">
+                                            @tag.Name
+                                        </span>
+                                    }
+                                </div>
+                            }
+                        </div>
+                        <small class="text-muted">@post.CreatedAt</small>
+                    </div>
+                </a>
+            }
         </div>
     }
-
-    @if (User?.Identity?.IsAuthenticated == true)
-    {
-        <a asp-controller="Post" asp-action="Create" asp-route-id="@Model.Id" class="btn btn-success mt-2">Create Post</a>
-    }
-
-    <div>
-        <h3 class="mb-3">Posts</h3>
-
-        @if (Model.Posts == null || !Model.Posts.Any())
-        {
-            <p class="text-muted">No posts in this board yet.</p>
-        }
-        else
-        {
-            <div class="list-group">
-                @foreach (var post in Model.Posts.OrderByDescending(p => p.CreatedAt))
-                {
-                    <a asp-controller="Post" asp-action="Details" asp-route-id="@post.Id"
-                       class="list-group-item list-group-item-action mb-2 p-3 shadow-sm rounded border-0 text-dark text-decoration-none">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div class="fw-semibold">@post.Title</div>
-                            <small class="text-muted">@post.CreatedAt</small>
-                        </div>
-                    </a>
-                }
-            </div>
-        }
-    </div>
 </div>

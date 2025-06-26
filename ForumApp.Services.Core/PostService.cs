@@ -28,12 +28,22 @@ public class PostService : IPostService
         IEnumerable<PostForBoardDetailsViewModel>? posts = await dbContext
             .Posts
             .Include(p => p.Board)
+            .Include(p => p.PostTags)
+            .ThenInclude(p => p.Tag)
             .Where(p => p.BoardId == boardId)
             .Select(p => new PostForBoardDetailsViewModel
             {
                 Id = p.Id,
                 Title = p.Title,
                 CreatedAt = p.CreatedAt.ToString(DateTimeFormat),
+                Tags = p.PostTags
+                    .Select(pt=>new TagViewModel
+                    {
+                        Id=pt.Tag.Id,
+                        Name = pt.Tag.Name,
+                        ColorHex = pt.Tag.ColorHex,
+                    })
+                    .ToArray()
             })
             .ToArrayAsync();
 
