@@ -15,12 +15,14 @@ public class PostService : IPostService
     private readonly ForumAppDbContext dbContext;
     private readonly UserManager<ApplicationUser> userManager;
     private readonly IReplyService replyService;
+    private readonly ITagService tagService;
 
-    public PostService(ForumAppDbContext dbContext, UserManager<ApplicationUser> userManager, IReplyService replyService)
+    public PostService(ForumAppDbContext dbContext, UserManager<ApplicationUser> userManager, IReplyService replyService, ITagService tagService)
     {
         this.dbContext = dbContext;
         this.userManager = userManager;
         this.replyService = replyService;
+        this.tagService = tagService;
     }
 
     public async Task<IEnumerable<PostForBoardDetailsViewModel>?> GetPostsForBoardDetailsAsync(Guid boardId)
@@ -37,9 +39,9 @@ public class PostService : IPostService
                 Title = p.Title,
                 CreatedAt = p.CreatedAt.ToString(DateTimeFormat),
                 Tags = p.PostTags
-                    .Select(pt=>new TagViewModel
+                    .Select(pt => new TagViewModel
                     {
-                        Id=pt.Tag.Id,
+                        Id = pt.Tag.Id,
                         Name = pt.Tag.Name,
                         ColorHex = pt.Tag.ColorHex,
                     })
@@ -55,6 +57,9 @@ public class PostService : IPostService
 
         Post? post = await dbContext
             .Posts
+            .Include(post => post.PostTags)
+            .ThenInclude(post => post.Tag)
+            .AsNoTracking()
             .SingleOrDefaultAsync(p => p.Id == id && p.ApplicationUserId == userId);
 
         if (post == null)
@@ -62,12 +67,27 @@ public class PostService : IPostService
             return model;
         }
 
+        ICollection<TagViewModel> tags = await tagService
+            .GetTagsAsync();
+
         model = new PostEditInputModel
         {
             Id = id,
             Title = post.Title,
             Content = post.Content,
             ImageUrl = post.ImageUrl,
+            AvailableTags = tags,
+            Tags = post.PostTags
+                .Select(pt => new TagViewModel
+                {
+                    Id = pt.Tag.Id,
+                    Name = pt.Tag.Name,
+                    ColorHex = pt.Tag.ColorHex,
+                })
+                .ToHashSet(),
+            TagIds = post.PostTags
+                .Select(pt=>pt.TagId)  
+                .ToHashSet(),
         };
 
         return model;
