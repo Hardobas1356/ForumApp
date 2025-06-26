@@ -1,5 +1,6 @@
 ﻿using ForumApp.Services.Core.Interfaces;
 using ForumApp.Web.ViewModels.Post;
+using ForumApp.Web.ViewModels.Tag;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -94,9 +95,13 @@ public class PostController : BaseController
     {
         try
         {
+            ICollection<TagViewModel> tags = await tagService
+                .GetTagsAsync();
+
             PostCreateInputModel model = new PostCreateInputModel()
             {
                 BoardId = id,
+                AvailableTags = tags
             };
 
             return View(model);
@@ -115,6 +120,8 @@ public class PostController : BaseController
         {
             if (!this.ModelState.IsValid)
             {
+                model.AvailableTags = await tagService
+                    .GetTagsAsync();
                 return View(model);
             }
 
@@ -123,6 +130,8 @@ public class PostController : BaseController
 
             if (!CreateResult)
             {
+                model.AvailableTags = await tagService
+                    .GetTagsAsync();
                 ModelState.AddModelError(String.Empty, "Error occured while adding post to board");
                 return View(model);
             }

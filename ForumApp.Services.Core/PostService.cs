@@ -171,18 +171,18 @@ public class PostService : IPostService
     }
     public async Task<bool> AddPostAsync(Guid userId, PostCreateInputModel model)
     {
-        Board? board = await dbContext
+        bool boardExists = await dbContext
             .Boards
-            .AsNoTracking()
-            .SingleOrDefaultAsync(b => b.Id == model.BoardId);
+            .AnyAsync(b => b.Id == model.BoardId);
 
-        if (board == null)
+        if (!boardExists)
         {
             return false;
         }
 
         Post post = new Post()
         {
+            Id = Guid.NewGuid(),
             BoardId = model.BoardId,
             Title = model.Title,
             Content = model.Content,
@@ -191,6 +191,18 @@ public class PostService : IPostService
             ImageUrl = model.ImageUrl,
             ApplicationUserId = userId,
         };
+
+        if (model.TagIds != null)
+        {
+            foreach (Guid tagId in model.TagIds)
+            {
+                post.PostTags.Add(new PostTag
+                {
+                    PostId = post.Id,
+                    TagId = tagId
+                });
+            }
+        }
 
         await dbContext.AddAsync(post);
         await dbContext.SaveChangesAsync();
