@@ -6,7 +6,7 @@ using System.Linq.Expressions;
 
 namespace ForumApp.Services.Core;
 
-public class Repository<T> : IAsyncRepository<T> where T : class
+public class Repository<T> : IRepository<T> where T : class
 {
     private readonly ForumAppDbContext dbContext;
     private readonly DbSet<T> dbSet;
@@ -45,39 +45,43 @@ public class Repository<T> : IAsyncRepository<T> where T : class
 
     public async Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate)
     {
-       return await dbSet
-            .AnyAsync(predicate);
-    }
-    public async Task<IEnumerable<T>> GetAllAsync()
-    {
         return await dbSet
-            .ToArrayAsync();
+             .AnyAsync(predicate);
     }
+    public async Task<IEnumerable<T>> GetAllAsync(bool asNoTracking = false)
+    {
+        IQueryable<T> query = dbSet;
+        if (asNoTracking)
+            query = query.AsNoTracking();
 
-    public async Task<IEnumerable<T>> GetAllAsNoTrackingAsync()
-    {
-        return await dbSet
-            .AsNoTracking()
-            .ToArrayAsync();
-    }
-
-    public async Task<T?> GetByIdAsync(Guid id)
-    {
-        return await dbSet
-            .FindAsync(id);
-    }
-    public async Task<IEnumerable<T>> GetWhereAsync(Expression<Func<T, bool>> predicate)
-    {
-        return await dbSet
-            .Where(predicate)
+        return await query
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<T>> GetWhereAsNoTrackingAsync(Expression<Func<T, bool>> predicate)
+    public async Task<T?> GetByIdAsync(Guid id, bool asNoTracking = false)
     {
-        return await dbSet
-            .AsNoTracking()
-            .Where(predicate)
+        IQueryable<T> query = dbSet;
+
+        if (asNoTracking)
+        {
+            query = query.AsNoTracking();
+        }
+
+        return await query
+            .FirstOrDefaultAsync(e => EF.Property<Guid>(e, "Id") == id);
+    }
+    public async Task<IEnumerable<T>> GetWhereAsync(Expression<Func<T, bool>> predicate, bool asNoTracking = false)
+    {
+        IQueryable<T> query = dbSet
+            .Where(predicate);
+
+        if (asNoTracking)
+        {
+            query = query
+                .AsNoTracking();
+        }
+
+        return await query
             .ToListAsync();
     }
 
@@ -90,4 +94,5 @@ public class Repository<T> : IAsyncRepository<T> where T : class
     {
         return await dbContext.SaveChangesAsync();
     }
+
 }

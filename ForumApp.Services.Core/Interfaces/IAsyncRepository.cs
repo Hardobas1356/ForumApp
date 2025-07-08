@@ -4,11 +4,9 @@ namespace ForumApp.Services.Core.Interfaces;
 
 public interface IAsyncRepository<T>where T : class
 {
-    Task<T?> GetByIdAsync(Guid id);
-    Task<IEnumerable<T>> GetAllAsync();
-    Task<IEnumerable<T>> GetAllAsNoTrackingAsync();
-    Task<IEnumerable<T>> GetWhereAsync(Expression<Func<T, bool>> predicate);
-    Task<IEnumerable<T>> GetWhereAsNoTrackingAsync(Expression<Func<T, bool>> predicate);
+    Task<T?> GetByIdAsync(Guid id,bool asNoTracking);
+    Task<IEnumerable<T>> GetAllAsync(bool asNoTracking);
+    Task<IEnumerable<T>> GetWhereAsync(Expression<Func<T, bool>> predicate, bool asNoTracking);
     Task AddAsync(T entity);
     Task AddRangeAsync(IEnumerable<T> entities);
     Task UpdateAsync(T entity);

@@ -1,4 +1,5 @@
 ﻿using ForumApp.Data;
+using ForumApp.Data.Models;
 using ForumApp.Services.Core.Interfaces;
 using ForumApp.Web.ViewModels.Board;
 using ForumApp.Web.ViewModels.Category;
@@ -11,25 +12,23 @@ namespace ForumApp.Services.Core;
 
 public class BoardService : IBoardService
 {
-    private readonly ForumAppDbContext dbContext;
+    private readonly IRepository<Board> repository;
     private readonly IPostService postService;
     private readonly ICategoryService categoryService;
 
-    public BoardService(ForumAppDbContext dbContext, IPostService postService, ICategoryService categoryService)
+    public BoardService(IRepository<Board> repository, IPostService postService, ICategoryService categoryService)
     {
-        this.dbContext = dbContext;
+        this.repository = repository;
         this.postService = postService;
         this.categoryService = categoryService;
     }
 
     public async Task<IEnumerable<BoardAllIndexViewModel>> GetAllBoardsAsync()
     {
-        var boards = await dbContext
-            .Boards
-            .Include(b=>b.BoardCategories)
-            .ThenInclude(bc=>bc.Category)
-            .AsNoTracking()
-            .Where(b => !b.IsDeleted)
+        IEnumerable<Board> boards = await repository
+            .GetAllAsync(true);
+
+        return boards
             .Select(b => new BoardAllIndexViewModel
             {
                 Id = b.Id,
@@ -43,22 +42,19 @@ public class BoardService : IBoardService
                         Name = bc.Category.Name,
                         ColorHex = bc.Category.ColorHex,
                     })
-                    .ToArray(),
+                    .ToArray()
             })
-            .ToArrayAsync();
-
-        return boards;
+            .ToArray();
     }
 
     public async Task<BoardDetailsViewModel?> GetBoardDetailsAsync(Guid boardId)
     {
-        var board = await dbContext
-               .Boards
-               .AsNoTracking()
-               .Where(b => b.Id == boardId)
-               .FirstOrDefaultAsync();
+        IEnumerable<Board> board = await repository
+            .GetWhereAsync(b => b.Id == boardId,true);
+        Board? boardEntity = board
+            .FirstOrDefault();
 
-        if (board == null)
+        if (boardEntity == null)
         {
             return null;
         }
@@ -71,10 +67,10 @@ public class BoardService : IBoardService
 
         return new BoardDetailsViewModel
         {
-            Id = board.Id,
-            Name = board.Name,
-            ImageUrl = board.ImageUrl,
-            Description = board.Description,
+            Id = boardEntity.Id,
+            Name = boardEntity.Name,
+            ImageUrl = boardEntity.ImageUrl,
+            Description = boardEntity.Description,
             Posts = posts?.ToHashSet(),
             Categories = categories?.ToHashSet(),
         };
