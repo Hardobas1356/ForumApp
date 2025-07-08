@@ -1,4 +1,5 @@
 ﻿using ForumApp.Data;
+using ForumApp.Data.Models;
 using ForumApp.Services.Core.Interfaces;
 using ForumApp.Web.ViewModels.Tag;
 using Microsoft.EntityFrameworkCore;
@@ -7,26 +8,27 @@ namespace ForumApp.Services.Core;
 
 public class TagService : ITagService
 {
-    private readonly ForumAppDbContext dbContext;
+    private readonly IGenericRepository<Tag> repository;
 
-    public TagService(ForumAppDbContext dbContext)
+    public TagService(IGenericRepository<Tag> repository)
     {
-        this.dbContext = dbContext;
+        this.repository = repository;
     }
 
     public async Task<ICollection<TagViewModel>> GetTagsAsync()
     {
-        ICollection<TagViewModel> tags = await dbContext
-            .Tags
-            .AsNoTracking()
+        var tags = await repository
+            .GetAllAsync(true);
+
+        var result = tags
             .Select(t => new TagViewModel
             {
                 Id = t.Id,
                 Name = t.Name,
                 ColorHex = t.ColorHex,
             })
-            .ToArrayAsync();
+            .ToArray();
 
-        return tags;
+        return result;
     }
 }
