@@ -68,7 +68,8 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
             .FirstOrDefaultAsync(e => EF.Property<Guid>(e, "Id") == id);
     }
 
-    public async Task<IEnumerable<T>> GetWhereAsync(Expression<Func<T, bool>> predicate, bool asNoTracking = false)
+    public async Task<IEnumerable<T>> GetWhereAsync(Expression<Func<T, bool>> predicate,
+                                                    bool asNoTracking = false)
     {
         IQueryable<T> query = dbSet
             .Where(predicate);
@@ -83,7 +84,8 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
             .ToListAsync();
     }
     public async Task<IEnumerable<T>> GetWhereWithIncludeAsync(Expression<Func<T, bool>> predicate,
-        Func<IQueryable<T>, IQueryable<T>> include)
+                                                               Func<IQueryable<T>, IQueryable<T>> include,
+                                                               bool asNoTracking = false)
     {
         IQueryable<T> query = dbSet.Where(predicate);
         query = include(query);
@@ -103,6 +105,22 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
 
         return await query
             .SingleOrDefaultAsync(predicate);
+    }
+
+    public async Task<T?> SingleOrDefaultWithIncludeAsync(Expression<Func<T, bool>> predicate,
+                                                    Func<IQueryable<T>, IQueryable<T>> include,
+                                                    bool asNoTracking)
+    {
+        IQueryable<T> query = dbSet
+            .Where(predicate);
+
+        query = include(query);
+
+        if (asNoTracking)
+            query = query.AsNoTracking();
+        
+         return await query
+            .SingleOrDefaultAsync();
     }
 
     public void Update(T entity)
