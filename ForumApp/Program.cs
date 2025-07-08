@@ -44,7 +44,7 @@ builder
 
 builder
     .Services
-    .AddScoped(typeof(IRepository<>), typeof(Repository<>));
+    .AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder
     .Services
     .AddScoped<IBoardService, BoardService>();

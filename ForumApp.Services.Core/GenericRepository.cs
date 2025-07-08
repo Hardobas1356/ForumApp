@@ -6,12 +6,12 @@ using System.Linq.Expressions;
 
 namespace ForumApp.Services.Core;
 
-public class Repository<T> : IRepository<T> where T : class
+public class GenericRepository<T> : IRepository<T>, IGenericRepository<T> where T : class
 {
     private readonly ForumAppDbContext dbContext;
     private readonly DbSet<T> dbSet;
 
-    public Repository(ForumAppDbContext dbContext)
+    public GenericRepository(ForumAppDbContext dbContext)
     {
         this.dbContext = dbContext;
         this.dbSet = dbContext.Set<T>();
@@ -29,18 +29,15 @@ public class Repository<T> : IRepository<T> where T : class
             .AddRangeAsync(entities);
     }
 
-    public Task DeleteAsync(T entity)
+    public void Delete(T entity)
     {
-        dbSet
-            .Remove(entity);
-        return Task.CompletedTask;
+        dbSet.Remove(entity);
     }
 
-    public Task DeleteRangeAsync(IEnumerable<T> entities)
+    public void DeleteRange(IEnumerable<T> entities)
     {
         dbSet
             .RemoveRange(entities);
-        return Task.CompletedTask;
     }
 
     public async Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate)
@@ -85,14 +82,13 @@ public class Repository<T> : IRepository<T> where T : class
             .ToListAsync();
     }
 
-    public async Task UpdateAsync(T entity)
-    {
-        dbSet.Update(entity);
-        await Task.CompletedTask;
-    }
     public async Task<int> SaveChangesAsync()
     {
         return await dbContext.SaveChangesAsync();
     }
 
+    public void Update(T entity)
+    {
+        dbSet.Update(entity);
+    }
 }

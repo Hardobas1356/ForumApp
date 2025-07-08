@@ -12,11 +12,11 @@ namespace ForumApp.Services.Core;
 
 public class BoardService : IBoardService
 {
-    private readonly IRepository<Board> repository;
+    private readonly IGenericRepository<Board> repository;
     private readonly IPostService postService;
     private readonly ICategoryService categoryService;
 
-    public BoardService(IRepository<Board> repository, IPostService postService, ICategoryService categoryService)
+    public BoardService(IGenericRepository<Board> repository, IPostService postService, ICategoryService categoryService)
     {
         this.repository = repository;
         this.postService = postService;
