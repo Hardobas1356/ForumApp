@@ -12,14 +12,24 @@ namespace ForumApp.Services.Core;
 
 public class PostService : IPostService
 {
-    private readonly ForumAppDbContext dbContext;
+    private readonly IGenericRepository<Post> postRepository;
+    private readonly IGenericRepository<Board> boardRepository;
+    private readonly IGenericRepository<PostTag> postTagRepository;
     private readonly UserManager<ApplicationUser> userManager;
     private readonly IReplyService replyService;
     private readonly ITagService tagService;
 
-    public PostService(ForumAppDbContext dbContext, UserManager<ApplicationUser> userManager, IReplyService replyService, ITagService tagService)
+    public PostService(
+        IGenericRepository<Post> postRepository,
+        IGenericRepository<Board> boardRepository,
+        IGenericRepository<PostTag> postTagRepository,
+        UserManager<ApplicationUser> userManager,
+        IReplyService replyService,
+        ITagService tagService)
     {
-        this.dbContext = dbContext;
+        this.postRepository = postRepository;
+        this.boardRepository = boardRepository;
+        this.postTagRepository = postTagRepository;
         this.userManager = userManager;
         this.replyService = replyService;
         this.tagService = tagService;
@@ -27,50 +37,48 @@ public class PostService : IPostService
 
     public async Task<IEnumerable<PostForBoardDetailsViewModel>?> GetPostsForBoardDetailsAsync(Guid boardId)
     {
-        IEnumerable<PostForBoardDetailsViewModel>? posts = await dbContext
-            .Posts
-            .Include(p => p.Board)
-            .Include(p => p.PostTags)
-            .ThenInclude(p => p.Tag)
-            .Where(p => p.BoardId == boardId)
+        IEnumerable<Post> posts = await postRepository
+           .GetWhereWithIncludeAsync(p => p.BoardId == boardId,
+                                     q => q.Include(p => p.Board)
+                                           .Include(p => p.PostTags)
+                                           .ThenInclude(pt => pt.Tag),
+                                     asNoTracking: true);
+
+        return posts
             .Select(p => new PostForBoardDetailsViewModel
             {
                 Id = p.Id,
                 Title = p.Title,
                 CreatedAt = p.CreatedAt.ToString(DateTimeFormat),
                 Tags = p.PostTags
-                    .Select(pt => new TagViewModel
-                    {
-                        Id = pt.Tag.Id,
-                        Name = pt.Tag.Name,
-                        ColorHex = pt.Tag.ColorHex,
-                    })
-                    .ToArray()
+                        .Select(pt => new TagViewModel
+                        {
+                            Id = pt.Tag.Id,
+                            Name = pt.Tag.Name,
+                            ColorHex = pt.Tag.ColorHex,
+                        })
+                        .ToArray()
             })
-            .ToArrayAsync();
-
-        return posts;
+            .ToArray();
     }
     public async Task<PostEditInputModel?> GetPostForEditAsync(Guid userId, Guid id)
     {
-        PostEditInputModel? model = null;
-
-        Post? post = await dbContext
-            .Posts
-            .Include(post => post.PostTags)
-            .ThenInclude(post => post.Tag)
-            .AsNoTracking()
-            .SingleOrDefaultAsync(p => p.Id == id && p.ApplicationUserId == userId);
+        Post? post = await postRepository
+            .SingleOrDefaultWithIncludeAsync(p => p.ApplicationUserId == userId
+                                                  && p.Id == id,
+                                             q => q.Include(p => p.PostTags)
+                                                   .ThenInclude(pt => pt.Tag),
+                                             asNoTracking: true);
 
         if (post == null)
         {
-            return model;
+            return null;
         }
 
         ICollection<TagViewModel> tags = await tagService
             .GetTagsAsync();
 
-        model = new PostEditInputModel
+        return new PostEditInputModel
         {
             Id = id,
             Title = post.Title,
@@ -89,30 +97,27 @@ public class PostService : IPostService
                 .Select(pt => pt.TagId)
                 .ToHashSet(),
         };
-
-        return model;
     }
     public async Task<bool> EditPostAsync(Guid userId, PostEditInputModel model)
     {
-        Post? post = await dbContext
-            .Posts
-            .Include(p => p.PostTags)
-            .ThenInclude(pt => pt.Tag)
-            .Where(p => p.Id == model.Id)
-            .FirstOrDefaultAsync();
+        Post? post = await postRepository
+            .SingleOrDefaultWithIncludeAsync(p => p.Id == model.Id
+                                                && p.ApplicationUserId == userId,
+                                             q => q.Include(p => p.PostTags)
+                                                 .ThenInclude(pt => pt.Tag),
+                                             asNoTracking: false);
 
-        if (post == null || post.ApplicationUserId != userId)
+        if (post == null)
         {
             return false;
         }
-
 
         post.Title = model.Title;
         post.Content = model.Content;
         post.ModifiedAt = DateTime.UtcNow;
         post.ImageUrl = model.ImageUrl;
 
-        dbContext.PostTags.RemoveRange(post.PostTags);
+        postTagRepository.DeleteRange(post.PostTags);
 
         if (model.TagIds != null)
         {
@@ -126,54 +131,52 @@ public class PostService : IPostService
             }
         }
 
-        await dbContext.SaveChangesAsync();
+        await postRepository.SaveChangesAsync();
         return true;
     }
     public async Task<PostDetailsViewModel?> GetPostDetailsAsync(Guid? userId, Guid id)
     {
-        PostDetailsViewModel? post = await dbContext
-            .Posts
-            .Include(p => p.Board)
-            .Include(p => p.ApplicationUser)
-            .Include(p => p.PostTags)
-            .ThenInclude(pt => pt.Tag)
-            .AsNoTracking()
-            .Where(p => p.Id == id)
-            .Select(p => new PostDetailsViewModel
-            {
-                Id = p.Id,
-                Title = p.Title,
-                Content = p.Content,
-                CreatedAt = p.CreatedAt.ToString(DateTimeFormat),
-                Author = p.ApplicationUser.DisplayName,
-                ImageUrl = p.ImageUrl,
-                BoardId = p.BoardId,
-                BoardName = p.Board.Name,
-                IsPublisher = userId != null && p.ApplicationUserId == userId,
-                Tags = p.PostTags
-                    .Select(pt => new TagViewModel
-                    {
-                        Id = pt.Tag.Id,
-                        Name = pt.Tag.Name,
-                        ColorHex = pt.Tag.ColorHex,
-                    })
-                    .ToArray()
-            })
-            .FirstOrDefaultAsync();
-
-        if (post != null)
+        Post? post = await postRepository
+            .SingleOrDefaultWithIncludeAsync(p => p.Id == id,
+                                             q => q.Include(p => p.Board)
+                                                 .Include(p => p.ApplicationUser)
+                                                 .Include(p => p.PostTags)
+                                                 .ThenInclude(pt => pt.Tag),
+                                             asNoTracking: true);
+        if (post == null)
         {
-            post.Replies = await replyService
-                .GetRepliesForPostDetailsAsync(userId, post.Id);
+            return null;
         }
 
-        return post;
+        PostDetailsViewModel? model = new PostDetailsViewModel
+        {
+            Id = post.Id,
+            Title = post.Title,
+            Content = post.Content,
+            CreatedAt = post.CreatedAt.ToString(DateTimeFormat),
+            Author = post.ApplicationUser.DisplayName,
+            ImageUrl = post.ImageUrl,
+            BoardId = post.BoardId,
+            BoardName = post.Board.Name,
+            IsPublisher = userId != null && post.ApplicationUserId == userId,
+            Tags = post.PostTags
+                       .Select(pt => new TagViewModel
+                       {
+                           Id = pt.Tag.Id,
+                           Name = pt.Tag.Name,
+                           ColorHex = pt.Tag.ColorHex,
+                       })
+                       .ToArray(),
+            Replies = await replyService
+                            .GetRepliesForPostDetailsAsync(userId, post.Id)
+        };
+
+        return model;
     }
     public async Task<bool> AddPostAsync(Guid userId, PostCreateInputModel model)
     {
-        bool boardExists = await dbContext
-            .Boards
-            .AnyAsync(b => b.Id == model.BoardId);
+        bool boardExists = await boardRepository
+            .ExistsAsync(b => b.Id == model.BoardId);
 
         if (!boardExists)
         {
@@ -192,11 +195,13 @@ public class PostService : IPostService
             ApplicationUserId = userId,
         };
 
+        await postRepository.AddAsync(post);
+
         if (model.TagIds != null)
         {
             foreach (Guid tagId in model.TagIds)
             {
-                post.PostTags.Add(new PostTag
+                await postTagRepository.AddAsync(new PostTag
                 {
                     PostId = post.Id,
                     TagId = tagId
@@ -204,36 +209,40 @@ public class PostService : IPostService
             }
         }
 
-        await dbContext.AddAsync(post);
-        await dbContext.SaveChangesAsync();
+        await postRepository.SaveChangesAsync();
 
         return true;
     }
     public async Task<PostDeleteViewModel?> GetPostForDeleteAsync(Guid userId, Guid id)
     {
-        PostDeleteViewModel? post = await dbContext
-            .Posts
-            .Where(p => p.Id == id && p.ApplicationUserId == userId)
-            .AsNoTracking()
-            .Select(p => new PostDeleteViewModel
-            {
-                Id = p.Id,
-                Content = p.Content,
-                Title = p.Title,
-                CreatedAt = p.CreatedAt,
-                ImageUrl = p.ImageUrl,
-                BoardId = p.BoardId,
-            })
-            .FirstOrDefaultAsync();
+        Post? post = await postRepository
+            .SingleOrDefaultAsync(p => p.ApplicationUserId == userId
+                                     && p.Id == id,
+                                     asNoTracking: true);
 
-        return post;
+        if (post == null)
+        {
+            return null;
+        }
+
+        PostDeleteViewModel? model = new PostDeleteViewModel
+        {
+            Id = post.Id,
+            Content = post.Content,
+            Title = post.Title,
+            CreatedAt = post.CreatedAt,
+            ImageUrl = post.ImageUrl,
+            BoardId = post.BoardId,
+        };
+
+        return model;
     }
     public async Task<bool> DeletePostAsync(Guid userId, PostDeleteViewModel model)
     {
-        Post? post = await dbContext
-            .Posts
-            .Where(p => p.Id == model.Id && p.ApplicationUserId == userId)
-            .SingleOrDefaultAsync();
+        Post? post = await postRepository
+            .SingleOrDefaultAsync(p => p.Id == model.Id
+                                  && p.ApplicationUserId == userId,
+                                  asNoTracking: false);
 
         if (post == null)
         {
@@ -241,9 +250,8 @@ public class PostService : IPostService
         }
 
         bool boardExists =
-            await dbContext
-            .Boards
-            .AnyAsync(b => b.Id == model.BoardId);
+            await boardRepository
+            .ExistsAsync(b => b.Id == model.BoardId);
 
         if (!boardExists)
         {
@@ -252,7 +260,7 @@ public class PostService : IPostService
 
         post.IsDeleted = true;
 
-        await dbContext.SaveChangesAsync();
+        await postRepository.SaveChangesAsync();
 
         return true;
     }

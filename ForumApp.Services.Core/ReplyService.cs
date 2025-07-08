@@ -56,7 +56,8 @@ public class ReplyService : IReplyService
     {
         IEnumerable<Reply> replies = await replyRepository
             .GetWhereWithIncludeAsync(r => r.PostId == postId,
-                                      q => q.Include(r => r.ApplicationUser));
+                                      q => q.Include(r => r.ApplicationUser),
+                                      asNoTracking: true);
 
         return replies
             .Select(r => new ReplyDetailForPostDetailViewModel
