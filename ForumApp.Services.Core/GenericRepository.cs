@@ -1,11 +1,12 @@
 ﻿using ForumApp.Data;
 using ForumApp.Services.Core.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Linq.Expressions;
 
 namespace ForumApp.Services.Core;
 
-public class GenericRepository<T> : IRepository<T>, IGenericRepository<T> where T : class
+public class GenericRepository<T> : IGenericRepository<T> where T : class
 {
     private readonly ForumAppDbContext dbContext;
     private readonly DbSet<T> dbSet;
@@ -66,6 +67,7 @@ public class GenericRepository<T> : IRepository<T>, IGenericRepository<T> where 
         return await query
             .FirstOrDefaultAsync(e => EF.Property<Guid>(e, "Id") == id);
     }
+
     public async Task<IEnumerable<T>> GetWhereAsync(Expression<Func<T, bool>> predicate, bool asNoTracking = false)
     {
         IQueryable<T> query = dbSet
@@ -80,10 +82,27 @@ public class GenericRepository<T> : IRepository<T>, IGenericRepository<T> where 
         return await query
             .ToListAsync();
     }
-
+    public async Task<IEnumerable<T>> GetWhereWithIncludeAsync(Expression<Func<T, bool>> predicate,
+        Func<IQueryable<T>, IQueryable<T>> include)
+    {
+        IQueryable<T> query = dbSet.Where(predicate);
+        query = include(query);
+        return await query.ToListAsync();
+    }
     public async Task<int> SaveChangesAsync()
     {
         return await dbContext.SaveChangesAsync();
+    }
+
+    public async Task<T?> SingleOrDefaultAsync(Expression<Func<T, bool>> predicate, bool asNoTracking = false)
+    {
+        IQueryable<T> query = dbSet;
+
+        if (asNoTracking)
+            query = query.AsNoTracking();
+
+        return await query
+            .SingleOrDefaultAsync(predicate);
     }
 
     public void Update(T entity)

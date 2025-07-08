@@ -11,20 +11,24 @@ namespace ForumApp.Services.Core;
 
 public class ReplyService : IReplyService
 {
-    private readonly ForumAppDbContext dbContext;
+    private readonly IGenericRepository<Reply> replyRepository;
+    private readonly IGenericRepository<Post> postRepository;
     private readonly UserManager<ApplicationUser> userManager;
 
-    public ReplyService(ForumAppDbContext dbContext, UserManager<ApplicationUser> userManager)
+    public ReplyService(
+        IGenericRepository<Reply> replyRepository,
+        IGenericRepository<Post> postRepository,
+        UserManager<ApplicationUser> userManager)
     {
-        this.dbContext = dbContext;
+        this.replyRepository = replyRepository;
+        this.postRepository = postRepository;
         this.userManager = userManager;
     }
 
     public async Task<bool> CreateReplyForPostAsync(Guid userId, ReplyCreateInputModel model)
     {
-        Post? post = await dbContext
-            .Posts
-            .SingleOrDefaultAsync(p => p.Id == model.PostId);
+        Post? post = await postRepository
+            .GetByIdAsync(model.PostId, true);
 
         ApplicationUser? user = await userManager
             .FindByIdAsync(userId.ToString());
@@ -42,110 +46,94 @@ public class ReplyService : IReplyService
             CreatedAt = DateTime.UtcNow,
         };
 
-        await dbContext.Replies.AddAsync(reply);
-        await dbContext.SaveChangesAsync();
+        await replyRepository.AddAsync(reply);
+        await replyRepository.SaveChangesAsync();
 
         return true;
     }
 
     public async Task<ICollection<ReplyDetailForPostDetailViewModel>?> GetRepliesForPostDetailsAsync(Guid? userId, Guid postId)
     {
-        ICollection<ReplyDetailForPostDetailViewModel>? replies = await dbContext
-            .Replies
-            .Include(r => r.ApplicationUser)
-            .AsNoTracking()
-            .Where(r => r.PostId == postId)
+        IEnumerable<Reply> replies = await replyRepository
+            .GetWhereWithIncludeAsync(r => r.PostId == postId,
+                                      q => q.Include(r => r.ApplicationUser));
+
+        return replies
             .Select(r => new ReplyDetailForPostDetailViewModel
             {
                 Id = r.Id,
                 Content = r.Content,
-                Author = r.ApplicationUser.DisplayName,
-                IsPublisher = userId == null ? false : r.ApplicationUser.Id == userId,
-                CreatedAt = r.CreatedAt.ToString(DateTimeFormat)
+                Author = r.ApplicationUser?.DisplayName ?? "Unknown",
+                CreatedAt = r.CreatedAt.ToString(DateTimeFormat),
+                IsPublisher = userId != null && r.ApplicationUserId == userId
             })
-            .ToArrayAsync();
-
-        return replies;
+            .ToArray();
     }
 
     public async Task<ReplyDeleteViewModel?> GetReplyForDeleteAsync(Guid userId, Guid postId, Guid id)
     {
-        Reply? reply = await dbContext
-            .Replies
-            .Where(r => r.Id == id && r.PostId == postId && r.ApplicationUserId == userId)
-            .AsNoTracking()
-            .SingleOrDefaultAsync();
+        Reply? reply = await replyRepository
+             .SingleOrDefaultAsync(r =>
+                                   r.Id == id && r.PostId == postId
+                                   && r.ApplicationUserId == userId,
+                                   asNoTracking: true);
 
-        if (reply == null)
-        {
-            return null;
-        }
+        if (reply == null) return null;
 
-        ReplyDeleteViewModel model = new ReplyDeleteViewModel()
+        return new ReplyDeleteViewModel
         {
             Id = id,
             PostId = postId,
             Content = reply.Content,
-            CreatedAt = reply.CreatedAt.ToString(DateTimeFormat),
+            CreatedAt = reply.CreatedAt.ToString(DateTimeFormat)
         };
-
-        return model;
     }
     public async Task<bool> SoftDeleteReplyAsync(Guid userId, ReplyDeleteViewModel model)
     {
-        Reply? reply = await dbContext
-            .Replies
+        Reply? reply = await replyRepository
             .SingleOrDefaultAsync(r => r.Id == model.Id
-                && r.PostId == model.PostId && r.ApplicationUserId == userId);
+                                  && r.PostId == model.PostId
+                                  && r.ApplicationUserId == userId,
+                                  asNoTracking: false);
 
-        if (reply == null)
-        {
-            return false;
-        }
+        if (reply == null) return false;
 
         reply.IsDeleted = true;
-
-        await dbContext.SaveChangesAsync();
+        await replyRepository.SaveChangesAsync();
 
         return true;
     }
     public async Task<ReplyEditInputModel?> GetReplyForEditAsync(Guid userId, Guid postId, Guid id)
     {
-        Reply? reply = await dbContext
-            .Replies
-            .AsNoTracking()
+        Reply? reply = await replyRepository
             .SingleOrDefaultAsync(r => r.Id == id
-                && r.PostId == postId && r.ApplicationUserId == userId);
+                                  && r.PostId == postId
+                                  && r.ApplicationUserId == userId,
+                                  asNoTracking: true);
 
-        if (reply == null)
-        {
-            return null;
-        }
+        if (reply == null) return null;
 
-        ReplyEditInputModel model = new ReplyEditInputModel()
+        return new ReplyEditInputModel
         {
             Id = reply.Id,
             PostId = reply.PostId,
             Content = reply.Content,
         };
-
-        return model;
     }
 
     public async Task<bool> EditReplyAsync(Guid userId, ReplyEditInputModel model)
     {
-        Reply? reply = await dbContext
-            .Replies
-            .SingleOrDefaultAsync(r => r.ApplicationUserId == userId && r.Id == model.Id);
+        Reply? reply = await replyRepository
+            .SingleOrDefaultAsync(r => r.Id == model.Id
+                                  && r.PostId == model.PostId
+                                  && r.ApplicationUserId == userId,
+                                  asNoTracking: false);
 
-        if (reply == null)
-        {
-            return false;
-        }
+        if (reply == null) return false;
 
         reply.Content = model.Content;
-        
-        await dbContext.SaveChangesAsync(); 
+        await replyRepository.SaveChangesAsync();
+
         return true;
     }
 }
