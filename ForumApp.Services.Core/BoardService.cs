@@ -1,12 +1,8 @@
-﻿using ForumApp.Data;
-using ForumApp.Data.Models;
+﻿using ForumApp.Data.Models;
 using ForumApp.Services.Core.Interfaces;
 using ForumApp.Web.ViewModels.Board;
 using ForumApp.Web.ViewModels.Category;
 using ForumApp.Web.ViewModels.Post;
-using Microsoft.EntityFrameworkCore;
-
-using static ForumApp.GCommon.GlobalConstants;
 
 namespace ForumApp.Services.Core;
 

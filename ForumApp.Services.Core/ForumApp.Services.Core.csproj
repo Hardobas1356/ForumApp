@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ForumApp.Data.Models\ForumApp.Data.Models.csproj" />
     <ProjectReference Include="..\ForumApp.Data\ForumApp.Data.csproj" />
     <ProjectReference Include="..\ForumApp.GCommon\ForumApp.GCommon.csproj" />
     <ProjectReference Include="..\ForumApp.Services.Common\ForumApp.Services.Common.csproj" />

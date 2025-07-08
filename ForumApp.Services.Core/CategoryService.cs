@@ -1,4 +1,5 @@
 ﻿using ForumApp.Data;
+using ForumApp.Data.Models;
 using ForumApp.Services.Core.Interfaces;
 using ForumApp.Web.ViewModels.Category;
 using Microsoft.EntityFrameworkCore;
@@ -7,44 +8,44 @@ namespace ForumApp.Services.Core;
 
 public class CategoryService : ICategoryService
 {
-    private readonly ForumAppDbContext dbContext;
+    private readonly IGenericRepository<Category> repository;
 
-    public CategoryService(ForumAppDbContext dbContext)
+    public CategoryService(IGenericRepository<Category> repository)
     {
-        this.dbContext = dbContext;
+        this.repository = repository;
     }
 
     public async Task<ICollection<CategoryViewModel>> GetCategoriesAsync()
     {
-        ICollection<CategoryViewModel> categories = await dbContext
-            .Categories
-            .AsNoTracking()
+        IEnumerable<Category> categories = await repository
+            .GetAllAsync(true);
+
+        ICollection<CategoryViewModel> entities = categories
             .Select(c => new CategoryViewModel
             {
                 Id = c.Id,
                 Name = c.Name,
                 ColorHex = c.ColorHex,
             })
-            .ToArrayAsync();
+            .ToArray();
 
-        return categories;
+        return entities;
     }
 
     public async Task<ICollection<CategoryViewModel>> GetCategoriesAsyncByBoardId(Guid boardId)
     {
-        ICollection<CategoryViewModel> categories = await dbContext
-            .BoardCategories
-            .Include(bc => bc.Category)
-            .AsNoTracking()
-            .Where(bc => bc.BoardId == boardId)
-            .Select(bc => new CategoryViewModel
-            {
-                Id = bc.Category.Id,
-                Name = bc.Category.Name,
-                ColorHex = bc.Category.ColorHex,
-            })
-            .ToArrayAsync();
+        IEnumerable<Category> categories = await repository
+            .GetWhereAsync(c => c.BoardCategories.Any(bc => bc.BoardId == boardId), true);
 
-        return categories;
+        ICollection<CategoryViewModel> result = categories
+                .Select(c => new CategoryViewModel
+                {
+                    Id = c.Id,
+                    Name = c.Name,
+                    ColorHex = c.ColorHex,
+                })
+                .ToArray();
+
+        return result;
     }
 }
