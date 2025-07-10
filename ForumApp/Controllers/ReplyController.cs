@@ -1,4 +1,5 @@
 ﻿using ForumApp.Data.Models;
+using ForumApp.Services.Core;
 using ForumApp.Services.Core.Interfaces;
 using ForumApp.Web.ViewModels.Post;
 using ForumApp.Web.ViewModels.Reply;
@@ -9,9 +10,11 @@ namespace ForumApp.Web.Controllers;
 public class ReplyController : BaseController
 {
     private readonly IReplyService replyService;
-    public ReplyController(IReplyService replyService)
+    private readonly IPermissionService permissionService;
+    public ReplyController(IReplyService replyService, IPermissionService permissionService)
     {
         this.replyService = replyService;
+        this.permissionService = permissionService;
     }
 
     [HttpGet]
@@ -49,7 +52,7 @@ public class ReplyController : BaseController
 
             if (!createResult)
             {
-                ModelState.AddModelError(String.Empty, "Fatal error while adding reply to post");
+                ModelState.AddModelError(String.Empty, "Fatal error while creating reply");
                 return NotFound();
             }
 
@@ -67,6 +70,11 @@ public class ReplyController : BaseController
     {
         try
         {
+            if (!await permissionService.CanManageReplyAsync((Guid)this.GetUserId()!, id))
+            {
+                return RedirectToAction("Details", "Post", new { id = postId });
+            }
+
             ReplyDeleteViewModel? model = await replyService
                 .GetReplyForDeleteAsync((Guid)this.GetUserId()!, postId, id);
 
@@ -89,6 +97,11 @@ public class ReplyController : BaseController
     {
         try
         {
+            if (!await permissionService.CanManageReplyAsync((Guid)this.GetUserId()!, model.Id))
+            {
+                return RedirectToAction("Details", "Post", new { id = model.PostId });
+            }
+
             bool deleteResult = await replyService.SoftDeleteReplyAsync((Guid)this.GetUserId()!, model);
             if (!deleteResult)
             {
@@ -110,6 +123,11 @@ public class ReplyController : BaseController
     {
         try
         {
+            if (!await permissionService.CanManageReplyAsync((Guid)this.GetUserId()!, id))
+            {
+                return RedirectToAction("Details", "Post", new { id = postId });
+            }
+
             ReplyEditInputModel? model = await replyService
                 .GetReplyForEditAsync((Guid)this.GetUserId()!, postId, id);
 
@@ -132,9 +150,14 @@ public class ReplyController : BaseController
     {
         try
         {
+            if (!await permissionService.CanManageReplyAsync((Guid)this.GetUserId()!, model.Id))
+            {
+                return RedirectToAction("Details", "Post", new { id = model.PostId });
+            }
+
             if (!ModelState.IsValid)
             {
-                ModelState.AddModelError(String.Empty,"Error while creating reply");
+                ModelState.AddModelError(String.Empty, "Error while editing reply");
                 return View(model);
             }
 
@@ -143,7 +166,7 @@ public class ReplyController : BaseController
 
             if (!editResult)
             {
-                ModelState.AddModelError(String.Empty, "Error while creating reply");
+                ModelState.AddModelError(String.Empty, "Error while editing reply");
                 return View(model);
             }
 
