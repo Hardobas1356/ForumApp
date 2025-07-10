@@ -1,7 +1,6 @@
 ﻿using ForumApp.Data;
 using ForumApp.Services.Core.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Linq.Expressions;
 
 namespace ForumApp.Services.Core;
