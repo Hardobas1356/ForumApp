@@ -25,6 +25,8 @@ public class Board
 
     [Comment("Represents whether the board is deleted or not")]
     public bool IsDeleted { get; set; } = false;
+    [Comment("Represents whether the board is approved to be created by admin")]
+    public bool IsApproved { get; set; } = false;
 
 
     public virtual ICollection<Post> Posts { get; set; }
