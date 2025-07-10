@@ -60,6 +60,9 @@ builder
 builder
     .Services
     .AddScoped<ITagService, TagService>();
+builder
+    .Services
+    .AddScoped<IPermissionService, PermissionService>();
 
 var app = builder.Build();
 

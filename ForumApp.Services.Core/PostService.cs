@@ -176,7 +176,7 @@ public class PostService : IPostService
     public async Task<bool> AddPostAsync(Guid userId, PostCreateInputModel model)
     {
         bool boardExists = await boardRepository
-            .ExistsAsync(b => b.Id == model.BoardId);
+            .AnyAsync(b => b.Id == model.BoardId);
 
         if (!boardExists)
         {
@@ -251,7 +251,7 @@ public class PostService : IPostService
 
         bool boardExists =
             await boardRepository
-            .ExistsAsync(b => b.Id == model.BoardId);
+            .AnyAsync(b => b.Id == model.BoardId);
 
         if (!boardExists)
         {

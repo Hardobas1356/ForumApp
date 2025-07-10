@@ -39,7 +39,7 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
             .RemoveRange(entities);
     }
 
-    public async Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate)
+    public async Task<bool> AnyAsync(Expression<Func<T, bool>> predicate)
     {
         return await dbSet
              .AnyAsync(predicate);

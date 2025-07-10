@@ -17,6 +17,6 @@ public interface IAsyncRepository<T> where T : class
                                                   bool asNoTracking);
     Task AddAsync(T entity);
     Task AddRangeAsync(IEnumerable<T> entities);
-    Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate);
+    Task<bool> AnyAsync(Expression<Func<T, bool>> predicate);
     Task<int> SaveChangesAsync();
 }
