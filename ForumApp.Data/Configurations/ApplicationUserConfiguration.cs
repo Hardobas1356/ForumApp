@@ -39,6 +39,7 @@ public class ApplicationUserConfiguration : IEntityTypeConfiguration<Application
             SecurityStamp = Guid.NewGuid().ToString(),
             ConcurrencyStamp = Guid.NewGuid().ToString(),
             PasswordHash = "AQAAAAIAAYagAAAAEC9bG6Y4LAGgT2Ih3qsFwL2zHcLv4RYK0zPWYtrsi0P6bq31sMQzmxkAghrUYZ9AIQ==",
+            IsDeleted = false,
         },
         new ApplicationUser
         {
@@ -53,6 +54,7 @@ public class ApplicationUserConfiguration : IEntityTypeConfiguration<Application
             SecurityStamp = Guid.NewGuid().ToString(),
             ConcurrencyStamp = Guid.NewGuid().ToString(),
             PasswordHash = "AQAAAAIAAYagAAAAEC9bG6Y4LAGgT2Ih3qsFwL2zHcLv4RYK0zPWYtrsi0P6bq31sMQzmxkAghrUYZ9AIQ==",
+            IsDeleted = false,
         }
     };
 }

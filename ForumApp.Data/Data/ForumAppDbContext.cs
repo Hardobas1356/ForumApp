@@ -20,6 +20,7 @@ public class ForumAppDbContext : IdentityDbContext<ApplicationUser, IdentityRole
     public virtual DbSet<Category> Categories { get; set; } = null!;
     public virtual DbSet<Reply> Replies { get; set; } = null!;
     public virtual DbSet<PostTag> PostTags { get; set; } = null!;
+    public virtual DbSet<BoardManager> BoardManagers { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

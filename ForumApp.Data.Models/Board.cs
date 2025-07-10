@@ -31,4 +31,6 @@ public class Board
         = new HashSet<Post>();
     public virtual ICollection<BoardCategory> BoardCategories { get; set; }
         = new HashSet<BoardCategory>();
+    public virtual ICollection<BoardManager> BoardManagers { get; set; } 
+        = new HashSet<BoardManager>();
 }

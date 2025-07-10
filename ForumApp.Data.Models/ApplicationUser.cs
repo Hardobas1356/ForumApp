@@ -13,9 +13,13 @@ public class ApplicationUser : IdentityUser<Guid>
 
     [Comment("Name with which user is displayed in app")]
     public string DisplayName { get; set; } = null!;
+    [Comment("Shows whether the user is deleted")]
+    public bool IsDeleted { get; set; } = false;
 
     public virtual ICollection<Post> Posts { get; set; } 
         = new HashSet<Post>();
     public virtual ICollection<Reply> Replies { get; set; }
         =new HashSet<Reply>();
+    public virtual ICollection<BoardManager> BoardManagers { get; set; }
+    = new HashSet<BoardManager>();
 }
