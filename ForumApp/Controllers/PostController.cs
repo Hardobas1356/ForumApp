@@ -1,4 +1,6 @@
-﻿using ForumApp.Services.Core.Interfaces;
+﻿using ForumApp.Data.Models;
+using ForumApp.Services.Core;
+using ForumApp.Services.Core.Interfaces;
 using ForumApp.Web.ViewModels.Post;
 using ForumApp.Web.ViewModels.Tag;
 using Microsoft.AspNetCore.Authorization;
@@ -10,11 +12,13 @@ public class PostController : BaseController
 {
     private readonly IPostService postService;
     private readonly ITagService tagService;
+    private readonly IPermissionService permissionService;
 
-    public PostController(IPostService postService, ITagService tagService)
+    public PostController(IPostService postService, ITagService tagService, IPermissionService permissionService)
     {
         this.postService = postService;
         this.tagService = tagService;
+        this.permissionService = permissionService;
     }
 
     [HttpGet]
@@ -22,8 +26,9 @@ public class PostController : BaseController
     public async Task<IActionResult> Details(Guid id)
     {
         try
-        {
-            var model = await postService.GetPostDetailsAsync(this.GetUserId(),id);
+        {   
+            PostDetailsViewModel? model = await postService
+                .GetPostDetailsAsync(this.GetUserId(),id);
 
             if (model == null)
             {
@@ -47,6 +52,11 @@ public class PostController : BaseController
             var model = await postService
                 .GetPostForEditAsync((Guid)this.GetUserId()!, id);
 
+            if (!await permissionService.CanManagePostAsync((Guid)this.GetUserId()!, id))
+            {
+                return RedirectToAction("Index", "Board");
+            }
+
             if (model == null)
             {
                 return RedirectToAction("Index", "Board");
@@ -66,6 +76,11 @@ public class PostController : BaseController
     {
         try
         {
+            if (!await permissionService.CanManagePostAsync((Guid)this.GetUserId()!, model.Id))
+            {
+                return RedirectToAction("Index", "Board");
+            }
+
             if (!this.ModelState.IsValid)
             {
                 model.AvailableTags = await tagService
@@ -150,9 +165,14 @@ public class PostController : BaseController
     {
         try
         {
+            if (!await permissionService.CanManagePostAsync((Guid)this.GetUserId()!, id))
+            {
+                return RedirectToAction("Index", "Board");
+            }
+
             PostDeleteViewModel? model = await postService
                 .GetPostForDeleteAsync((Guid)this.GetUserId()!, id);
-            
+
             if (model == null)
             {
                 return RedirectToAction("Index", "Board");
@@ -172,6 +192,11 @@ public class PostController : BaseController
     {
         try
         {
+            if (!await permissionService.CanManagePostAsync((Guid)this.GetUserId()!, model.Id))
+            {
+                return RedirectToAction("Index", "Board");
+            }
+
             bool postDeletionResult = await postService
                 .DeletePostAsync((Guid)this.GetUserId()!, model);
 
