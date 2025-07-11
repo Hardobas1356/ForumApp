@@ -1,13 +1,34 @@
-﻿@{
-    ViewData["Title"] = "Admin Dashboard";
-}
+﻿@using ForumApp.Web.ViewModels.Admin.Board
+@model IEnumerable<BoardAdminViewModel>
 
-<h1>Admin Dashboard</h1>
+<h2>Admin Dashboard</h2>
 
-<p>Welcome, Administrator!</p>
-
-<ul>
-    <li><a href="#">Pending Boards</a></li>
-    <li><a href="#">Manage Moderators</a></li>
-    <li><a href="#">View Reports</a></li>
-</ul>
+<table class="table">
+	<thead>
+		<tr>
+			<th>Name</th>
+			<th>Description</th>
+			<th>Approved</th>
+			<th>Actions</th>
+		</tr>
+	</thead>
+	<tbody>
+		@foreach (var board in Model)
+		{
+			<tr>
+				<td>@board.Name</td>
+				<td>@board.Description</td>
+				<td>@board.IsApproved</td>
+				<td>
+					@if (!board.IsApproved)
+					{
+						<form method="post" asp-route-id="@board.Id" asp-action="Approve" asp-controller="Dashboard" asp-area="Admin">
+							@Html.AntiForgeryToken()
+							<button type="submit" class="btn btn-success btn-sm">Approve</button>
+						</form>
+					}
+				</td>
+			</tr>
+		}
+	</tbody>
+</table>

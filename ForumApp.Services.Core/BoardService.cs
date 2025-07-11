@@ -1,5 +1,6 @@
 ﻿using ForumApp.Data.Models;
 using ForumApp.Services.Core.Interfaces;
+using ForumApp.Web.ViewModels.Admin.Board;
 using ForumApp.Web.ViewModels.Board;
 using ForumApp.Web.ViewModels.Category;
 using ForumApp.Web.ViewModels.Post;
@@ -8,20 +9,39 @@ namespace ForumApp.Services.Core;
 
 public class BoardService : IBoardService
 {
-    private readonly IGenericRepository<Board> repository;
+    private readonly IGenericRepository<Board> boardRepository;
     private readonly IPostService postService;
     private readonly ICategoryService categoryService;
 
     public BoardService(IGenericRepository<Board> repository, IPostService postService, ICategoryService categoryService)
     {
-        this.repository = repository;
+        this.boardRepository = repository;
         this.postService = postService;
         this.categoryService = categoryService;
     }
 
+    public async Task<bool> ApproveBoardAsync(Guid id)
+    {
+        Board? board = await boardRepository
+            .GetByIdAsync(id,
+                          asNoTracking: false,
+                          ignoreQueryFilters: true);
+
+        if (board == null)
+        {
+            return false;
+        }
+
+        board.IsApproved = true;
+
+        await boardRepository.SaveChangesAsync();
+
+        return true;
+    }
+
     public async Task<IEnumerable<BoardAllIndexViewModel>> GetAllBoardsAsync()
     {
-        IEnumerable<Board> boards = await repository
+        IEnumerable<Board> boards = await boardRepository
             .GetAllAsync(true);
 
         return boards
@@ -43,10 +63,29 @@ public class BoardService : IBoardService
             .ToArray();
     }
 
+    public async Task<IEnumerable<BoardAdminViewModel>?> GetAllBoardsForAdminAsync()
+    {
+        IEnumerable<Board> boards = await boardRepository
+            .GetAllAsync(asNoTracking: true,
+                         ignoreQueryFilters: true);
+
+        IEnumerable<BoardAdminViewModel> result = boards
+            .Select(b => new BoardAdminViewModel
+            {
+                Id = b.Id,
+                Name = b.Name,
+                Description = b.Description,
+                IsApproved = b.IsApproved,
+                IsDeleted = b.IsDeleted,
+            });
+
+        return result;
+    }
+
     public async Task<BoardDetailsViewModel?> GetBoardDetailsAsync(Guid boardId)
     {
-        IEnumerable<Board> board = await repository
-            .GetWhereAsync(b => b.Id == boardId,true);
+        IEnumerable<Board> board = await boardRepository
+            .GetWhereAsync(b => b.Id == boardId, true);
         Board? boardEntity = board
             .FirstOrDefault();
 

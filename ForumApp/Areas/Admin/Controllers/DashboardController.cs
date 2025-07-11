@@ -1,4 +1,5 @@
 ﻿using ForumApp.Services.Core.Interfaces;
+using ForumApp.Web.ViewModels.Admin.Board;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ForumApp.Web.Areas.Admin.Controllers;
@@ -12,8 +13,22 @@ public class DashboardController : Controller
         this.boardService = boardService;
     }
 
-    public IActionResult Index()
+    [HttpGet]
+    public async Task<IActionResult> Index()
     {
-        return View();
+        IEnumerable<BoardAdminViewModel>? model = await boardService
+            .GetAllBoardsForAdminAsync();
+
+        return View(model);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Approve(Guid id)
+    {
+        await boardService
+            .ApproveBoardAsync(id);
+
+        return RedirectToAction(nameof(Index));
     }
 }
