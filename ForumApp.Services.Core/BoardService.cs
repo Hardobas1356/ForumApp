@@ -133,6 +133,24 @@ public class BoardService : IBoardService
         return model;
     }
 
+    public async Task<bool> RestoreBoardAsync(Guid id)
+    {
+        Board? board = await boardRepository
+            .GetByIdAsync(id,
+                          asNoTracking:false,
+                          ignoreQueryFilters: true);
+
+        if (board == null)
+        {
+            return false;
+        }
+
+        board.IsDeleted = false;
+        await boardRepository.SaveChangesAsync();
+
+        return true;
+    }
+
     public async Task<bool> SoftDeleteBoardAsync(BoardDeleteViewModel model)
     {
         Board? board = await boardRepository

@@ -27,8 +27,17 @@
 							<button type="submit" class="btn btn-success btn-sm">Approve</button>
 						</form>
 					}
+
 					<a asp-area="Admin" asp-controller="Dashboard" asp-action="Delete" asp-route-id="@board.Id"
 					   class="btn btn-danger btn-sm">Delete</a>
+
+					@if (board.IsDeleted)
+					{
+						<form asp-area="Admin" asp-controller="Dashboard" asp-action="RestoreDeletedBoard" asp-route-id="@board.Id" method="post" style="display:inline">
+							@Html.AntiForgeryToken()
+							<button type="submit" class="btn btn-warning btn-sm">Restore</button>
+						</form>
+					}
 				</td>
 			</tr>
 		}

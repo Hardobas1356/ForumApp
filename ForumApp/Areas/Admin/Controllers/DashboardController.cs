@@ -90,4 +90,27 @@ public class DashboardController : Controller
             return RedirectToAction(nameof(Index));
         }
     }
+
+    [HttpPost]
+    public async Task<IActionResult> RestoreDeletedBoard(Guid id)
+    {
+        try
+        {
+            bool actionResult = await boardService
+                .RestoreBoardAsync(id);
+
+            if (!actionResult)
+            {
+                //Todo add failure message
+                return RedirectToAction(nameof(Index));
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+            return RedirectToAction(nameof(Index));
+        }
+    }
 }
