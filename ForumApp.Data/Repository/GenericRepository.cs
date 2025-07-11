@@ -2,6 +2,7 @@
 using ForumApp.Data.Repository.Interfaces;
 using ForumApp.Services.Core.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Linq.Expressions;
 
 namespace ForumApp.Services.Core;
@@ -49,6 +50,18 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
         return await query
              .AnyAsync(predicate);
     }
+    public async Task<IEnumerable<T>> GetAllWithInludeAsync(Func<IQueryable<T>, IQueryable<T>> include,
+                                                      bool asNoTracking = true,
+                                                      bool ignoreQueryFilters = false)
+    {
+        IQueryable<T> query = BuildQueryable(asNoTracking, ignoreQueryFilters);
+
+        query = include(query);
+
+        return await query
+            .ToListAsync();
+    }
+
     public async Task<IEnumerable<T>> GetAllAsync(bool asNoTracking,
                                                   bool ignoreQueryFilters)
     {

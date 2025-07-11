@@ -35,7 +35,8 @@ public class CategoryService : ICategoryService
     public async Task<ICollection<CategoryViewModel>> GetCategoriesAsyncByBoardId(Guid boardId)
     {
         IEnumerable<Category> categories = await repository
-            .GetWhereAsync(c => c.BoardCategories.Any(bc => bc.BoardId == boardId), true);
+            .GetWhereAsync(c => c.BoardCategories.Any(bc => bc.BoardId == boardId),
+                           asNoTracking: true);
 
         ICollection<CategoryViewModel> result = categories
                 .Select(c => new CategoryViewModel

@@ -42,7 +42,7 @@ public class BoardService : IBoardService
     public async Task<IEnumerable<BoardAllIndexViewModel>> GetAllBoardsAsync()
     {
         IEnumerable<Board> boards = await boardRepository
-            .GetAllAsync(true);
+            .GetAllAsync();
 
         return boards
             .Select(b => new BoardAllIndexViewModel
