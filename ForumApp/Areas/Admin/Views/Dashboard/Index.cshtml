@@ -1,45 +1,72 @@
 ﻿@using ForumApp.Web.ViewModels.Admin.Board
 @model IEnumerable<BoardAdminViewModel>
 
-<h2>Admin Dashboard</h2>
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
 
-<table class="table">
-	<thead>
-		<tr>
-			<th>Name</th>
-			<th>Description</th>
-			<th>Approved</th>
-			<th>Actions</th>
-		</tr>
-	</thead>
-	<tbody>
-		@foreach (var board in Model)
-		{
-			<tr>
-				<td>@board.Name</td>
-				<td>@board.Description</td>
-				<td>@board.IsApproved</td>
-				<td>
-					@if (!board.IsApproved)
-					{
-						<form method="post" asp-route-id="@board.Id" asp-action="Approve" asp-controller="Dashboard" asp-area="Admin">
-							@Html.AntiForgeryToken()
-							<button type="submit" class="btn btn-success btn-sm">Approve</button>
-						</form>
-					}
+<h2 class="mb-4">Admin Dashboard</h2>
 
-					<a asp-area="Admin" asp-controller="Dashboard" asp-action="Delete" asp-route-id="@board.Id"
-					   class="btn btn-danger btn-sm">Delete</a>
+<div class="row row-cols-1 row-cols-md-2 g-4">
+    @foreach (var board in Model)
+    {
+        <div class="col">
+            <div class="card h-100 shadow-sm border-@((board.IsDeleted ? "danger" : board.IsApproved ? "success" : "warning"))">
+                <div class="card-body">
+                    <h5 class="card-title">@board.Name</h5>
+                    <p class="card-text text-muted">@board.Description</p>
 
-					@if (board.IsDeleted)
-					{
-						<form asp-area="Admin" asp-controller="Dashboard" asp-action="RestoreDeletedBoard" asp-route-id="@board.Id" method="post" style="display:inline">
-							@Html.AntiForgeryToken()
-							<button type="submit" class="btn btn-warning btn-sm">Restore</button>
-						</form>
-					}
-				</td>
-			</tr>
-		}
-	</tbody>
-</table>
+                    <div class="mb-2">
+                        <span class="badge bg-@(board.IsApproved ? "success" : "secondary")">
+                            @(board.IsApproved ? "Approved" : "Pending")
+                        </span>
+
+                        @if (board.IsDeleted)
+                        {
+                            <span class="badge bg-danger">Deleted</span>
+                        }
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-2">
+                        @if (!board.IsApproved)
+                        {
+                            <form method="post"
+                                  asp-route-id="@board.Id"
+                                  asp-action="Approve"
+                                  asp-controller="Dashboard"
+                                  asp-area="Admin">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-sm btn-success">
+                                    <i class="bi bi-check-circle"></i> Approve
+                                </button>
+                            </form>
+                        }
+
+                        <a asp-area="Admin"
+                           asp-controller="Dashboard"
+                           asp-action="Delete"
+                           asp-route-id="@board.Id"
+                           class="btn btn-sm btn-danger">
+                            <i class="bi bi-trash"></i> Delete
+                        </a>
+
+                        @if (board.IsDeleted)
+                        {
+                            <form method="post"
+                                  asp-area="Admin"
+                                  asp-controller="Dashboard"
+                                  asp-action="RestoreDeletedBoard"
+                                  asp-route-id="@board.Id"
+                                  style="display:inline">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-sm btn-warning">
+                                    <i class="bi bi-arrow-counterclockwise"></i> Restore
+                                </button>
+                            </form>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
