@@ -16,19 +16,78 @@ public class DashboardController : Controller
     [HttpGet]
     public async Task<IActionResult> Index()
     {
-        IEnumerable<BoardAdminViewModel>? model = await boardService
-            .GetAllBoardsForAdminAsync();
+        try
+        {
+            IEnumerable<BoardAdminViewModel>? model = await boardService
+                .GetAllBoardsForAdminAsync();
 
-        return View(model);
+            return View(model);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+            return RedirectToAction(nameof(Index));
+        }
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Approve(Guid id)
     {
-        await boardService
-            .ApproveBoardAsync(id);
+        try
+        {
+            await boardService
+                .ApproveBoardAsync(id);
 
-        return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(Index));
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+            return RedirectToAction(nameof(Index));
+        }
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        try
+        {
+            BoardDeleteViewModel? model = await boardService
+                 .GetBoardForDeletionAsync(id);
+
+            if (model == null)
+            {
+                return NotFound();
+            }
+
+            return View(model);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+            return RedirectToAction(nameof(Index));
+        }
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> SoftDeleteConfirm(BoardDeleteViewModel model)
+    {
+        try
+        {
+            bool deleteResult = await boardService.SoftDeleteBoardAsync(model);
+
+            if (!deleteResult)
+            {
+                return View(model);
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+            return RedirectToAction(nameof(Index));
+        }
     }
 }

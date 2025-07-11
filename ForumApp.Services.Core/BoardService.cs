@@ -110,4 +110,42 @@ public class BoardService : IBoardService
             Categories = categories?.ToHashSet(),
         };
     }
+
+    public async Task<BoardDeleteViewModel?> GetBoardForDeletionAsync(Guid id)
+    {
+        Board? board = await boardRepository
+            .GetByIdAsync(id);
+
+        if (board == null)
+        {
+            return null;
+        }
+
+        BoardDeleteViewModel model = new BoardDeleteViewModel()
+        {
+            Id = id,
+            Name = board.Name,
+            ImageUrl = board.ImageUrl,
+
+        };
+
+        return model;
+    }
+
+    public async Task<bool> SoftDeleteBoardAsync(BoardDeleteViewModel model)
+    {
+        Board? board = await boardRepository
+            .GetByIdAsync(model.Id,
+                          asNoTracking:false);
+
+        if (board==null)
+        {
+            return false;
+        }
+
+        board.IsDeleted = true;
+        await boardRepository.SaveChangesAsync();
+
+        return true;
+    }
 }
