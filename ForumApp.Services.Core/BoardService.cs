@@ -4,6 +4,7 @@ using ForumApp.Web.ViewModels.Admin.Board;
 using ForumApp.Web.ViewModels.Board;
 using ForumApp.Web.ViewModels.Category;
 using ForumApp.Web.ViewModels.Post;
+using Microsoft.EntityFrameworkCore;
 
 namespace ForumApp.Services.Core;
 
@@ -42,7 +43,9 @@ public class BoardService : IBoardService
     public async Task<IEnumerable<BoardAllIndexViewModel>> GetAllBoardsAsync()
     {
         IEnumerable<Board> boards = await boardRepository
-            .GetAllAsync();
+            .GetAllWithInludeAsync(q => q
+                                    .Include(b => b.BoardCategories)
+                                    .ThenInclude(bc => bc.Category));
 
         return boards
             .Select(b => new BoardAllIndexViewModel
@@ -84,12 +87,10 @@ public class BoardService : IBoardService
 
     public async Task<BoardDetailsViewModel?> GetBoardDetailsAsync(Guid boardId)
     {
-        IEnumerable<Board> board = await boardRepository
-            .GetWhereAsync(b => b.Id == boardId, true);
-        Board? boardEntity = board
-            .FirstOrDefault();
+        Board? board = await boardRepository
+            .SingleOrDefaultAsync(b => b.Id == boardId);
 
-        if (boardEntity == null)
+        if (board == null)
         {
             return null;
         }
@@ -102,10 +103,10 @@ public class BoardService : IBoardService
 
         return new BoardDetailsViewModel
         {
-            Id = boardEntity.Id,
-            Name = boardEntity.Name,
-            ImageUrl = boardEntity.ImageUrl,
-            Description = boardEntity.Description,
+            Id = board.Id,
+            Name = board.Name,
+            ImageUrl = board.ImageUrl,
+            Description = board.Description,
             Posts = posts?.ToHashSet(),
             Categories = categories?.ToHashSet(),
         };
@@ -136,9 +137,9 @@ public class BoardService : IBoardService
     {
         Board? board = await boardRepository
             .GetByIdAsync(model.Id,
-                          asNoTracking:false);
+                          asNoTracking: false);
 
-        if (board==null)
+        if (board == null)
         {
             return false;
         }

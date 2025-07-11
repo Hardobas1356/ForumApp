@@ -9,7 +9,7 @@ public interface IAsyncRepository<T> where T : class
                           bool ignoreQueryFilters = false);
     Task<IEnumerable<T>> GetAllAsync(bool asNoTracking = true,
                                      bool ignoreQueryFilters = false);
-    Task<IEnumerable<T>> GetAllWithInludeAsync(Func<IQueryable<T>, IQueryable<T>> include.
+    Task<IEnumerable<T>> GetAllWithInludeAsync(Func<IQueryable<T>, IQueryable<T>> include,
                                                bool asNoTracking = true,
                                                bool ignoreQueryFilters = false);
     Task<T?> SingleOrDefaultAsync(Expression<Func<T, bool>> predicate,

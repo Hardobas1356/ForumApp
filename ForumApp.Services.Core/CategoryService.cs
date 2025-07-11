@@ -8,16 +8,16 @@ namespace ForumApp.Services.Core;
 
 public class CategoryService : ICategoryService
 {
-    private readonly IGenericRepository<Category> repository;
+    private readonly IGenericRepository<Category> categoryRepository;
 
     public CategoryService(IGenericRepository<Category> repository)
     {
-        this.repository = repository;
+        this.categoryRepository = repository;
     }
 
     public async Task<ICollection<CategoryViewModel>> GetCategoriesAsync()
     {
-        IEnumerable<Category> categories = await repository
+        IEnumerable<Category> categories = await categoryRepository
             .GetAllAsync(true);
 
         ICollection<CategoryViewModel> entities = categories
@@ -34,9 +34,9 @@ public class CategoryService : ICategoryService
 
     public async Task<ICollection<CategoryViewModel>> GetCategoriesAsyncByBoardId(Guid boardId)
     {
-        IEnumerable<Category> categories = await repository
-            .GetWhereAsync(c => c.BoardCategories.Any(bc => bc.BoardId == boardId),
-                           asNoTracking: true);
+        IEnumerable<Category> categories = await categoryRepository
+            .GetWhereWithIncludeAsync(c => c.BoardCategories.Any(bc => bc.BoardId == boardId),
+                                      q => q.Include(c => c.BoardCategories));
 
         ICollection<CategoryViewModel> result = categories
                 .Select(c => new CategoryViewModel
