@@ -1,5 +1,7 @@
-﻿namespace ForumApp.Services.Core.Interfaces;
+﻿using ForumApp.Data.Repository.Interfaces;
 
-public interface IGenericRepository<T> : IAsyncRepository<T>, ISynchronousRepository<T> where T : class
+namespace ForumApp.Services.Core.Interfaces;
+
+public interface IGenericRepository<T> : IAsyncRepository<T>, IIgnoreQueryFilters<T>, ISynchronousRepository<T> where T : class
 {
 }

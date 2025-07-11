@@ -1,4 +1,5 @@
 ﻿using ForumApp.Data;
+using ForumApp.Data.Repository.Interfaces;
 using ForumApp.Services.Core.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
@@ -39,54 +40,50 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
             .RemoveRange(entities);
     }
 
-    public async Task<bool> AnyAsync(Expression<Func<T, bool>> predicate)
+    public async Task<bool> AnyAsync(Expression<Func<T, bool>> predicate,
+                                     bool asNoTracking,
+                                     bool ignoreQueryFilters)
     {
-        return await dbSet
+        IQueryable<T> query = BuildQueryable(asNoTracking, ignoreQueryFilters);
+
+        return await query
              .AnyAsync(predicate);
     }
-    public async Task<IEnumerable<T>> GetAllAsync(bool asNoTracking = false)
+    public async Task<IEnumerable<T>> GetAllAsync(bool asNoTracking,
+                                                  bool ignoreQueryFilters)
     {
-        IQueryable<T> query = dbSet;
-        if (asNoTracking)
-            query = query.AsNoTracking();
+        IQueryable<T> query = BuildQueryable(asNoTracking, ignoreQueryFilters);
 
         return await query
             .ToListAsync();
     }
 
-    public async Task<T?> GetByIdAsync(Guid id, bool asNoTracking = false)
+    public async Task<T?> GetByIdAsync(Guid id,
+                                       bool asNoTracking,
+                                       bool ignoreQueryFilters)
     {
-        IQueryable<T> query = dbSet;
-
-        if (asNoTracking)
-        {
-            query = query.AsNoTracking();
-        }
+        IQueryable<T> query = BuildQueryable(asNoTracking, ignoreQueryFilters);
 
         return await query
             .FirstOrDefaultAsync(e => EF.Property<Guid>(e, "Id") == id);
     }
 
     public async Task<IEnumerable<T>> GetWhereAsync(Expression<Func<T, bool>> predicate,
-                                                    bool asNoTracking = false)
+                                                    bool asNoTracking,
+                                                    bool ignoreQueryFilters)
     {
-        IQueryable<T> query = dbSet
-            .Where(predicate);
-
-        if (asNoTracking)
-        {
-            query = query
-                .AsNoTracking();
-        }
+        IQueryable<T> query = BuildQueryable(asNoTracking, ignoreQueryFilters);
 
         return await query
             .ToListAsync();
     }
     public async Task<IEnumerable<T>> GetWhereWithIncludeAsync(Expression<Func<T, bool>> predicate,
                                                                Func<IQueryable<T>, IQueryable<T>> include,
-                                                               bool asNoTracking = false)
+                                                               bool asNoTracking,
+                                                               bool ignoreQueryFilters)
     {
-        IQueryable<T> query = dbSet.Where(predicate);
+        IQueryable<T> query = BuildQueryable(asNoTracking, ignoreQueryFilters)
+            .Where(predicate);
         query = include(query);
         return await query.ToListAsync();
     }
@@ -95,12 +92,11 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
         return await dbContext.SaveChangesAsync();
     }
 
-    public async Task<T?> SingleOrDefaultAsync(Expression<Func<T, bool>> predicate, bool asNoTracking = false)
+    public async Task<T?> SingleOrDefaultAsync(Expression<Func<T, bool>> predicate,
+                                                bool asNoTracking,
+                                                bool ignoreQueryFilters)
     {
-        IQueryable<T> query = dbSet;
-
-        if (asNoTracking)
-            query = query.AsNoTracking();
+        IQueryable<T> query = BuildQueryable(asNoTracking, ignoreQueryFilters);
 
         return await query
             .SingleOrDefaultAsync(predicate);
@@ -108,22 +104,38 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
 
     public async Task<T?> SingleOrDefaultWithIncludeAsync(Expression<Func<T, bool>> predicate,
                                                     Func<IQueryable<T>, IQueryable<T>> include,
-                                                    bool asNoTracking)
+                                                    bool asNoTracking,
+                                                    bool ignoreQueryFilters)
     {
-        IQueryable<T> query = dbSet
+        IQueryable<T> query = BuildQueryable(asNoTracking, ignoreQueryFilters)
             .Where(predicate);
 
         query = include(query);
 
-        if (asNoTracking)
-            query = query.AsNoTracking();
-        
-         return await query
-            .SingleOrDefaultAsync();
+        return await query
+           .SingleOrDefaultAsync();
     }
 
     public void Update(T entity)
     {
         dbSet.Update(entity);
+    }
+    public IQueryable<T> IgnoreQueryFilters()
+    {
+        return dbSet.IgnoreQueryFilters();
+    }
+
+    private IQueryable<T> BuildQueryable(bool asNoTracking,
+                                         bool ignoreQueryFilters)
+    {
+        IQueryable<T> query = dbSet;
+
+        if (ignoreQueryFilters)
+            query = query.IgnoreQueryFilters();
+
+        if (asNoTracking)
+            query = query.AsNoTracking();
+
+        return query;
     }
 }
