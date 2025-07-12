@@ -65,7 +65,7 @@ public class ReplyService : IReplyService
                 Id = r.Id,
                 Content = r.Content,
                 Author = r.ApplicationUser?.DisplayName ?? "Unknown",
-                CreatedAt = r.CreatedAt.ToString(DateTimeFormat),
+                CreatedAt = r.CreatedAt.ToString(ApplicationDateTimeFormat),
                 IsPublisher = userId != null && r.ApplicationUserId == userId
             })
             .ToArray();
@@ -86,7 +86,7 @@ public class ReplyService : IReplyService
             Id = id,
             PostId = postId,
             Content = reply.Content,
-            CreatedAt = reply.CreatedAt.ToString(DateTimeFormat)
+            CreatedAt = reply.CreatedAt.ToString(ApplicationDateTimeFormat)
         };
     }
     public async Task<bool> SoftDeleteReplyAsync(Guid userId, ReplyDeleteViewModel model)

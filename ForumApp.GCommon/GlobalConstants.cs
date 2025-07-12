@@ -2,5 +2,5 @@
 
 public static class GlobalConstants
 {
-    public static string DateTimeFormat = "yyyy-MM-dd";
+    public static string ApplicationDateTimeFormat = "yyyy-MM-dd";
 }

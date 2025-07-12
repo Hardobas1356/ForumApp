@@ -49,7 +49,7 @@ public class PostService : IPostService
             {
                 Id = p.Id,
                 Title = p.Title,
-                CreatedAt = p.CreatedAt.ToString(DateTimeFormat),
+                CreatedAt = p.CreatedAt.ToString(ApplicationDateTimeFormat),
                 Tags = p.PostTags
                         .Select(pt => new TagViewModel
                         {
@@ -153,8 +153,8 @@ public class PostService : IPostService
             Id = post.Id,
             Title = post.Title,
             Content = post.Content,
-            CreatedAt = post.CreatedAt.ToString(DateTimeFormat),
-            ModifiedAt = post.ModifiedAt.ToString(DateTimeFormat),
+            CreatedAt = post.CreatedAt.ToString(ApplicationDateTimeFormat),
+            ModifiedAt = post.ModifiedAt.ToString(ApplicationDateTimeFormat),
             Author = post.ApplicationUser.DisplayName,
             ImageUrl = post.ImageUrl,
             BoardId = post.BoardId,

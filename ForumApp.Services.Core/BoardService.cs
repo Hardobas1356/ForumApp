@@ -4,10 +4,11 @@ using ForumApp.Web.ViewModels.Admin.Board;
 using ForumApp.Web.ViewModels.Board;
 using ForumApp.Web.ViewModels.Category;
 using ForumApp.Web.ViewModels.Post;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-
+using System.Runtime.Serialization;
 using static ForumApp.GCommon.FilterEnums;
+
+using static ForumApp.GCommon.GlobalConstants;
 
 namespace ForumApp.Services.Core;
 
@@ -113,6 +114,7 @@ public class BoardService : IBoardService
             Name = board.Name,
             ImageUrl = board.ImageUrl,
             Description = board.Description,
+            CreatedAt = board.CreatedAt.ToString(ApplicationDateTimeFormat),
             Posts = posts?.ToHashSet(),
             Categories = categories?.ToHashSet(),
         };
