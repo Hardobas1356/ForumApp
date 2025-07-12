@@ -5,7 +5,6 @@ using ForumApp.Web.ViewModels.Board;
 using ForumApp.Web.ViewModels.Category;
 using ForumApp.Web.ViewModels.Post;
 using Microsoft.EntityFrameworkCore;
-using System.Runtime.Serialization;
 using static ForumApp.GCommon.FilterEnums;
 
 using static ForumApp.GCommon.GlobalConstants;
@@ -238,5 +237,15 @@ public class BoardService : IBoardService
             Console.WriteLine("Error creating board: " + e.Message);
             return false;
         }
+    }
+
+    public async Task<string?> GetBoardNameByIdAsync(Guid id)
+    {
+        Board? board = await boardRepository.GetByIdAsync(id, ignoreQueryFilters: true);
+
+        if (board == null)
+            return null;
+
+        return board.Name;
     }
 }

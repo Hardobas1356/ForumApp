@@ -13,12 +13,15 @@ public class PostController : BaseController
     private readonly IPostService postService;
     private readonly ITagService tagService;
     private readonly IPermissionService permissionService;
+    private readonly IBoardService boardService;
 
-    public PostController(IPostService postService, ITagService tagService, IPermissionService permissionService)
+    public PostController(IPostService postService, ITagService tagService,
+        IPermissionService permissionService, IBoardService boardService)
     {
         this.postService = postService;
         this.tagService = tagService;
         this.permissionService = permissionService;
+        this.boardService = boardService;
     }
 
     [HttpGet]
@@ -26,9 +29,9 @@ public class PostController : BaseController
     public async Task<IActionResult> Details(Guid id)
     {
         try
-        {   
+        {
             PostDetailsViewModel? model = await postService
-                .GetPostDetailsAsync(this.GetUserId(),id);
+                .GetPostDetailsAsync(this.GetUserId(), id);
 
             if (model == null)
             {
@@ -40,7 +43,7 @@ public class PostController : BaseController
         catch (Exception e)
         {
             Console.WriteLine(e.Message);
-            return RedirectToAction("Index" , "Board");
+            return RedirectToAction("Index", "Board");
         }
     }
 
@@ -110,13 +113,16 @@ public class PostController : BaseController
     {
         try
         {
+            string? boardName = await boardService.GetBoardNameByIdAsync(id);
+
             ICollection<TagViewModel> tags = await tagService
                 .GetTagsAsync();
 
             PostCreateInputModel model = new PostCreateInputModel()
             {
                 BoardId = id,
-                AvailableTags = tags
+                AvailableTags = tags,
+                BoardName = boardName,
             };
 
             return View(model);
@@ -141,7 +147,7 @@ public class PostController : BaseController
             }
 
             bool CreateResult =
-                await postService.AddPostAsync((Guid)this.GetUserId()!,model);
+                await postService.AddPostAsync((Guid)this.GetUserId()!, model);
 
             if (!CreateResult)
             {
