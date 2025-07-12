@@ -1,0 +1,88 @@
+﻿@using ForumApp.Web.ViewModels.Board
+@model BoardCreateInputModel
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+
+            <div class="alert alert-info shadow-sm mb-4" role="alert">
+                <strong>Note:</strong> Your board will need approval by an administrator before it becomes visible.
+                You will automatically become a moderator of this board upon creation.
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="card-title mb-0">
+                        <i class="fas fa-plus me-2"></i>Create Board
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Create" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <div class="mb-3">
+                            <label asp-for="Name" class="form-label fw-semibold">Name</label>
+                            <input asp-for="Name" class="form-control" placeholder="Enter board name..." />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label fw-semibold">Description</label>
+                            <textarea asp-for="Description" class="form-control" rows="5" placeholder="Describe the board..."></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="ImageUrl" class="form-label fw-semibold">Image URL (Optional)</label>
+                            <input asp-for="ImageUrl" class="form-control" placeholder="https://example.com/image.jpg" />
+                            <span asp-validation-for="ImageUrl" class="text-danger"></span>
+                        </div>
+
+                        @if (Model.AvailableCategories.Any())
+                        {
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold">Categories</label>
+                                <div class="border rounded p-3 bg-light">
+                                    <div class="row">
+                                        @foreach (var category in Model.AvailableCategories)
+                                        {
+                                            <div class="col-md-6 col-lg-4 mb-2">
+                                                <div class="form-check">
+                                                    <input class="form-check-input"
+                                                           type="checkbox"
+                                                           name="SelectedCategoryIds"
+                                                           value="@category.Id"
+                                                           id="cat-@category.Id" />
+                                                    <label class="form-check-label" for="cat-@category.Id">
+                                                        <span class="badge"
+                                                              style="background-color:@category.ColorHex; color:@(category.ColorHex.ToLower() == "#ffffff" ? "#000" : "#fff");">
+                                                            @category.Name
+                                                        </span>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                    <small class="text-muted">Select at least one category for your board.</small>
+                                </div>
+                            </div>
+                        }
+
+                        <div class="d-flex gap-2 justify-content-end">
+                            <a asp-action="Index" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-1"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-plus me-1"></i>Create Board
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

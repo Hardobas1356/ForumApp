@@ -4,6 +4,7 @@ using ForumApp.Web.ViewModels.Admin.Board;
 using ForumApp.Web.ViewModels.Board;
 using ForumApp.Web.ViewModels.Category;
 using ForumApp.Web.ViewModels.Post;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 using static ForumApp.GCommon.FilterEnums;
@@ -16,30 +17,12 @@ public class BoardService : IBoardService
     private readonly IPostService postService;
     private readonly ICategoryService categoryService;
 
-    public BoardService(IGenericRepository<Board> repository, IPostService postService, ICategoryService categoryService)
+    public BoardService(IGenericRepository<Board> boardRepository, IPostService postService,
+        ICategoryService categoryService)
     {
-        this.boardRepository = repository;
+        this.boardRepository = boardRepository;
         this.postService = postService;
         this.categoryService = categoryService;
-    }
-
-    public async Task<bool> ApproveBoardAsync(Guid id)
-    {
-        Board? board = await boardRepository
-            .GetByIdAsync(id,
-                          asNoTracking: false,
-                          ignoreQueryFilters: true);
-
-        if (board == null)
-        {
-            return false;
-        }
-
-        board.IsApproved = true;
-
-        await boardRepository.SaveChangesAsync();
-
-        return true;
     }
 
     public async Task<IEnumerable<BoardAllIndexViewModel>> GetAllBoardsAsync()
@@ -173,7 +156,24 @@ public class BoardService : IBoardService
 
         return true;
     }
+    public async Task<bool> ApproveBoardAsync(Guid id)
+    {
+        Board? board = await boardRepository
+            .GetByIdAsync(id,
+                          asNoTracking: false,
+                          ignoreQueryFilters: true);
 
+        if (board == null)
+        {
+            return false;
+        }
+
+        board.IsApproved = true;
+
+        await boardRepository.SaveChangesAsync();
+
+        return true;
+    }
     public async Task<bool> SoftDeleteBoardAsync(BoardDeleteViewModel model)
     {
         Board? board = await boardRepository
@@ -189,5 +189,52 @@ public class BoardService : IBoardService
         await boardRepository.SaveChangesAsync();
 
         return true;
+    }
+    public async Task<bool> CreateBoardAsync(Guid userId, BoardCreateInputModel model)
+    {
+        Board board = new Board()
+        {
+            Id = Guid.NewGuid(),
+            Name = model.Name,
+            Description = model.Description,
+            ImageUrl = model.ImageUrl,
+            CreatedAt = DateTime.UtcNow,
+        };
+
+        BoardManager manager = new BoardManager
+        {
+            BoardId = board.Id,
+            ApplicationUserId = userId,
+        };
+
+        board.BoardManagers.Add(manager);
+
+        ICollection<CategoryViewModel> categories = await categoryService.GetCategoriesAsync();
+
+        foreach (Guid categoryId in model.SelectedCategoryIds)
+        {
+            if (!categories.Any(c => c.Id == categoryId))
+            {
+                continue;
+            }
+
+            BoardCategory boardCategory = new BoardCategory()
+            {
+                BoardId = board.Id,
+                CategoryId = categoryId
+            };
+            board.BoardCategories.Add(boardCategory);
+        }
+        try
+        {
+            await boardRepository.AddAsync(board);
+            await boardRepository.SaveChangesAsync();
+            return true;
+        }
+        catch (DbUpdateException e)
+        {
+            Console.WriteLine("Error creating board: " + e.Message);
+            return false;
+        }
     }
 }

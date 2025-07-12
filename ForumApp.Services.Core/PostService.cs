@@ -104,7 +104,7 @@ public class PostService : IPostService
             .SingleOrDefaultWithIncludeAsync(p => p.Id == model.Id
                                                 && p.ApplicationUserId == userId,
                                              q => q.Include(p => p.PostTags)
-                                                 .ThenInclude(pt => pt.Tag),
+                                                   .ThenInclude(pt => pt.Tag),
                                              asNoTracking: false);
 
         if (post == null)

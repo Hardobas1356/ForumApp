@@ -4,12 +4,14 @@
     {
         public static class BoardConstants
         {
-            public static readonly int NameMaxLength = 130;
-            public static readonly int DescriptionMaxLength = 600;
+            public const int NameMinLength = 3;
+            public const int NameMaxLength = 130;
+            public const int DescriptionMaxLength = 600;
+            public const int DescriptionMinLength = 10;
         }
         public static class TagConstants
         {
-            public static readonly int NameMaxLength = 128;
+            public const int NameMaxLength = 128;
             public const int ColorHexLength = 7;
             public const string ColorHexRegexValidation = "^#([0-9A-Fa-f]{6})$";
             public const string ColorHexDefaultValue = "#FFFFFF";
@@ -45,8 +47,8 @@
 
         public static class ApplicationUserConstants
         {
-            public static readonly int DisplayNameMinLength = 3;
-            public static readonly int DisplayNameMaxLength = 80;
+            public const int DisplayNameMinLength = 3;
+            public const int DisplayNameMaxLength = 80;
         }
     }
 }
