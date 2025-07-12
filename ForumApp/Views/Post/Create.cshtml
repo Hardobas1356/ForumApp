@@ -4,21 +4,19 @@
 <div class="container py-4">
     <div class="row justify-content-center">
         <div class="col-lg-8">
-            <div class="alert alert-info d-flex justify-content-between align-items-center">
-                <div>
-                    Posting in <strong>@Model.BoardName</strong>
-                </div>
-                <a asp-controller="Board" asp-action="Details" asp-route-id="@Model.BoardId" class="btn btn-sm btn-outline-primary">
-                    <i class="fas fa-arrow-left me-1"></i>Back to Board
-                </a>
-            </div>
             <div class="card shadow-sm">
-                <div class="card-header bg-success text-white">
+                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
                     <h2 class="card-title mb-0">
                         <i class="fas fa-plus me-2"></i>Create Post
                     </h2>
+                    <a asp-controller="Board" asp-action="Details" asp-route-id="@Model.BoardId" class="btn btn-sm btn-outline-light">
+                        <i class="fas fa-arrow-left me-1"></i>Back to Board
+                    </a>
                 </div>
                 <div class="card-body">
+                    <div class="alert alert-info mb-4">
+                        Posting in <strong>@Model.BoardName</strong>
+                    </div>
                     <form asp-action="Create" method="post">
                         <input type="hidden" asp-for="BoardId" />
 
