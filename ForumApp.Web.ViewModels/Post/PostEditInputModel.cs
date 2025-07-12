@@ -9,6 +9,9 @@ public class PostEditInputModel
 {
     [Required]
     public Guid Id { get; set; }
+    [Required]
+    public Guid BoardId { get; set; }
+    public string? BoardName { get; set; }
 
     [Required(ErrorMessage = TitleRequiredErrorMessage)]
     [MaxLength(TitleMaximumLength, ErrorMessage = TitleInvalidLengthErrorMessage)]

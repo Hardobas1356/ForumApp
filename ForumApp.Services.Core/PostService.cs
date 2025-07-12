@@ -66,7 +66,8 @@ public class PostService : IPostService
         Post? post = await postRepository
             .SingleOrDefaultWithIncludeAsync(p => p.ApplicationUserId == userId
                                                   && p.Id == id,
-                                             q => q.Include(p => p.PostTags)
+                                             q => q.Include(p => p.Board)
+                                                   .Include(p => p.PostTags)
                                                    .ThenInclude(pt => pt.Tag),
                                              asNoTracking: true);
 
@@ -85,6 +86,8 @@ public class PostService : IPostService
             Content = post.Content,
             ImageUrl = post.ImageUrl,
             AvailableTags = tags,
+            BoardId = post.BoardId,
+            BoardName = post.Board.Name,
             Tags = post.PostTags
                 .Select(pt => new TagViewModel
                 {
@@ -217,11 +220,11 @@ public class PostService : IPostService
     public async Task<PostDeleteViewModel?> GetPostForDeleteAsync(Guid userId, Guid id)
     {
         Post? post = await postRepository
-            .SingleOrDefaultAsync(p => p.ApplicationUserId == userId
-                                     && p.Id == id,
-                                     asNoTracking: true);
+            .SingleOrDefaultWithIncludeAsync(p => p.ApplicationUserId == userId
+                                             && p.Id == id,
+                                             q => q.Include(p => p.Board));
 
-        if (post == null)
+        if (post == null || post.Board == null)
         {
             return null;
         }
@@ -231,9 +234,10 @@ public class PostService : IPostService
             Id = post.Id,
             Content = post.Content,
             Title = post.Title,
-            CreatedAt = post.CreatedAt,
+            CreatedAt = post.CreatedAt.ToString(ApplicationDateTimeFormat),
             ImageUrl = post.ImageUrl,
             BoardId = post.BoardId,
+            BoardName = post.Board.Name,
         };
 
         return model;
