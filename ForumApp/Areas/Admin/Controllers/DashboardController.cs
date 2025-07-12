@@ -2,6 +2,8 @@
 using ForumApp.Web.ViewModels.Admin.Board;
 using Microsoft.AspNetCore.Mvc;
 
+using static ForumApp.GCommon.FilterEnums;
+
 namespace ForumApp.Web.Areas.Admin.Controllers;
 
 [Area("Admin")]
@@ -14,12 +16,14 @@ public class DashboardController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(BoardAdminFilter filter)
     {
         try
         {
+            ViewBag.CurrentFilter = filter;
+
             IEnumerable<BoardAdminViewModel>? model = await boardService
-                .GetAllBoardsForAdminAsync();
+                .GetAllBoardsForAdminAsync(filter);
 
             return View(model);
         }

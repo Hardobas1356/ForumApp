@@ -87,6 +87,8 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
     {
         IQueryable<T> query = BuildQueryable(asNoTracking, ignoreQueryFilters);
 
+        query = query.Where(predicate);
+
         return await query
             .ToListAsync();
     }

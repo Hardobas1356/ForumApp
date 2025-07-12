@@ -6,6 +6,8 @@ using ForumApp.Web.ViewModels.Category;
 using ForumApp.Web.ViewModels.Post;
 using Microsoft.EntityFrameworkCore;
 
+using static ForumApp.GCommon.FilterEnums;
+
 namespace ForumApp.Services.Core;
 
 public class BoardService : IBoardService
@@ -66,13 +68,34 @@ public class BoardService : IBoardService
             .ToArray();
     }
 
-    public async Task<IEnumerable<BoardAdminViewModel>?> GetAllBoardsForAdminAsync()
+    public async Task<IEnumerable<BoardAdminViewModel>?> GetAllBoardsForAdminAsync(BoardAdminFilter filter)
     {
-        IEnumerable<Board> boards = await boardRepository
-            .GetAllAsync(asNoTracking: true,
-                         ignoreQueryFilters: true);
+        IEnumerable<Board>? boards = null;
 
-        IEnumerable<BoardAdminViewModel> result = boards
+        switch (filter)
+        {
+            case BoardAdminFilter.All:
+                boards = await boardRepository
+                    .GetAllAsync(ignoreQueryFilters: true);
+                break;
+            case BoardAdminFilter.Pending:
+                boards = await boardRepository
+                    .GetWhereAsync(b => !b.IsApproved,
+                                   ignoreQueryFilters: true);
+                break;
+            case BoardAdminFilter.Approved:
+                boards = await boardRepository
+                    .GetWhereAsync(b => b.IsApproved,
+                                   ignoreQueryFilters: true);
+                break;
+            case BoardAdminFilter.Deleted:
+                boards = await boardRepository
+                    .GetWhereAsync(b => b.IsDeleted,
+                                   ignoreQueryFilters: true);
+                break;
+        }
+
+        IEnumerable<BoardAdminViewModel> result = boards!
             .Select(b => new BoardAdminViewModel
             {
                 Id = b.Id,
@@ -137,7 +160,7 @@ public class BoardService : IBoardService
     {
         Board? board = await boardRepository
             .GetByIdAsync(id,
-                          asNoTracking:false,
+                          asNoTracking: false,
                           ignoreQueryFilters: true);
 
         if (board == null)

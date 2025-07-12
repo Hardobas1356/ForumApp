@@ -1,11 +1,27 @@
-﻿@using ForumApp.Web.ViewModels.Admin.Board
+﻿@using static ForumApp.GCommon.FilterEnums
+@using ForumApp.Web.ViewModels.Admin.Board
 @model IEnumerable<BoardAdminViewModel>
 
 @{
     ViewData["Title"] = "Admin Dashboard";
+    BoardAdminFilter currentFilter = (BoardAdminFilter)(ViewBag.CurrentFilter ?? BoardAdminFilter.All);
 }
 
 <h2 class="mb-4">Admin Dashboard</h2>
+
+<form method="get" asp-action="Index" class="mb-4">
+    <div class="input-group">
+        <select class="form-select" name="filter" onchange="this.form.submit()">
+            @foreach (BoardAdminFilter filter in Enum.GetValues(typeof(BoardAdminFilter)))
+            {
+                <option value="@filter" selected="@(filter == currentFilter)">
+                    @filter
+                </option>
+            }
+        </select>
+        <button class="btn btn-outline-secondary" type="submit">Apply</button>
+    </div>
+</form>
 
 <div class="row row-cols-1 row-cols-md-2 g-4">
     @foreach (var board in Model)
