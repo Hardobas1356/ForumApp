@@ -154,6 +154,7 @@ public class PostService : IPostService
             Title = post.Title,
             Content = post.Content,
             CreatedAt = post.CreatedAt.ToString(DateTimeFormat),
+            ModifiedAt = post.ModifiedAt.ToString(DateTimeFormat),
             Author = post.ApplicationUser.DisplayName,
             ImageUrl = post.ImageUrl,
             BoardId = post.BoardId,
