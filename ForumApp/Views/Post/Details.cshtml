@@ -2,7 +2,20 @@
 @model PostDetailsViewModel
 
 <div class="container mt-4">
+    <div class="mb-3">
+        <a asp-controller="Board"
+           asp-action="Details"
+           asp-route-id="@Model.BoardId"
+           class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-arrow-left me-1"></i> Back to "@Model.BoardName"
+        </a>
+    </div>
+
     <h2 class="mb-1">@Model.Title</h2>
+
+    <div class="text-muted mb-2">
+        <small>Posted in: <strong>@Model.BoardName</strong></small>
+    </div>
 
     @if (Model.Tags != null && Model.Tags.Any())
     {
@@ -17,19 +30,22 @@
         </div>
     }
 
-    <h5 class="text-muted">Created by @Model.Author</h5>
     <div class="text-muted mb-3">
-        <span>Created at: @Model.CreatedAt</span>
+        <span><i class="far fa-user me-1"></i>@Model.Author</span> |
+        <span><i class="far fa-calendar-alt me-1"></i>Created: @Model.CreatedAt</span>
         @if (Model.ModifiedAt != Model.CreatedAt)
         {
-            <span class="ms-3">Modified at: @Model.ModifiedAt</span>
+            <span class="ms-3"><i class="fas fa-edit me-1"></i>Modified: @Model.ModifiedAt</span>
         }
     </div>
 
     @if (!string.IsNullOrWhiteSpace(Model.ImageUrl))
     {
         <div class="mb-3 text-center">
-            <img src="@Model.ImageUrl" alt="Post image" class="img-fluid rounded shadow-sm" style="max-height: 400px;" />
+            <img src="@Model.ImageUrl"
+                 alt="Post image"
+                 class="img-fluid rounded shadow-sm"
+                 style="max-height: 400px;" />
         </div>
     }
 
@@ -40,8 +56,12 @@
     @if (User?.Identity?.IsAuthenticated == true && Model.IsPublisher)
     {
         <div class="mb-4">
-            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning me-2">Edit</a>
-            <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">Delete</a>
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning me-2">
+                <i class="fas fa-edit me-1"></i>Edit
+            </a>
+            <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">
+                <i class="fas fa-trash-alt me-1"></i>Delete
+            </a>
         </div>
     }
 
@@ -51,13 +71,18 @@
         <h4 class="mb-0">Replies</h4>
         @if (User?.Identity?.IsAuthenticated == true)
         {
-            <a asp-controller="Reply" asp-action="Create" asp-route-postId="@Model.Id" class="btn btn-primary">Add Reply</a>
+            <a asp-controller="Reply"
+               asp-action="Create"
+               asp-route-postId="@Model.Id"
+               class="btn btn-primary">
+                <i class="fas fa-reply me-1"></i>Add Reply
+            </a>
         }
     </div>
 
     @if (!Model.Replies.Any())
     {
-        <p class="fst-italic">No replies in this post yet.</p>
+        <p class="fst-italic text-muted">No replies in this post yet.</p>
     }
     else
     {
@@ -73,8 +98,16 @@
                         @if (User?.Identity?.IsAuthenticated == true && reply.IsPublisher == true)
                         {
                             <div class="btn-group" role="group">
-                                <a asp-controller="Reply" asp-action="Edit" asp-route-id="@reply.Id" asp-route-postId="@Model.Id" class="btn btn-sm btn-warning">Edit</a>
-                                <a asp-controller="Reply" asp-action="Delete" asp-route-id="@reply.Id" asp-route-postId="@Model.Id" class="btn btn-sm btn-danger">Delete</a>
+                                <a asp-controller="Reply"
+                                   asp-action="Edit"
+                                   asp-route-id="@reply.Id"
+                                   asp-route-postId="@Model.Id"
+                                   class="btn btn-sm btn-warning">Edit</a>
+                                <a asp-controller="Reply"
+                                   asp-action="Delete"
+                                   asp-route-id="@reply.Id"
+                                   asp-route-postId="@Model.Id"
+                                   class="btn btn-sm btn-danger">Delete</a>
                             </div>
                         }
                     </div>
