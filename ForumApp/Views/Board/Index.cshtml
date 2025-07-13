@@ -34,6 +34,7 @@ else
                    asp-route-id="@board.Id"
                    class="list-group-item list-group-item-action mb-3 p-3 shadow rounded border-0 text-dark text-decoration-none"
                    style="transition: background-color 0.2s;">
+
                     <div class="d-flex align-items-center mb-2">
                         @if (!string.IsNullOrWhiteSpace(board.ImageUrl))
                         {
@@ -43,7 +44,15 @@ else
                                  style="width: 60px; height: 60px; object-fit: cover; border-radius: 6px; box-shadow: 0 0 3px rgba(0,0,0,0.2);" />
                         }
                         <div>
-                            <h4 class="mb-0">@board.Name</h4>
+                            <h4 class="mb-0 d-flex align-items-center">
+                                @board.Name
+                                @if (board.IsModerator)
+                                {
+                                    <span class="badge bg-warning text-dark ms-2" title="You're a moderator">
+                                        <i class="fas fa-user-shield me-1"></i> Moderator
+                                    </span>
+                                }
+                            </h4>
 
                             @if (board.Categories != null && board.Categories.Any())
                             {
@@ -57,11 +66,9 @@ else
                                     }
                                 </div>
                             }
-
                             <p class="mb-0 text-muted">@board.Description</p>
                         </div>
                     </div>
-
                 </a>
             }
         </div>

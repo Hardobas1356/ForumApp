@@ -24,7 +24,7 @@ public class BoardController : BaseController
         try
         {
             IEnumerable<BoardAllIndexViewModel> boards = await boardService
-                .GetAllBoardsAsync();
+                .GetAllBoardsAsync(this.GetUserId());
 
             return View(boards);
         }

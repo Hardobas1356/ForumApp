@@ -25,10 +25,11 @@ public class BoardService : IBoardService
         this.categoryService = categoryService;
     }
 
-    public async Task<IEnumerable<BoardAllIndexViewModel>> GetAllBoardsAsync()
+    public async Task<IEnumerable<BoardAllIndexViewModel>> GetAllBoardsAsync(Guid? userId)
     {
         IEnumerable<Board> boards = await boardRepository
             .GetAllWithInludeAsync(q => q
+                                    .Include(b => b.BoardManagers)
                                     .Include(b => b.BoardCategories)
                                     .ThenInclude(bc => bc.Category));
 
@@ -39,6 +40,8 @@ public class BoardService : IBoardService
                 Name = b.Name,
                 ImageUrl = b.ImageUrl,
                 Description = b.Description,
+                IsModerator = userId != null && b.BoardManagers
+                    .Any(m => m.ApplicationUserId == userId),
                 Categories = b.BoardCategories
                     .Select(bc => new CategoryViewModel
                     {

@@ -8,7 +8,7 @@ namespace ForumApp.Services.Core.Interfaces;
 public interface IBoardService
 {
     Task<IEnumerable<BoardAdminViewModel>?> GetAllBoardsForAdminAsync(BoardAdminFilter filter);
-    Task<IEnumerable<BoardAllIndexViewModel>> GetAllBoardsAsync();
+    Task<IEnumerable<BoardAllIndexViewModel>> GetAllBoardsAsync(Guid? userId);
     Task<BoardDetailsViewModel?> GetBoardDetailsAsync(Guid boardId);
     Task<BoardDeleteViewModel?> GetBoardForDeletionAsync(Guid id);
     Task<string?> GetBoardNameByIdAsync(Guid id);
