@@ -13,6 +13,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 
+using static ForumApp.GCommon.ValidationConstants.ApplicationUserConstants;
+using static ForumApp.GCommon.ErrorMessages.ApplicationUser;
+
 namespace ForumApp.Web.Areas.Identity.Pages.Account;
 
 public class RegisterModel : PageModel
@@ -67,7 +70,14 @@ public class RegisterModel : PageModel
 
         [Required]
         [Display(Name = "Display Name")]
+        [MaxLength(DisplayNameMaxLength)]
+        [MinLength(DisplayNameMinLength)]
         public string DisplayName { get; set; }
+        [Required]
+        [Display(Name = "Handle (Username)")]
+        [StringLength(UserNameMaxLength, MinimumLength = UserNameMinLenth)]
+        [RegularExpression(UserNameRegex, ErrorMessage = UserNameRegexError)]
+        public string UserName { get; set; }
         /// <summary>
         ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
@@ -82,7 +92,7 @@ public class RegisterModel : PageModel
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
         [Required]
-        [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
+        [StringLength(PassworkMaxLength, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = PassworkMinLength)]
         [DataType(DataType.Password)]
         [Display(Name = "Password")]
         public string Password { get; set; }
@@ -93,7 +103,7 @@ public class RegisterModel : PageModel
         /// </summary>
         [DataType(DataType.Password)]
         [Display(Name = "Confirm password")]
-        [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
+        [Compare("Password", ErrorMessage = PasswordMissmatchError)]
         public string ConfirmPassword { get; set; }
     }
 
@@ -110,9 +120,18 @@ public class RegisterModel : PageModel
         ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
         if (ModelState.IsValid)
         {
-            var user = CreateUser();
+            ApplicationUser existingUser = await _userManager.FindByNameAsync(Input.UserName);
+            if (existingUser != null)
+            {
+                ModelState.AddModelError(nameof(Input.UserName), "This handle is already taken.");
+                return Page();
+            }
 
-            await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
+            ApplicationUser user = CreateUser();
+
+            Input.UserName = Input.UserName.ToLowerInvariant().Trim();
+
+            await _userStore.SetUserNameAsync(user, Input.UserName, CancellationToken.None);
             await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
 
             user.DisplayName = Input.DisplayName;
