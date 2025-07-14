@@ -4,6 +4,6 @@ namespace ForumApp.Services.Core.Interfaces;
 
 public interface ICategoryService
 {
-    Task<ICollection<CategoryViewModel>> GetCategoriesAsync();
-    Task<ICollection<CategoryViewModel>> GetCategoriesAsyncByBoardId(Guid boardId); 
+    Task<IEnumerable<CategoryViewModel>> GetCategoriesAsync();
+    Task<IEnumerable<CategoryViewModel>> GetCategoriesAsyncByBoardId(Guid boardId); 
 }

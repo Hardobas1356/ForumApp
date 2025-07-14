@@ -15,7 +15,7 @@ public class CategoryService : ICategoryService
         this.categoryRepository = repository;
     }
 
-    public async Task<ICollection<CategoryViewModel>> GetCategoriesAsync()
+    public async Task<IEnumerable<CategoryViewModel>> GetCategoriesAsync()
     {
         IEnumerable<Category> categories = await categoryRepository
             .GetAllAsync(true);
@@ -32,7 +32,7 @@ public class CategoryService : ICategoryService
         return entities;
     }
 
-    public async Task<ICollection<CategoryViewModel>> GetCategoriesAsyncByBoardId(Guid boardId)
+    public async Task<IEnumerable<CategoryViewModel>> GetCategoriesAsyncByBoardId(Guid boardId)
     {
         IEnumerable<Category> categories = await categoryRepository
             .GetWhereWithIncludeAsync(c => c.BoardCategories.Any(bc => bc.BoardId == boardId),

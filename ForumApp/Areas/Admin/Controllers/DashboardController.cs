@@ -1,4 +1,5 @@
-﻿using ForumApp.Services.Core.Interfaces;
+﻿using ForumApp.Data.Models;
+using ForumApp.Services.Core.Interfaces;
 using ForumApp.Web.ViewModels.Admin.Board;
 using Microsoft.AspNetCore.Mvc;
 
@@ -26,6 +27,28 @@ public class DashboardController : Controller
                 .GetAllBoardsForAdminAsync(filter);
 
             return View(model);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+            return RedirectToAction(nameof(Index));
+        }
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Details(Guid id)
+    {
+        try
+        {
+            BoardDetailsAdminViewModel? board = await boardService
+                .GetBoardDetailsAdminAsync(id);
+
+            if (board == null)
+            {
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(board);
         }
         catch (Exception e)
         {

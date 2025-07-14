@@ -1,6 +1,7 @@
 ﻿using ForumApp.Data.Models;
 using ForumApp.Services.Core.Interfaces;
 using ForumApp.Web.ViewModels.Admin.Board;
+using ForumApp.Web.ViewModels.Admin.BoardModerators;
 using ForumApp.Web.ViewModels.Board;
 using ForumApp.Web.ViewModels.Category;
 using ForumApp.Web.ViewModels.Post;
@@ -96,6 +97,11 @@ public class BoardService : IBoardService
 
     public async Task<BoardDetailsViewModel?> GetBoardDetailsAsync(Guid boardId)
     {
+        if (boardId == Guid.Empty)
+        {
+            return null;
+        }
+
         Board? board = await boardRepository
             .SingleOrDefaultAsync(b => b.Id == boardId);
 
@@ -107,7 +113,7 @@ public class BoardService : IBoardService
         IEnumerable<PostForBoardDetailsViewModel>? posts =
             await postService.GetPostsForBoardDetailsAsync(boardId);
 
-        ICollection<CategoryViewModel>? categories =
+        IEnumerable<CategoryViewModel>? categories =
             await categoryService.GetCategoriesAsyncByBoardId(boardId);
 
         return new BoardDetailsViewModel
@@ -117,8 +123,51 @@ public class BoardService : IBoardService
             ImageUrl = board.ImageUrl,
             Description = board.Description,
             CreatedAt = board.CreatedAt.ToString(ApplicationDateTimeFormat),
-            Posts = posts?.ToHashSet(),
-            Categories = categories?.ToHashSet(),
+            Posts = posts ?? new HashSet<PostForBoardDetailsViewModel>(),
+            Categories = categories ?? new HashSet<CategoryViewModel>(),
+        };
+    }
+    public async Task<BoardDetailsAdminViewModel?> GetBoardDetailsAdminAsync(Guid boardId)
+    {
+        if (boardId == Guid.Empty)
+        {
+            return null;
+        }
+
+        Board? board = await boardRepository
+            .SingleOrDefaultWithIncludeAsync(b => b.Id == boardId,
+                                             q => q.Include(b => b.BoardManagers)
+                                                   .ThenInclude(bm => bm.ApplicationUser),
+                                             ignoreQueryFilters: true);
+
+        if (board == null)
+        {
+            return null;
+        }
+
+        IEnumerable<PostForBoardDetailsViewModel>? posts =
+            await postService.GetPostsForBoardDetailsAsync(boardId);
+
+        IEnumerable<CategoryViewModel>? categories =
+            await categoryService.GetCategoriesAsyncByBoardId(boardId);
+
+        return new BoardDetailsAdminViewModel
+        {
+            Id = board.Id,
+            Name = board.Name,
+            ImageUrl = board.ImageUrl,
+            Description = board.Description,
+            CreatedAt = board.CreatedAt.ToString(ApplicationDateTimeFormat),
+            Posts = posts ?? new HashSet<PostForBoardDetailsViewModel>(),
+            Categories = categories ?? new HashSet<CategoryViewModel>(),
+            Moderators = board.BoardManagers
+                .Select(bm => new BoardModeratorViewModel
+                {
+                    Id = bm.ApplicationUserId,
+                    DisplayName = bm.ApplicationUser.DisplayName,
+                    Handle = bm.ApplicationUser.UserName ?? "Unknown",
+                })
+                .ToArray()
         };
     }
 
@@ -213,7 +262,7 @@ public class BoardService : IBoardService
 
         board.BoardManagers.Add(manager);
 
-        ICollection<CategoryViewModel> categories = await categoryService.GetCategoriesAsync();
+        IEnumerable<CategoryViewModel> categories = await categoryService.GetCategoriesAsync();
 
         foreach (Guid categoryId in model.SelectedCategoryIds)
         {

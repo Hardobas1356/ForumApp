@@ -23,6 +23,6 @@ public class BoardCreateInputModel
     public IEnumerable<Guid> SelectedCategoryIds { get; set; } 
         = new HashSet<Guid>();
 
-    public ICollection<CategoryViewModel> AvailableCategories { get; set; } 
+    public IEnumerable<CategoryViewModel> AvailableCategories { get; set; } 
         =  new HashSet<CategoryViewModel>();
 }

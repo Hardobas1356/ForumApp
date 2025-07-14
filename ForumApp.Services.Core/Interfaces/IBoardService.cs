@@ -10,6 +10,7 @@ public interface IBoardService
     Task<IEnumerable<BoardAdminViewModel>?> GetAllBoardsForAdminAsync(BoardAdminFilter filter);
     Task<IEnumerable<BoardAllIndexViewModel>> GetAllBoardsAsync(Guid? userId);
     Task<BoardDetailsViewModel?> GetBoardDetailsAsync(Guid boardId);
+    Task<BoardDetailsAdminViewModel?> GetBoardDetailsAdminAsync(Guid boardId);
     Task<BoardDeleteViewModel?> GetBoardForDeletionAsync(Guid id);
     Task<string?> GetBoardNameByIdAsync(Guid id);
     Task<bool> CreateBoardAsync(Guid userId,BoardCreateInputModel model);

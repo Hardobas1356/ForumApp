@@ -39,7 +39,8 @@ public class PostService : IPostService
     {
         IEnumerable<Post> posts = await postRepository
            .GetWhereWithIncludeAsync(p => p.BoardId == boardId,
-                                     q => q.Include(p => p.Board)
+                                     q => q.Include(p => p.ApplicationUser)
+                                           .Include(p => p.Board)
                                            .Include(p => p.PostTags)
                                            .ThenInclude(pt => pt.Tag),
                                      asNoTracking: true);
@@ -50,6 +51,8 @@ public class PostService : IPostService
                 Id = p.Id,
                 Title = p.Title,
                 CreatedAt = p.CreatedAt.ToString(ApplicationDateTimeFormat),
+                Author = p.ApplicationUser.DisplayName,
+                Handle = p.ApplicationUser.UserName,
                 Tags = p.PostTags
                         .Select(pt => new TagViewModel
                         {

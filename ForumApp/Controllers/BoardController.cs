@@ -40,7 +40,7 @@ public class BoardController : BaseController
     {
         try
         {
-            ICollection<CategoryViewModel> categories = await this.categoryService
+            IEnumerable<CategoryViewModel> categories = await this.categoryService
                 .GetCategoriesAsync();
 
             BoardCreateInputModel model = new BoardCreateInputModel()
@@ -65,7 +65,7 @@ public class BoardController : BaseController
         {
             if (!this.ModelState.IsValid)
             {
-                ICollection<CategoryViewModel> categories = await this.categoryService
+                IEnumerable<CategoryViewModel> categories = await this.categoryService
                     .GetCategoriesAsync();
                 model.AvailableCategories = categories;
 
@@ -77,7 +77,7 @@ public class BoardController : BaseController
 
             if (!createResult)
             {
-                ICollection<CategoryViewModel> categories = await this.categoryService
+                IEnumerable<CategoryViewModel> categories = await this.categoryService
                     .GetCategoriesAsync();
                 model.AvailableCategories = categories;
 
