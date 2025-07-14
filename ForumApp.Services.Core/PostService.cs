@@ -223,11 +223,18 @@ public class PostService : IPostService
     public async Task<PostDeleteViewModel?> GetPostForDeleteAsync(Guid userId, Guid id)
     {
         Post? post = await postRepository
-            .SingleOrDefaultWithIncludeAsync(p => p.ApplicationUserId == userId
-                                             && p.Id == id,
-                                             q => q.Include(p => p.Board));
+            .SingleOrDefaultWithIncludeAsync(p => p.Id == id,
+                                             q => q.Include(p => p.Board)
+                                                   .ThenInclude(b => b.BoardManagers));
 
         if (post == null || post.Board == null)
+        {
+            return null;
+        }
+
+        bool canDelete = await UserHasRights(post, userId);
+
+        if (!canDelete)
         {
             return null;
         }
@@ -248,11 +255,19 @@ public class PostService : IPostService
     public async Task<bool> DeletePostAsync(Guid userId, PostDeleteViewModel model)
     {
         Post? post = await postRepository
-            .SingleOrDefaultAsync(p => p.Id == model.Id
-                                  && p.ApplicationUserId == userId,
-                                  asNoTracking: false);
+            .SingleOrDefaultWithIncludeAsync(p => p.Id == model.Id,
+                                             q => q.Include(p => p.Board)
+                                                   .ThenInclude(b => b.BoardManagers),
+                                             asNoTracking: false);
 
         if (post == null)
+        {
+            return false;
+        }
+
+        bool canDelete = await UserHasRights(post, userId);
+
+        if (!canDelete)
         {
             return false;
         }
@@ -271,5 +286,24 @@ public class PostService : IPostService
         await postRepository.SaveChangesAsync();
 
         return true;
+    }
+
+    private async Task<bool> UserHasRights(Post post, Guid userId)
+    {
+        if (post.ApplicationUserId == userId)
+        {
+            return true;
+        }
+
+        if (post.Board.BoardManagers.Any(m => m.ApplicationUserId == userId))
+        {
+            return true;
+        }
+
+        ApplicationUser? user = await userManager
+            .FindByIdAsync(userId.ToString());
+
+        return await userManager
+            .IsInRoleAsync(user, "Admin");
     }
 }
