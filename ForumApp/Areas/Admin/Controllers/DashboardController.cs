@@ -1,6 +1,7 @@
 ﻿using ForumApp.Data.Models;
 using ForumApp.Services.Core.Interfaces;
 using ForumApp.Web.ViewModels.Admin.Board;
+using ForumApp.Web.ViewModels.ApplicationUser;
 using Microsoft.AspNetCore.Mvc;
 
 using static ForumApp.GCommon.FilterEnums;
@@ -11,9 +12,11 @@ namespace ForumApp.Web.Areas.Admin.Controllers;
 public class DashboardController : Controller
 {
     private readonly IBoardService boardService;
-    public DashboardController(IBoardService boardService)
+    private readonly IApplicationUserService applicationUserService;
+    public DashboardController(IBoardService boardService, IApplicationUserService applicationUserService)
     {
         this.boardService = boardService;
+        this.applicationUserService = applicationUserService;
     }
 
     [HttpGet]
@@ -49,6 +52,38 @@ public class DashboardController : Controller
             }
 
             return View(board);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+            return RedirectToAction(nameof(Index));
+        }
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> SearchUsers(Guid boardId, string handle)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(handle))
+            {
+                return RedirectToAction(nameof(Details), new { id = boardId });
+            }
+
+            BoardDetailsAdminViewModel? board = await boardService
+                .GetBoardDetailsAdminAsync(boardId);
+
+            if (board == null)
+            {
+                return RedirectToAction(nameof(Index));
+            }
+
+            ICollection<UserModeratorViewModel>? searchResults = await applicationUserService
+                .SearchUsersWithModeratorStatusAsync(boardId, handle);
+
+            board.SearchResults = searchResults;
+            board.SearchPerformed = true;
+            return View("Details", board);
         }
         catch (Exception e)
         {

@@ -63,6 +63,10 @@ builder
 builder
     .Services
     .AddScoped<IPermissionService, PermissionService>();
+builder
+    .Services
+    .AddScoped<IApplicationUserService, ApplicationUserService>();
+
 
 var app = builder.Build();
 
