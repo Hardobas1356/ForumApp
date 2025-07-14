@@ -16,8 +16,9 @@ public class PostDetailsViewModel
     public Guid BoardId { get; set; }
     public string BoardName { get; set; } = null!;
     public bool IsPublisher { get; set; } = false;
-    public ICollection<ReplyDetailForPostDetailViewModel>? Replies { get; set; }
-        = new HashSet<ReplyDetailForPostDetailViewModel>();
+    public bool CanModerate { get; set; }
+    public ICollection<ReplyForPostDetailViewModel>? Replies { get; set; }
+        = new HashSet<ReplyForPostDetailViewModel>();
     public ICollection<TagViewModel>? Tags { get; set; }
         = new HashSet<TagViewModel>();
 }

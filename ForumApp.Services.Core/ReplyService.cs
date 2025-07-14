@@ -52,7 +52,7 @@ public class ReplyService : IReplyService
         return true;
     }
 
-    public async Task<ICollection<ReplyDetailForPostDetailViewModel>?> GetRepliesForPostDetailsAsync(Guid? userId, Guid postId)
+    public async Task<ICollection<ReplyForPostDetailViewModel>?> GetRepliesForPostDetailsAsync(Guid? userId, Guid postId, bool canModerate)
     {
         IEnumerable<Reply> replies = await replyRepository
             .GetWhereWithIncludeAsync(r => r.PostId == postId,
@@ -60,13 +60,14 @@ public class ReplyService : IReplyService
                                       asNoTracking: true);
 
         return replies
-            .Select(r => new ReplyDetailForPostDetailViewModel
+            .Select(r => new ReplyForPostDetailViewModel
             {
                 Id = r.Id,
                 Content = r.Content,
                 Author = r.ApplicationUser?.DisplayName ?? "Unknown",
                 CreatedAt = r.CreatedAt.ToString(ApplicationDateTimeFormat),
-                IsPublisher = userId != null && r.ApplicationUserId == userId
+                IsPublisher = userId != null && r.ApplicationUserId == userId,
+                CanModerate = canModerate
             })
             .ToArray();
     }
@@ -74,12 +75,21 @@ public class ReplyService : IReplyService
     public async Task<ReplyDeleteViewModel?> GetReplyForDeleteAsync(Guid userId, Guid postId, Guid id)
     {
         Reply? reply = await replyRepository
-             .SingleOrDefaultAsync(r =>
-                                   r.Id == id && r.PostId == postId
-                                   && r.ApplicationUserId == userId,
-                                   asNoTracking: true);
+            .SingleOrDefaultWithIncludeAsync(r => r.Id == id
+                                                    && r.PostId == postId,
+                                             q => q.Include(r => r.Post)
+                                                   .ThenInclude(p => p.Board)
+                                                   .ThenInclude(b => b.BoardManagers));
 
-        if (reply == null) return null;
+        if (reply == null || reply.Post == null || reply.Post.Board == null)
+        {
+            return null;
+        }
+
+        if (!await UserHasRights(reply, userId))
+        {
+            return null;
+        }
 
         return new ReplyDeleteViewModel
         {
@@ -92,12 +102,20 @@ public class ReplyService : IReplyService
     public async Task<bool> SoftDeleteReplyAsync(Guid userId, ReplyDeleteViewModel model)
     {
         Reply? reply = await replyRepository
-            .SingleOrDefaultAsync(r => r.Id == model.Id
-                                  && r.PostId == model.PostId
-                                  && r.ApplicationUserId == userId,
-                                  asNoTracking: false);
+           .SingleOrDefaultWithIncludeAsync(r => r.Id == model.Id
+                                                   && r.PostId == model.PostId,
+                                            q => q.Include(r => r.Post.Board.BoardManagers),
+                                            asNoTracking: false);
 
-        if (reply == null) return false;
+        if (reply == null || reply.Post == null || reply.Post.Board == null)
+        {
+            return false;
+        }
+
+        if (!await UserHasRights(reply, userId))
+        {
+            return false;
+        }
 
         reply.IsDeleted = true;
         await replyRepository.SaveChangesAsync();
@@ -136,5 +154,29 @@ public class ReplyService : IReplyService
         await replyRepository.SaveChangesAsync();
 
         return true;
+    }
+
+    private async Task<bool> UserHasRights(Reply reply, Guid userId)
+    {
+        if (reply.ApplicationUserId == userId)
+        {
+            return true;
+        }
+
+        if (reply.Post.Board.BoardManagers.Any(m => m.ApplicationUserId == userId))
+        {
+            return true;
+        }
+
+        ApplicationUser? user = await userManager
+            .FindByIdAsync(userId.ToString());
+
+        if (user == null)
+        {
+            return false;
+        }
+
+        return await userManager
+            .IsInRoleAsync(user, "Admin");
     }
 }

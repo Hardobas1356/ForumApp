@@ -145,16 +145,19 @@ public class PostService : IPostService
         Post? post = await postRepository
             .SingleOrDefaultWithIncludeAsync(p => p.Id == id,
                                              q => q.Include(p => p.Board)
-                                                 .Include(p => p.ApplicationUser)
-                                                 .Include(p => p.PostTags)
-                                                 .ThenInclude(pt => pt.Tag),
+                                                   .ThenInclude(b=>b.BoardManagers)
+                                                   .Include(p => p.ApplicationUser)
+                                                   .Include(p => p.PostTags)
+                                                   .ThenInclude(pt => pt.Tag),
                                              asNoTracking: true);
         if (post == null)
         {
             return null;
         }
 
-        PostDetailsViewModel? model = new PostDetailsViewModel
+        bool canModerate = userId != null ? await UserHasRights(post, (Guid)userId) : false;
+
+        PostDetailsViewModel model = new PostDetailsViewModel
         {
             Id = post.Id,
             Title = post.Title,
@@ -165,6 +168,7 @@ public class PostService : IPostService
             ImageUrl = post.ImageUrl,
             BoardId = post.BoardId,
             BoardName = post.Board.Name,
+            CanModerate = canModerate,
             IsPublisher = userId != null && post.ApplicationUserId == userId,
             Tags = post.PostTags
                        .Select(pt => new TagViewModel
@@ -175,7 +179,7 @@ public class PostService : IPostService
                        })
                        .ToArray(),
             Replies = await replyService
-                            .GetRepliesForPostDetailsAsync(userId, post.Id)
+                            .GetRepliesForPostDetailsAsync(userId, post.Id, canModerate)
         };
 
         return model;

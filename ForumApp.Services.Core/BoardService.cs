@@ -300,4 +300,23 @@ public class BoardService : IBoardService
 
         return board.Name;
     }
+
+    public async Task<bool> IsModeratorAsync(Guid boardId, Guid? userId)
+    {
+        Board? board = await boardRepository
+            .SingleOrDefaultWithIncludeAsync(b => b.Id == boardId,
+                                             q => q.Include(b => b.BoardManagers));
+
+        if (board==null)
+        {
+            return false;
+        }
+
+        if (!board.BoardManagers.Any(bm => bm.ApplicationUserId == userId))
+        {
+            return false;
+        }
+
+        return true;
+    }
 }
