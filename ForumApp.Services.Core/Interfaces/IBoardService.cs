@@ -11,12 +11,12 @@ public interface IBoardService
     Task<IEnumerable<BoardAllIndexViewModel>> GetAllBoardsAsync(Guid? userId);
     Task<BoardDetailsViewModel?> GetBoardDetailsAsync(Guid boardId);
     Task<BoardDetailsAdminViewModel?> GetBoardDetailsAdminAsync(Guid boardId);
-    Task<BoardDeleteViewModel?> GetBoardForDeletionAsync(Guid id);
-    Task<string?> GetBoardNameByIdAsync(Guid id);
+    Task<BoardDeleteViewModel?> GetBoardForDeletionAsync(Guid boardId);
+    Task<string?> GetBoardNameByIdAsync(Guid boardId);
     Task<bool> CreateBoardAsync(Guid userId,BoardCreateInputModel model);
-    Task<bool> RestoreBoardAsync(Guid id);
+    Task<bool> RestoreBoardAsync(Guid boardId);
     Task<bool> SoftDeleteBoardAsync(BoardDeleteViewModel model);
-    Task<bool> ApproveBoardAsync(Guid id);
+    Task<bool> ApproveBoardAsync(Guid boardId);
     Task<bool> AddModeratorAsync(Guid userId, Guid boardId);
     Task<bool> RemoveModeratorAsync(Guid userId, Guid boardId);
 }

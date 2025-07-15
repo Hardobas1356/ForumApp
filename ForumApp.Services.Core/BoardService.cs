@@ -7,7 +7,6 @@ using ForumApp.Web.ViewModels.Category;
 using ForumApp.Web.ViewModels.Post;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage.Json;
 using static ForumApp.GCommon.FilterEnums;
 
 using static ForumApp.GCommon.GlobalConstants;
@@ -63,48 +62,34 @@ public class BoardService : IBoardService
     }
     public async Task<IEnumerable<BoardAdminViewModel>?> GetAllBoardsForAdminAsync(BoardAdminFilter filter)
     {
-        IEnumerable<Board>? boards = null;
+        IQueryable<Board> query = boardRepository.GetQueryable(ignoreQueryFilters: true);
 
-        switch (filter)
+        query = filter switch
         {
-            case BoardAdminFilter.All:
-                boards = await boardRepository
-                    .GetAllAsync(ignoreQueryFilters: true);
-                break;
-            case BoardAdminFilter.Pending:
-                boards = await boardRepository
-                    .GetWhereAsync(b => !b.IsApproved,
-                                   ignoreQueryFilters: true);
-                break;
-            case BoardAdminFilter.Approved:
-                boards = await boardRepository
-                    .GetWhereAsync(b => b.IsApproved,
-                                   ignoreQueryFilters: true);
-                break;
-            case BoardAdminFilter.Deleted:
-                boards = await boardRepository
-                    .GetWhereAsync(b => b.IsDeleted,
-                                   ignoreQueryFilters: true);
-                break;
-        }
+            BoardAdminFilter.Pending => query.Where(b => !b.IsApproved),
+            BoardAdminFilter.Approved => query.Where(b => b.IsApproved),
+            BoardAdminFilter.Deleted => query.Where(b => b.IsDeleted),
+            _ => query
+        };
 
-        IEnumerable<BoardAdminViewModel> result = boards!
-            .Select(b => new BoardAdminViewModel
-            {
-                Id = b.Id,
-                Name = b.Name,
-                Description = b.Description,
-                IsApproved = b.IsApproved,
-                IsDeleted = b.IsDeleted,
-            });
+        IEnumerable<BoardAdminViewModel> boards = await query
+                .Select(b => new BoardAdminViewModel
+                {
+                    Id = b.Id,
+                    Name = b.Name,
+                    Description = b.Description,
+                    IsApproved = b.IsApproved,
+                    IsDeleted = b.IsDeleted,
+                })
+                .ToListAsync();
 
-        return result;
+        return boards;
     }
     public async Task<BoardDetailsViewModel?> GetBoardDetailsAsync(Guid boardId)
     {
         if (boardId == Guid.Empty)
         {
-            return null;
+            throw new ArgumentException("BoardId is null", nameof(boardId));
         }
 
         Board? board = await boardRepository
@@ -112,7 +97,7 @@ public class BoardService : IBoardService
 
         if (board == null)
         {
-            return null;
+            throw new ArgumentException("Board not found", nameof(boardId));
         }
 
         IEnumerable<PostForBoardDetailsViewModel>? posts =
@@ -136,7 +121,7 @@ public class BoardService : IBoardService
     {
         if (boardId == Guid.Empty)
         {
-            return null;
+            throw new ArgumentException("BoardId is null", nameof(boardId));
         }
 
         Board? board = await boardRepository
@@ -144,10 +129,9 @@ public class BoardService : IBoardService
                                              q => q.Include(b => b.BoardManagers)
                                                    .ThenInclude(bm => bm.ApplicationUser),
                                              ignoreQueryFilters: true);
-
         if (board == null)
         {
-            return null;
+            throw new ArgumentException("Board not found with Id", nameof(boardId));
         }
 
         IEnumerable<PostForBoardDetailsViewModel>? posts =
@@ -178,19 +162,24 @@ public class BoardService : IBoardService
 
         return model;
     }
-    public async Task<BoardDeleteViewModel?> GetBoardForDeletionAsync(Guid id)
+    public async Task<BoardDeleteViewModel?> GetBoardForDeletionAsync(Guid boardId)
     {
+        if (boardId == Guid.Empty)
+        {
+            throw new ArgumentException("BoardId is null", nameof(boardId));
+        }
+
         Board? board = await boardRepository
-            .GetByIdAsync(id);
+            .GetByIdAsync(boardId);
 
         if (board == null)
         {
-            return null;
+            throw new ArgumentException("Board not found with Id", nameof(boardId));
         }
 
         BoardDeleteViewModel model = new BoardDeleteViewModel()
         {
-            Id = id,
+            Id = boardId,
             Name = board.Name,
             ImageUrl = board.ImageUrl,
 
@@ -198,16 +187,21 @@ public class BoardService : IBoardService
 
         return model;
     }
-    public async Task<bool> RestoreBoardAsync(Guid id)
+    public async Task<bool> RestoreBoardAsync(Guid boardId)
     {
+        if (boardId == Guid.Empty)
+        {
+            throw new ArgumentException("BoardId is null", nameof(boardId));
+        }
+
         Board? board = await boardRepository
-            .GetByIdAsync(id,
+            .GetByIdAsync(boardId,
                           asNoTracking: false,
                           ignoreQueryFilters: true);
 
         if (board == null)
         {
-            return false;
+            throw new ArgumentException("Board not found with Id", nameof(boardId));
         }
 
         board.IsDeleted = false;
@@ -215,16 +209,21 @@ public class BoardService : IBoardService
 
         return true;
     }
-    public async Task<bool> ApproveBoardAsync(Guid id)
+    public async Task<bool> ApproveBoardAsync(Guid boardId)
     {
+        if (boardId == Guid.Empty)
+        {
+            throw new ArgumentException("BoardId is null",nameof(boardId));
+        }
+
         Board? board = await boardRepository
-            .GetByIdAsync(id,
+            .GetByIdAsync(boardId,
                           asNoTracking: false,
                           ignoreQueryFilters: true);
 
         if (board == null)
         {
-            return false;
+            throw new ArgumentException("Board not found", nameof(boardId));
         }
 
         board.IsApproved = true;
@@ -241,7 +240,7 @@ public class BoardService : IBoardService
 
         if (board == null)
         {
-            return false;
+            throw new ArgumentException("Board not found", nameof(model.Id));
         }
 
         board.IsDeleted = true;
@@ -270,7 +269,8 @@ public class BoardService : IBoardService
             .ToList();
 
         if (invalidCategoryIds.Any())
-            throw new ArgumentException($"Invalid category IDs: {string.Join(", ", invalidCategoryIds)}", nameof(model.SelectedCategoryIds));
+            throw new ArgumentException($"Invalid category IDs: {string.Join(", ", invalidCategoryIds)}",
+                nameof(model.SelectedCategoryIds));
 
         Board board = new Board
         {
@@ -309,31 +309,43 @@ public class BoardService : IBoardService
             throw new Exception("Failed to create board in database", e);
         }
     }
-    public async Task<string?> GetBoardNameByIdAsync(Guid id)
+    public async Task<string?> GetBoardNameByIdAsync(Guid boardId)
     {
-        Board? board = await boardRepository.GetByIdAsync(id, ignoreQueryFilters: true);
+        if (boardId == Guid.Empty)
+        {
+            throw new ArgumentException("BoardId is null", nameof(boardId));
+        }
+
+        Board? board = await boardRepository.GetByIdAsync(boardId, ignoreQueryFilters: true);
 
         if (board == null)
-            return null;
+        {
+            throw new ArgumentException("Board not found", nameof(boardId));
+        }
 
         return board.Name;
     }
     public async Task<bool> AddModeratorAsync(Guid userId, Guid boardId)
     {
+        if (boardId == Guid.Empty)
+        {
+            throw new ArgumentException("BoardId is null", nameof(boardId));
+        }
+
         Board? board = await boardRepository
             .SingleOrDefaultAsync(b => b.Id == boardId);
 
         if (board == null)
         {
-            return false;
+            throw new ArgumentException("Board not found", nameof(boardId));
         }
 
         ApplicationUser? user = await userManager
             .FindByIdAsync(userId.ToString());
 
-        if (user == null)
+        if (board == null)
         {
-            return false;
+            throw new ArgumentException("User not found", nameof(userId));
         }
 
         BoardManager? boardManager = await boardManagerRepository
@@ -368,6 +380,11 @@ public class BoardService : IBoardService
     }
     public async Task<bool> RemoveModeratorAsync(Guid userId, Guid boardId)
     {
+        if (boardId == Guid.Empty || userId == Guid.Empty)
+        {
+            throw new ArgumentException("User ID and Board ID must be provided.");
+        }
+
         BoardManager? boardManager = await boardManagerRepository
             .SingleOrDefaultAsync(bm => bm.BoardId == boardId
                                   && bm.ApplicationUserId == userId,
@@ -375,7 +392,7 @@ public class BoardService : IBoardService
 
         if (boardManager == null)
         {
-            return false;
+            throw new InvalidOperationException("Moderator relationship not found.");
         }
 
         boardManager.IsDeleted = true;
