@@ -124,7 +124,7 @@ public class DashboardController : Controller
         catch (Exception e)
         {
             Console.WriteLine(e.Message);
-            throw;
+            return RedirectToAction(nameof(Details), new { Id = boardId });
         }
     }
 
@@ -143,7 +143,7 @@ public class DashboardController : Controller
         catch (Exception e)
         {
             Console.WriteLine(e.Message);
-            throw;
+            return RedirectToAction(nameof(Details), new { Id = boardId });
         }
     }
 

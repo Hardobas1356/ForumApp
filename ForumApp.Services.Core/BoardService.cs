@@ -251,7 +251,28 @@ public class BoardService : IBoardService
     }
     public async Task<bool> CreateBoardAsync(Guid userId, BoardCreateInputModel model)
     {
-        Board board = new Board()
+        if (userId == Guid.Empty)
+            throw new ArgumentException("User ID cannot be empty", nameof(userId));
+
+        if (model == null)
+            throw new ArgumentNullException(nameof(model));
+
+        if (string.IsNullOrWhiteSpace(model.Name))
+            throw new ArgumentException("Board name is required", nameof(model));
+
+        IEnumerable<CategoryViewModel> categories = await categoryService
+            .GetCategoriesAsync();
+        HashSet<Guid> validCategoryIds = categories
+            .Select(c => c.Id).ToHashSet();
+
+        List<Guid> invalidCategoryIds = model.SelectedCategoryIds
+            .Where(id => !validCategoryIds.Contains(id))
+            .ToList();
+
+        if (invalidCategoryIds.Any())
+            throw new ArgumentException($"Invalid category IDs: {string.Join(", ", invalidCategoryIds)}", nameof(model.SelectedCategoryIds));
+
+        Board board = new Board
         {
             Id = Guid.NewGuid(),
             Name = model.Name,
@@ -268,32 +289,24 @@ public class BoardService : IBoardService
 
         board.BoardManagers.Add(manager);
 
-        IEnumerable<CategoryViewModel> categories = await categoryService.GetCategoriesAsync();
-
-        foreach (Guid categoryId in model.SelectedCategoryIds)
+        foreach (var categoryId in model.SelectedCategoryIds)
         {
-            if (!categories.Any(c => c.Id == categoryId))
-            {
-                continue;
-            }
-
-            BoardCategory boardCategory = new BoardCategory()
+            board.BoardCategories.Add(new BoardCategory
             {
                 BoardId = board.Id,
                 CategoryId = categoryId
-            };
-            board.BoardCategories.Add(boardCategory);
+            });
         }
+
         try
         {
             await boardRepository.AddAsync(board);
             await boardRepository.SaveChangesAsync();
             return true;
         }
-        catch (DbUpdateException e)
+        catch (Exception e)
         {
-            Console.WriteLine("Error creating board: " + e.Message);
-            return false;
+            throw new Exception("Failed to create board in database", e);
         }
     }
     public async Task<string?> GetBoardNameByIdAsync(Guid id)
