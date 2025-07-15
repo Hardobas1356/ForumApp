@@ -17,5 +17,6 @@ public interface IBoardService
     Task<bool> RestoreBoardAsync(Guid id);
     Task<bool> SoftDeleteBoardAsync(BoardDeleteViewModel model);
     Task<bool> ApproveBoardAsync(Guid id);
-    Task<bool> IsModeratorAsync(Guid boardId, Guid? userId);
+    Task<bool> AddModeratorAsync(Guid userId, Guid boardId);
+    Task<bool> RemoveModeratorAsync(Guid userId, Guid boardId);
 }

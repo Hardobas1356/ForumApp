@@ -58,7 +58,7 @@
 							<strong>@mod.DisplayName</strong>
 							<span class="text-muted">(@mod.Handle)</span>
 						</div>
-						<form asp-area="Admin" asp-controller="Board" asp-action="RemoveModerator" method="post" class="d-inline">
+						<form asp-area="Admin" asp-controller="Dashboard" asp-action="RemoveModerator" method="post" class="d-inline">
 							<input type="hidden" name="boardId" value="@Model.Id" />
 							<input type="hidden" name="userId" value="@mod.Id" />
 							<button type="submit" class="btn btn-sm btn-outline-danger">
@@ -99,7 +99,7 @@
 								</div>
 								@if (user.IsModerator)
 								{
-									<form asp-area="Admin" asp-controller="Board" asp-action="RemoveModerator" method="post" class="d-inline">
+									<form asp-area="Admin" asp-controller="Dashboard" asp-action="RemoveModerator" method="post" class="d-inline">
 										<input type="hidden" name="boardId" value="@Model.Id" />
 										<input type="hidden" name="userId" value="@user.Id" />
 										<button type="submit" class="btn btn-sm btn-outline-danger">
@@ -109,7 +109,7 @@
 								}
 								else
 								{
-									<form asp-area="Admin" asp-controller="Board" asp-action="AddModerator" method="post" class="d-inline">
+									<form asp-area="Admin" asp-controller="Dashboard" asp-action="AddModerator" method="post" class="d-inline">
 										<input type="hidden" name="boardId" value="@Model.Id" />
 										<input type="hidden" name="userId" value="@user.Id" />
 										<button type="submit" class="btn btn-sm btn-outline-success">

@@ -1,5 +1,4 @@
-﻿using ForumApp.Data.Models;
-using ForumApp.Services.Core.Interfaces;
+﻿using ForumApp.Services.Core.Interfaces;
 using ForumApp.Web.ViewModels.Admin.Board;
 using ForumApp.Web.ViewModels.ApplicationUser;
 using Microsoft.AspNetCore.Mvc;
@@ -107,6 +106,44 @@ public class DashboardController : Controller
         {
             Console.WriteLine(e.Message);
             return RedirectToAction(nameof(Index));
+        }
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> AddModerator(Guid boardId, Guid userId)
+    {
+        try
+        {
+            await boardService.AddModeratorAsync(userId, boardId);
+
+            //todo add fail message on false
+
+            return RedirectToAction(nameof(Details), new { id = boardId });
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+            throw;
+        }
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> RemoveModerator(Guid boardId, Guid userId)
+    {
+        try
+        {
+            await boardService.RemoveModeratorAsync(userId, boardId);
+
+            //todo add fail message on false
+
+            return RedirectToAction(nameof(Details), new { id = boardId });
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+            throw;
         }
     }
 

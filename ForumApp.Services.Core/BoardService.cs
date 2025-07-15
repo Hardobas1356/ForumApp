@@ -5,7 +5,9 @@ using ForumApp.Web.ViewModels.Admin.BoardModerators;
 using ForumApp.Web.ViewModels.Board;
 using ForumApp.Web.ViewModels.Category;
 using ForumApp.Web.ViewModels.Post;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.Json;
 using static ForumApp.GCommon.FilterEnums;
 
 using static ForumApp.GCommon.GlobalConstants;
@@ -14,16 +16,21 @@ namespace ForumApp.Services.Core;
 
 public class BoardService : IBoardService
 {
+    private readonly IGenericRepository<BoardManager> boardManagerRepository;
     private readonly IGenericRepository<Board> boardRepository;
     private readonly IPostService postService;
     private readonly ICategoryService categoryService;
+    private readonly UserManager<ApplicationUser> userManager;
 
-    public BoardService(IGenericRepository<Board> boardRepository, IPostService postService,
-        ICategoryService categoryService)
+    public BoardService(IGenericRepository<BoardManager> boardManagerRepository, IGenericRepository<Board> boardRepository,
+        IPostService postService, ICategoryService categoryService,
+        UserManager<ApplicationUser> userManager)
     {
+        this.boardManagerRepository = boardManagerRepository;
         this.boardRepository = boardRepository;
         this.postService = postService;
         this.categoryService = categoryService;
+        this.userManager = userManager;
     }
 
     public async Task<IEnumerable<BoardAllIndexViewModel>> GetAllBoardsAsync(Guid? userId)
@@ -54,7 +61,6 @@ public class BoardService : IBoardService
             })
             .ToArray();
     }
-
     public async Task<IEnumerable<BoardAdminViewModel>?> GetAllBoardsForAdminAsync(BoardAdminFilter filter)
     {
         IEnumerable<Board>? boards = null;
@@ -94,7 +100,6 @@ public class BoardService : IBoardService
 
         return result;
     }
-
     public async Task<BoardDetailsViewModel?> GetBoardDetailsAsync(Guid boardId)
     {
         if (boardId == Guid.Empty)
@@ -151,7 +156,7 @@ public class BoardService : IBoardService
         IEnumerable<CategoryViewModel>? categories =
             await categoryService.GetCategoriesAsyncByBoardId(boardId);
 
-        return new BoardDetailsAdminViewModel
+        BoardDetailsAdminViewModel model = new BoardDetailsAdminViewModel
         {
             Id = board.Id,
             Name = board.Name,
@@ -161,6 +166,7 @@ public class BoardService : IBoardService
             Posts = posts ?? new HashSet<PostForBoardDetailsViewModel>(),
             Categories = categories ?? new HashSet<CategoryViewModel>(),
             Moderators = board.BoardManagers
+                .Where(bm => !bm.IsDeleted)
                 .Select(bm => new BoardModeratorViewModel
                 {
                     Id = bm.ApplicationUserId,
@@ -169,8 +175,9 @@ public class BoardService : IBoardService
                 })
                 .ToArray()
         };
-    }
 
+        return model;
+    }
     public async Task<BoardDeleteViewModel?> GetBoardForDeletionAsync(Guid id)
     {
         Board? board = await boardRepository
@@ -191,7 +198,6 @@ public class BoardService : IBoardService
 
         return model;
     }
-
     public async Task<bool> RestoreBoardAsync(Guid id)
     {
         Board? board = await boardRepository
@@ -290,7 +296,6 @@ public class BoardService : IBoardService
             return false;
         }
     }
-
     public async Task<string?> GetBoardNameByIdAsync(Guid id)
     {
         Board? board = await boardRepository.GetByIdAsync(id, ignoreQueryFilters: true);
@@ -300,22 +305,69 @@ public class BoardService : IBoardService
 
         return board.Name;
     }
-
-    public async Task<bool> IsModeratorAsync(Guid boardId, Guid? userId)
+    public async Task<bool> AddModeratorAsync(Guid userId, Guid boardId)
     {
         Board? board = await boardRepository
-            .SingleOrDefaultWithIncludeAsync(b => b.Id == boardId,
-                                             q => q.Include(b => b.BoardManagers));
+            .SingleOrDefaultAsync(b => b.Id == boardId);
 
-        if (board==null)
+        if (board == null)
         {
             return false;
         }
 
-        if (!board.BoardManagers.Any(bm => bm.ApplicationUserId == userId))
+        ApplicationUser? user = await userManager
+            .FindByIdAsync(userId.ToString());
+
+        if (user == null)
         {
             return false;
         }
+
+        BoardManager? boardManager = await boardManagerRepository
+            .SingleOrDefaultAsync(bm => bm.BoardId == boardId
+                                  && bm.ApplicationUserId == userId,
+                                  ignoreQueryFilters: true,
+                                  asNoTracking: false);
+
+        if (boardManager == null)
+        {
+            boardManager = new BoardManager()
+            {
+                ApplicationUserId = userId,
+                BoardId = boardId,
+                IsDeleted = false
+            };
+            await boardManagerRepository.AddAsync(boardManager);
+        }
+        else
+        {
+            if (!boardManager.IsDeleted)
+            {
+                return false;
+            }
+
+            boardManager.IsDeleted = false;
+        }
+
+        await boardManagerRepository.SaveChangesAsync();
+
+        return true;
+    }
+    public async Task<bool> RemoveModeratorAsync(Guid userId, Guid boardId)
+    {
+        BoardManager? boardManager = await boardManagerRepository
+            .SingleOrDefaultAsync(bm => bm.BoardId == boardId
+                                  && bm.ApplicationUserId == userId,
+                                  asNoTracking: false);
+
+        if (boardManager == null)
+        {
+            return false;
+        }
+
+        boardManager.IsDeleted = true;
+
+        await boardManagerRepository.SaveChangesAsync();
 
         return true;
     }
