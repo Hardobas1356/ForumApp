@@ -36,7 +36,7 @@ public class BoardService : IBoardService
     public async Task<IEnumerable<BoardAllIndexViewModel>> GetAllBoardsAsync(Guid? userId)
     {
         IEnumerable<Board> boards = await boardRepository
-            .GetAllWithInludeAsync(q => q
+            .GetAllWithIncludeAsync(q => q
                                     .Include(b => b.BoardManagers)
                                     .Include(b => b.BoardCategories)
                                     .ThenInclude(bc => bc.Category));

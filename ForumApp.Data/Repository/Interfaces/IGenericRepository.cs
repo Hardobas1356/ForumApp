@@ -2,6 +2,8 @@
 
 namespace ForumApp.Services.Core.Interfaces;
 
-public interface IGenericRepository<T> : IAsyncRepository<T>, IIgnoreQueryFilters<T>, ISynchronousRepository<T> where T : class
+public interface IGenericRepository<T> : IAsyncRepository<T>, IIgnoreQueryFilters<T>,
+    ISynchronousRepository<T>, IQueryableRepository<T>
+    where T : class
 {
 }
