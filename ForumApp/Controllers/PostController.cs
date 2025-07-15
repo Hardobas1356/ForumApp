@@ -14,14 +14,17 @@ public class PostController : BaseController
     private readonly ITagService tagService;
     private readonly IPermissionService permissionService;
     private readonly IBoardService boardService;
+    private readonly ILogger<PostController> logger;
 
     public PostController(IPostService postService, ITagService tagService,
-        IPermissionService permissionService, IBoardService boardService)
+        IPermissionService permissionService, IBoardService boardService,
+        ILogger<PostController> logger)
     {
         this.postService = postService;
         this.tagService = tagService;
         this.permissionService = permissionService;
         this.boardService = boardService;
+        this.logger = logger;
     }
 
     [HttpGet]
@@ -35,6 +38,7 @@ public class PostController : BaseController
 
             if (model == null)
             {
+                logger.LogWarning("Post with id {postId} not found", id);
                 return RedirectToAction("Index", "Board");
             }
 
@@ -42,7 +46,7 @@ public class PostController : BaseController
         }
         catch (Exception e)
         {
-            Console.WriteLine(e.Message);
+            logger.LogError(e, "Error occured while getting details for post");
             return RedirectToAction("Index", "Board");
         }
     }
@@ -57,11 +61,13 @@ public class PostController : BaseController
 
             if (!await permissionService.CanManagePostAsync((Guid)this.GetUserId()!, id))
             {
+                logger.LogWarning("User does not permission to edit");
                 return RedirectToAction("Index", "Board");
             }
 
             if (model == null)
             {
+                logger.LogWarning("Post not found");
                 return RedirectToAction("Index", "Board");
             }
 
@@ -69,23 +75,26 @@ public class PostController : BaseController
         }
         catch (Exception e)
         {
-            Console.WriteLine(e.Message);
+            logger.LogError(e, "Error occured while detting edit form for post");
             return RedirectToAction("Index", "Board");
         }
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(PostEditInputModel model)
     {
         try
         {
             if (!await permissionService.CanManagePostAsync((Guid)this.GetUserId()!, model.Id))
             {
+                logger.LogWarning("User does not permission to edit");
                 return RedirectToAction("Index", "Board");
             }
 
             if (!this.ModelState.IsValid)
             {
+                logger.LogWarning("Model submitted is invalid");
                 model.AvailableTags = await tagService
                     .GetTagsAsync();
                 ModelState.AddModelError(string.Empty, "Error while editing Post");
@@ -94,6 +103,7 @@ public class PostController : BaseController
 
             if (!await postService.EditPostAsync((Guid)this.GetUserId()!, model))
             {
+                logger.LogWarning("Edit post failed");
                 model.AvailableTags = await tagService
                     .GetTagsAsync();
                 return this.View(model);
@@ -103,7 +113,7 @@ public class PostController : BaseController
         }
         catch (Exception e)
         {
-            Console.WriteLine(e.Message);
+            logger.LogError(e, "Error while editing post");
             return RedirectToAction("Index", "Board");
         }
     }
@@ -129,18 +139,20 @@ public class PostController : BaseController
         }
         catch (Exception e)
         {
-            Console.WriteLine(e.Message);
+            logger.LogError(e, "Error occured while getting create form for post");
             return RedirectToAction(nameof(Details), "Board", new { Id = id });
         }
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(PostCreateInputModel model)
     {
         try
         {
             if (!this.ModelState.IsValid)
             {
+                logger.LogWarning("Model posted was invalid");
                 model.AvailableTags = await tagService
                     .GetTagsAsync();
                 return View(model);
@@ -153,6 +165,7 @@ public class PostController : BaseController
             {
                 model.AvailableTags = await tagService
                     .GetTagsAsync();
+                logger.LogWarning("Post could not be created");
                 ModelState.AddModelError(String.Empty, "Error occured while adding post to board");
                 return View(model);
             }
@@ -161,7 +174,7 @@ public class PostController : BaseController
         }
         catch (Exception e)
         {
-            Console.WriteLine(e.Message);
+            logger.LogError(e, "Error occured while creating post");
             return RedirectToAction(nameof(Details), "Board", new { Id = model.BoardId });
         }
     }
@@ -173,6 +186,7 @@ public class PostController : BaseController
         {
             if (!await permissionService.CanManagePostAsync((Guid)this.GetUserId()!, id))
             {
+                logger.LogWarning("User does not rights to delete");
                 return RedirectToAction("Index", "Board");
             }
 
@@ -181,6 +195,7 @@ public class PostController : BaseController
 
             if (model == null)
             {
+                logger.LogWarning("Post with id {postId} not found", id);
                 return RedirectToAction("Index", "Board");
             }
 
@@ -188,18 +203,20 @@ public class PostController : BaseController
         }
         catch (Exception e)
         {
-            Console.WriteLine(e.Message);
+            logger.LogError(e,"Error occured while getting delete form for post");
             return RedirectToAction("Index", "Board");
         }
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(PostDeleteViewModel model)
     {
         try
         {
             if (!await permissionService.CanManagePostAsync((Guid)this.GetUserId()!, model.Id))
             {
+                logger.LogWarning("User does not rights to delete");
                 return RedirectToAction("Index", "Board");
             }
 
@@ -208,6 +225,7 @@ public class PostController : BaseController
 
             if (!postDeletionResult)
             {
+                logger.LogWarning("Post could not be deleted");
                 return RedirectToAction("Details", "Board", new { Id = model.BoardId });
             }
 
@@ -215,7 +233,7 @@ public class PostController : BaseController
         }
         catch (Exception e)
         {
-            Console.WriteLine(e.Message);
+            logger.LogError(e, "Error occured while deleting post");
             return RedirectToAction("Index", "Board");
         }
     }
