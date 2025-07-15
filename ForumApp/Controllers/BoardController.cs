@@ -10,11 +10,13 @@ public class BoardController : BaseController
 {
     private readonly IBoardService boardService;
     private readonly ICategoryService categoryService;
+    private readonly ILogger<BoardController> logger;
 
-    public BoardController(IBoardService boardService, ICategoryService categoryService)
+    public BoardController(IBoardService boardService, ICategoryService categoryService, ILogger<BoardController> logger)
     {
         this.boardService = boardService;
         this.categoryService = categoryService;
+        this.logger = logger;
     }
 
     [HttpGet]
@@ -30,7 +32,7 @@ public class BoardController : BaseController
         }
         catch (Exception e)
         {
-            Console.WriteLine(e.Message);
+            logger.LogError(e, "Failed to load boards for Index view.");
             return RedirectToAction(nameof(Index));
         }
     }
@@ -52,7 +54,7 @@ public class BoardController : BaseController
         }
         catch (Exception e)
         {
-            Console.WriteLine(e.Message);
+            logger.LogError(e, "Failed to load categories for board creation form.");
             return RedirectToAction(nameof(Index));
         }
     }
@@ -65,6 +67,8 @@ public class BoardController : BaseController
         {
             if (!this.ModelState.IsValid)
             {
+                logger.LogWarning("Board creation form is invalid.");
+
                 IEnumerable<CategoryViewModel> categories = await this.categoryService
                     .GetCategoriesAsync();
                 model.AvailableCategories = categories;
@@ -77,6 +81,8 @@ public class BoardController : BaseController
 
             if (!createResult)
             {
+                logger.LogWarning("Board creation failed. BoardService returned false.");
+
                 IEnumerable<CategoryViewModel> categories = await this.categoryService
                     .GetCategoriesAsync();
                 model.AvailableCategories = categories;
@@ -90,7 +96,7 @@ public class BoardController : BaseController
         }
         catch (Exception e)
         {
-            Console.WriteLine(e.Message);
+            logger.LogError(e, "Unexpected error while creating a board.");
             ModelState.AddModelError(string.Empty, "Unexpected error occurred while creating the board.");
             model.AvailableCategories = await categoryService.GetCategoriesAsync();
             return View(model);
@@ -108,14 +114,15 @@ public class BoardController : BaseController
 
             if (board == null)
             {
-                return NotFound();
+                logger.LogWarning("Board with ID {BoardId} not found.", id);
+                return RedirectToAction(nameof(Index));
             }
 
             return View(board);
         }
         catch (Exception e)
         {
-            Console.WriteLine(e.Message);
+            logger.LogError(e, "Failed to load board details for board ID {BoardId}", id);
             return RedirectToAction(nameof(Index));
         }
     }
