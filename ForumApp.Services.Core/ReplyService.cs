@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 using static ForumApp.GCommon.GlobalConstants;
+using static ForumApp.GCommon.SortEnums.Reply;
 
 namespace ForumApp.Services.Core;
 
@@ -52,12 +53,33 @@ public class ReplyService : IReplyService
         return true;
     }
 
-    public async Task<ICollection<ReplyForPostDetailViewModel>?> GetRepliesForPostDetailsAsync(Guid? userId, Guid postId, bool canModerate)
+    public async Task<ICollection<ReplyForPostDetailViewModel>?> GetRepliesForPostDetailsAsync(Guid? userId, Guid postId, bool canModerate, ReplySortBy sortBy)
     {
-        IEnumerable<Reply> replies = await replyRepository
-            .GetWhereWithIncludeAsync(r => r.PostId == postId,
-                                      q => q.Include(r => r.ApplicationUser),
-                                      asNoTracking: true);
+        IQueryable<Reply> query = replyRepository
+            .GetQueryable()
+            .Where(r => r.PostId == postId)
+            .Include(r => r.ApplicationUser);
+
+        switch (sortBy)
+        {
+            case ReplySortBy.Default:
+                query = query.OrderBy(r => r.CreatedAt);
+                break;
+            case ReplySortBy.CreateTimeAscending:
+                query = query.OrderBy(r => r.CreatedAt);
+                break;
+            case ReplySortBy.CreateTimeDescending:
+                query = query.OrderByDescending(r => r.CreatedAt);
+                break;
+            case ReplySortBy.ContentAscending:
+                query = query.OrderBy(r => r.Content);
+                break;
+            case ReplySortBy.ContentDescending:
+                query = query.OrderByDescending(r => r.Content);
+                break;
+        }
+
+        IEnumerable<Reply> replies = await query.ToArrayAsync();
 
         return replies
             .Select(r => new ReplyForPostDetailViewModel

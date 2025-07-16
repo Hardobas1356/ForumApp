@@ -1,10 +1,10 @@
-﻿using ForumApp.Data.Models;
-using ForumApp.Services.Core;
-using ForumApp.Services.Core.Interfaces;
+﻿using ForumApp.Services.Core.Interfaces;
 using ForumApp.Web.ViewModels.Post;
 using ForumApp.Web.ViewModels.Tag;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+
+using static ForumApp.GCommon.SortEnums.Reply;
 
 namespace ForumApp.Web.Controllers;
 
@@ -29,18 +29,20 @@ public class PostController : BaseController
 
     [HttpGet]
     [AllowAnonymous]
-    public async Task<IActionResult> Details(Guid id)
+    public async Task<IActionResult> Details(Guid id, ReplySortBy sortBy)
     {
         try
         {
             PostDetailsViewModel? model = await postService
-                .GetPostDetailsAsync(this.GetUserId(), id);
+                .GetPostDetailsAsync(this.GetUserId(), id, sortBy);
 
             if (model == null)
             {
                 logger.LogWarning("Post with id {postId} not found", id);
                 return RedirectToAction("Index", "Board");
             }
+
+            ViewBag.ReplySortBy = sortBy;
 
             return View(model);
         }
@@ -203,7 +205,7 @@ public class PostController : BaseController
         }
         catch (Exception e)
         {
-            logger.LogError(e,"Error occured while getting delete form for post");
+            logger.LogError(e, "Error occured while getting delete form for post");
             return RedirectToAction("Index", "Board");
         }
     }

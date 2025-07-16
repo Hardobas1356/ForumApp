@@ -1,4 +1,6 @@
-﻿namespace ForumApp.GCommon;
+﻿using System.Diagnostics;
+
+namespace ForumApp.GCommon;
 
 public static class SortEnums
 {
@@ -27,6 +29,18 @@ public static class SortEnums
             TitleAscending,
             TitleDescending,
             Popularity,
+        }
+    }
+
+    public static class Reply
+    {
+        public enum ReplySortBy
+        {
+            Default,
+            CreateTimeAscending,
+            CreateTimeDescending,
+            ContentAscending,
+            ContentDescending,
         }
     }
 }

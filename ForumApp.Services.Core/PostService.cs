@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 using static ForumApp.GCommon.GlobalConstants;
 using static ForumApp.GCommon.SortEnums.Post;
+using static ForumApp.GCommon.SortEnums.Reply;
 
 namespace ForumApp.Services.Core;
 
@@ -165,7 +166,7 @@ public class PostService : IPostService
         await postRepository.SaveChangesAsync();
         return true;
     }
-    public async Task<PostDetailsViewModel?> GetPostDetailsAsync(Guid? userId, Guid id)
+    public async Task<PostDetailsViewModel?> GetPostDetailsAsync(Guid? userId, Guid id, ReplySortBy sortBy)
     {
         Post? post = await postRepository
             .SingleOrDefaultWithIncludeAsync(p => p.Id == id,
@@ -173,8 +174,7 @@ public class PostService : IPostService
                                                    .ThenInclude(b => b.BoardManagers)
                                                    .Include(p => p.ApplicationUser)
                                                    .Include(p => p.PostTags)
-                                                   .ThenInclude(pt => pt.Tag),
-                                             asNoTracking: true);
+                                                   .ThenInclude(pt => pt.Tag));
         if (post == null)
         {
             return null;
@@ -204,7 +204,7 @@ public class PostService : IPostService
                        })
                        .ToArray(),
             Replies = await replyService
-                            .GetRepliesForPostDetailsAsync(userId, post.Id, canModerate)
+                            .GetRepliesForPostDetailsAsync(userId, post.Id, canModerate, sortBy)
         };
 
         return model;
