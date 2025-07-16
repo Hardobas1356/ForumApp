@@ -13,10 +13,13 @@ public class DashboardController : Controller
 {
     private readonly IBoardService boardService;
     private readonly IApplicationUserService applicationUserService;
-    public DashboardController(IBoardService boardService, IApplicationUserService applicationUserService)
+    private readonly ILogger<DashboardController> logger;
+    public DashboardController(IBoardService boardService, IApplicationUserService applicationUserService,
+        ILogger<DashboardController> logger)
     {
         this.boardService = boardService;
         this.applicationUserService = applicationUserService;
+        this.logger = logger;
     }
 
     [HttpGet]
@@ -33,7 +36,7 @@ public class DashboardController : Controller
         }
         catch (Exception e)
         {
-            Console.WriteLine(e.Message);
+            logger.LogError("Error occurred while getting dashboard Index.");
             return RedirectToAction(nameof(Index));
         }
     }
@@ -44,10 +47,11 @@ public class DashboardController : Controller
         try
         {
             BoardDetailsAdminViewModel? board = await boardService
-                .GetBoardDetailsAdminAsync(id,sortBy);
+                .GetBoardDetailsAdminAsync(id, sortBy);
 
             if (board == null)
             {
+                logger.LogWarning("No board was found with ID: {id}", id);
                 return RedirectToAction(nameof(Index));
             }
 
@@ -57,7 +61,7 @@ public class DashboardController : Controller
         }
         catch (Exception e)
         {
-            Console.WriteLine(e.Message);
+            logger.LogError(e, "Error occurred while getting board details.");
             return RedirectToAction(nameof(Index));
         }
     }
@@ -69,6 +73,7 @@ public class DashboardController : Controller
         {
             if (string.IsNullOrWhiteSpace(handle))
             {
+                logger.LogWarning("No handle provided");
                 return RedirectToAction(nameof(Details), new { id = boardId });
             }
 
@@ -77,6 +82,7 @@ public class DashboardController : Controller
 
             if (board == null)
             {
+                logger.LogWarning("No board found ID: {id}", boardId);
                 return RedirectToAction(nameof(Index));
             }
 
@@ -89,7 +95,7 @@ public class DashboardController : Controller
         }
         catch (Exception e)
         {
-            Console.WriteLine(e.Message);
+            logger.LogError(e, "Error occurred while searching for users in dashboard board details.");
             return RedirectToAction(nameof(Index));
         }
     }
@@ -107,7 +113,7 @@ public class DashboardController : Controller
         }
         catch (Exception e)
         {
-            Console.WriteLine(e.Message);
+            logger.LogError(e, "Error occcured while approving board");
             return RedirectToAction(nameof(Index));
         }
     }
@@ -118,15 +124,18 @@ public class DashboardController : Controller
     {
         try
         {
-            await boardService.AddModeratorAsync(userId, boardId);
+            bool addResult = await boardService.AddModeratorAsync(userId, boardId);
 
-            //todo add fail message on false
+            if (!addResult)
+            {
+                logger.LogWarning("Failed to add moderator. UserId: {UserId}, BoardId: {BoardId}", userId, boardId);
+            }
 
             return RedirectToAction(nameof(Details), new { id = boardId });
         }
         catch (Exception e)
         {
-            Console.WriteLine(e.Message);
+            logger.LogError(e, "Error occcured while adding moderator");
             return RedirectToAction(nameof(Details), new { Id = boardId });
         }
     }
@@ -137,15 +146,18 @@ public class DashboardController : Controller
     {
         try
         {
-            await boardService.RemoveModeratorAsync(userId, boardId);
+            bool removeResult = await boardService.RemoveModeratorAsync(userId, boardId);
 
-            //todo add fail message on false
+            if (!removeResult)
+            {
+                logger.LogWarning("Failed to remove moderator. UserId: {UserId}, BoardId: {BoardId}", userId, boardId);
+            }
 
             return RedirectToAction(nameof(Details), new { id = boardId });
         }
         catch (Exception e)
         {
-            Console.WriteLine(e.Message);
+            logger.LogError(e, "Error occcured while removing moderator");
             return RedirectToAction(nameof(Details), new { Id = boardId });
         }
     }
@@ -160,6 +172,7 @@ public class DashboardController : Controller
 
             if (model == null)
             {
+                logger.LogWarning("Could not find board. ID: {id}", id);
                 return NotFound();
             }
 
@@ -167,7 +180,7 @@ public class DashboardController : Controller
         }
         catch (Exception e)
         {
-            Console.WriteLine(e.Message);
+            logger.LogError(e, "Error occurred while deleting board");
             return RedirectToAction(nameof(Index));
         }
     }
@@ -182,6 +195,7 @@ public class DashboardController : Controller
 
             if (!deleteResult)
             {
+                logger.LogWarning("Could not delete board. ID: {id}", model.Id);
                 return View(model);
             }
 
@@ -189,7 +203,7 @@ public class DashboardController : Controller
         }
         catch (Exception e)
         {
-            Console.WriteLine(e.Message);
+            logger.LogError(e, "Error occurred while deleting board");
             return RedirectToAction(nameof(Index));
         }
     }
@@ -205,7 +219,7 @@ public class DashboardController : Controller
 
             if (!actionResult)
             {
-                //Todo add failure message
+                logger.LogWarning("Could not restore board. ID: {id}", id);
                 return RedirectToAction(nameof(Index));
             }
 
@@ -213,7 +227,7 @@ public class DashboardController : Controller
         }
         catch (Exception e)
         {
-            Console.WriteLine(e.Message);
+            logger.LogError(e, "Error occurred while restoring board");
             return RedirectToAction(nameof(Index));
         }
     }
