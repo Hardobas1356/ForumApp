@@ -1,95 +1,116 @@
 ﻿@using static ForumApp.GCommon.FilterEnums
+@using static ForumApp.GCommon.SortEnums.Board
+
 @using ForumApp.Web.ViewModels.Admin.Board
 @model IEnumerable<BoardAdminViewModel>
 
 @{
-    ViewData["Title"] = "Admin Dashboard";
-    BoardAdminFilter currentFilter = (BoardAdminFilter)(ViewBag.CurrentFilter ?? BoardAdminFilter.All);
+	ViewData["Title"] = "Admin Dashboard";
+	BoardAdminFilter currentFilter = (BoardAdminFilter)(ViewBag.CurrentFilter ?? BoardAdminFilter.All);
+	BoardAllSortBy currentSort = ViewBag.CurrentSortingOrder != null
+		? (BoardAllSortBy)ViewBag.CurrentSortingOrder
+		: BoardAllSortBy.CreateTimeDescending;
 }
 
 <h2 class="mb-4">Admin Dashboard</h2>
 
 <form method="get" asp-action="Index" class="mb-4">
-    <div class="input-group">
-        <select class="form-select" name="filter">
-            @foreach (BoardAdminFilter filter in Enum.GetValues(typeof(BoardAdminFilter)))
-            {
-                <option value="@filter" selected="@(filter == currentFilter)">
-                    @filter
-                </option>
-            }
-        </select>
-        <button class="btn btn-outline-secondary" type="submit">Apply</button>
-    </div>
+	<div class="row g-2 align-items-center">
+		<div class="col-md-4">
+			<select class="form-select" name="filter">
+				@foreach (BoardAdminFilter filter in Enum.GetValues(typeof(BoardAdminFilter)))
+				{
+					<option value="@filter" selected="@(filter == currentFilter)">
+						@filter
+					</option>
+				}
+			</select>
+		</div>
+		<div class="col-md-4">
+			<select class="form-select" name="sortOrder">
+				@foreach (BoardAllSortBy sort in Enum.GetValues(typeof(BoardAllSortBy)))
+				{
+					<option value="@sort" selected="@(sort == currentSort)">
+						@sort.ToString().Replace("Ascending", " ↑").Replace("Descending", " ↓")
+					</option>
+				}
+			</select>
+		</div>
+		<div class="col-md-4">
+			<button class="btn btn-outline-secondary w-100" type="submit">
+				<i class="bi bi-filter-circle me-1"></i> Apply Filters
+			</button>
+		</div>
+	</div>
 </form>
 
 <div class="row row-cols-1 row-cols-md-2 g-4">
-    @foreach (var board in Model)
-    {
-        <div class="col">
-            <div class="card h-100 shadow-sm border-@((board.IsDeleted ? "danger" : board.IsApproved ? "success" : "warning"))">
-                <a asp-area="Admin"
-                   asp-controller="Dashboard"
-                   asp-action="Details"
-                   asp-route-id="@board.Id"
-                   class="stretched-link text-decoration-none text-dark"
-                   style="z-index: 1;"></a>
+	@foreach (var board in Model)
+	{
+		<div class="col">
+			<div class="card h-100 shadow-sm border-@((board.IsDeleted ? "danger" : board.IsApproved ? "success" : "warning"))">
+				<a asp-area="Admin"
+				   asp-controller="Dashboard"
+				   asp-action="Details"
+				   asp-route-id="@board.Id"
+				   class="stretched-link text-decoration-none text-dark"
+				   style="z-index: 1;"></a>
 
-                <div class="card-body position-relative">
-                    <h5 class="card-title">@board.Name</h5>
-                    <p class="card-text text-muted">@board.Description</p>
+				<div class="card-body position-relative">
+					<h5 class="card-title">@board.Name</h5>
+					<p class="card-text text-muted">@board.Description</p>
 
-                    <div class="mb-2">
-                        <span class="badge bg-@(board.IsApproved ? "success" : "secondary")">
-                            @(board.IsApproved ? "Approved" : "Pending")
-                        </span>
+					<div class="mb-2">
+						<span class="badge bg-@(board.IsApproved ? "success" : "secondary")">
+							@(board.IsApproved ? "Approved" : "Pending")
+						</span>
 
-                        @if (board.IsDeleted)
-                        {
-                            <span class="badge bg-danger">Deleted</span>
-                        }
-                    </div>
+						@if (board.IsDeleted)
+						{
+							<span class="badge bg-danger">Deleted</span>
+						}
+					</div>
 
-                    <div class="d-flex flex-wrap gap-2 mt-3 position-relative" style="z-index: 2;">
-                        @if (!board.IsApproved)
-                        {
-                            <form method="post"
-                                  asp-route-id="@board.Id"
-                                  asp-action="Approve"
-                                  asp-controller="Dashboard"
-                                  asp-area="Admin">
-                                @Html.AntiForgeryToken()
-                                <button type="submit" class="btn btn-sm btn-success">
-                                    <i class="bi bi-check-circle"></i> Approve
-                                </button>
-                            </form>
-                        }
+					<div class="d-flex flex-wrap gap-2 mt-3 position-relative" style="z-index: 2;">
+						@if (!board.IsApproved)
+						{
+							<form method="post"
+								  asp-route-id="@board.Id"
+								  asp-action="Approve"
+								  asp-controller="Dashboard"
+								  asp-area="Admin">
+								@Html.AntiForgeryToken()
+								<button type="submit" class="btn btn-sm btn-success">
+									<i class="bi bi-check-circle"></i> Approve
+								</button>
+							</form>
+						}
 
-                        <a asp-area="Admin"
-                           asp-controller="Dashboard"
-                           asp-action="Delete"
-                           asp-route-id="@board.Id"
-                           class="btn btn-sm btn-danger">
-                            <i class="bi bi-trash"></i> Delete
-                        </a>
+						<a asp-area="Admin"
+						   asp-controller="Dashboard"
+						   asp-action="Delete"
+						   asp-route-id="@board.Id"
+						   class="btn btn-sm btn-danger">
+							<i class="bi bi-trash"></i> Delete
+						</a>
 
-                        @if (board.IsDeleted)
-                        {
-                            <form method="post"
-                                  asp-area="Admin"
-                                  asp-controller="Dashboard"
-                                  asp-action="RestoreDeletedBoard"
-                                  asp-route-id="@board.Id"
-                                  style="display:inline">
-                                @Html.AntiForgeryToken()
-                                <button type="submit" class="btn btn-sm btn-warning">
-                                    <i class="bi bi-arrow-counterclockwise"></i> Restore
-                                </button>
-                            </form>
-                        }
-                    </div>
-                </div>
-            </div>
-        </div>
-    }
+						@if (board.IsDeleted)
+						{
+							<form method="post"
+								  asp-area="Admin"
+								  asp-controller="Dashboard"
+								  asp-action="RestoreDeletedBoard"
+								  asp-route-id="@board.Id"
+								  style="display:inline">
+								@Html.AntiForgeryToken()
+								<button type="submit" class="btn btn-sm btn-warning">
+									<i class="bi bi-arrow-counterclockwise"></i> Restore
+								</button>
+							</form>
+						}
+					</div>
+				</div>
+			</div>
+		</div>
+	}
 </div>

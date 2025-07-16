@@ -4,6 +4,7 @@ using ForumApp.Web.ViewModels.ApplicationUser;
 using Microsoft.AspNetCore.Mvc;
 
 using static ForumApp.GCommon.FilterEnums;
+using static ForumApp.GCommon.SortEnums.Board;
 using static ForumApp.GCommon.SortEnums.Post;
 
 namespace ForumApp.Web.Areas.Admin.Controllers;
@@ -23,14 +24,15 @@ public class DashboardController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> Index(BoardAdminFilter filter)
+    public async Task<IActionResult> Index(BoardAdminFilter filter, BoardAllSortBy sortOrder)
     {
         try
         {
             ViewBag.CurrentFilter = filter;
+            ViewBag.CurrentSortingOrder = sortOrder;
 
             IEnumerable<BoardAdminViewModel>? model = await boardService
-                .GetAllBoardsForAdminAsync(filter);
+                .GetAllBoardsForAdminAsync(filter, sortOrder);
 
             return View(model);
         }

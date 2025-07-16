@@ -86,17 +86,38 @@ public class BoardService : IBoardService
             })
             .ToArray();
     }
-    public async Task<IEnumerable<BoardAdminViewModel>?> GetAllBoardsForAdminAsync(BoardAdminFilter filter)
+    public async Task<IEnumerable<BoardAdminViewModel>?> GetAllBoardsForAdminAsync(BoardAdminFilter filter, BoardAllSortBy sortOrder)
     {
         IQueryable<Board> query = boardRepository.GetQueryable(ignoreQueryFilters: true);
 
         query = filter switch
         {
             BoardAdminFilter.Pending => query.Where(b => !b.IsApproved),
-            BoardAdminFilter.Approved => query.Where(b => b.IsApproved),
+            BoardAdminFilter.Approved => query.Where(b => b.IsApproved && !b.IsDeleted),
             BoardAdminFilter.Deleted => query.Where(b => b.IsDeleted),
             _ => query
         };
+
+        switch (sortOrder)
+        {
+            case BoardAllSortBy.None:
+                break;
+            case BoardAllSortBy.CreateTimeAscending:
+                query = query.OrderBy(b => b.CreatedAt);
+                break;
+            case BoardAllSortBy.CreateTimeDescending:
+                query = query.OrderByDescending(b => b.CreatedAt);
+                break;
+            case BoardAllSortBy.NameAscending:
+                query = query.OrderBy(b => b.Name);
+                break;
+            case BoardAllSortBy.NameDescending:
+                query = query.OrderByDescending(b => b.Name);
+                break;
+            case BoardAllSortBy.Popularity:
+                query = query.OrderByDescending(b => b.Posts.Count);
+                break;
+        }
 
         IEnumerable<BoardAdminViewModel> boards = await query
                 .Select(b => new BoardAdminViewModel
