@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using static ForumApp.GCommon.FilterEnums;
 
 using static ForumApp.GCommon.GlobalConstants;
+using static ForumApp.GCommon.SortEnums.Board;
 
 namespace ForumApp.Services.Core;
 
@@ -32,13 +33,37 @@ public class BoardService : IBoardService
         this.userManager = userManager;
     }
 
-    public async Task<IEnumerable<BoardAllIndexViewModel>> GetAllBoardsAsync(Guid? userId)
+    public async Task<IEnumerable<BoardAllIndexViewModel>> GetAllBoardsAsync(Guid? userId, BoardAllSortBy sortOrder)
     {
-        IEnumerable<Board> boards = await boardRepository
-            .GetAllWithIncludeAsync(q => q
-                                    .Include(b => b.BoardManagers)
-                                    .Include(b => b.BoardCategories)
-                                    .ThenInclude(bc => bc.Category));
+        IQueryable<Board> query = boardRepository
+            .GetQueryable()
+            .Include(b => b.Posts)
+            .Include(b => b.BoardManagers)
+            .Include(b => b.BoardCategories)
+            .ThenInclude(bc => bc.Category);
+
+        switch (sortOrder)
+        {
+            case BoardAllSortBy.None:
+                break;
+            case BoardAllSortBy.CreateTimeAscending:
+                query = query.OrderBy(b => b.CreatedAt);
+                break;
+            case BoardAllSortBy.CreateTimeDescending:
+                query = query.OrderByDescending(b => b.CreatedAt);
+                break;
+            case BoardAllSortBy.NameAscending:
+                query = query.OrderBy(b => b.Name);
+                break;
+            case BoardAllSortBy.NameDescending:
+                query = query.OrderByDescending(b => b.Name);
+                break;
+            case BoardAllSortBy.Popularity:
+                query = query.OrderByDescending(b => b.Posts.Count);
+                break;
+        }
+
+        IEnumerable<Board> boards = await query.ToArrayAsync();
 
         return boards
             .Select(b => new BoardAllIndexViewModel
@@ -213,7 +238,7 @@ public class BoardService : IBoardService
     {
         if (boardId == Guid.Empty)
         {
-            throw new ArgumentException("BoardId is null",nameof(boardId));
+            throw new ArgumentException("BoardId is null", nameof(boardId));
         }
 
         Board? board = await boardRepository

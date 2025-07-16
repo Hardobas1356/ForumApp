@@ -4,6 +4,8 @@ using ForumApp.Web.ViewModels.Category;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
+using static ForumApp.GCommon.SortEnums.Board;
+
 namespace ForumApp.Web.Controllers;
 
 public class BoardController : BaseController
@@ -21,12 +23,12 @@ public class BoardController : BaseController
 
     [HttpGet]
     [AllowAnonymous]
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(BoardAllSortBy sortOrder)
     {
         try
         {
             IEnumerable<BoardAllIndexViewModel> boards = await boardService
-                .GetAllBoardsAsync(this.GetUserId());
+                .GetAllBoardsAsync(this.GetUserId(),sortOrder);
 
             return View(boards);
         }

@@ -170,6 +170,7 @@ public class DashboardController : Controller
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> SoftDeleteConfirm(BoardDeleteViewModel model)
     {
         try
@@ -191,6 +192,7 @@ public class DashboardController : Controller
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> RestoreDeletedBoard(Guid id)
     {
         try

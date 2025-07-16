@@ -2,13 +2,14 @@
 using ForumApp.Web.ViewModels.Board;
 
 using static ForumApp.GCommon.FilterEnums;
+using static ForumApp.GCommon.SortEnums.Board;
 
 namespace ForumApp.Services.Core.Interfaces;
 
 public interface IBoardService
 {
     Task<IEnumerable<BoardAdminViewModel>?> GetAllBoardsForAdminAsync(BoardAdminFilter filter);
-    Task<IEnumerable<BoardAllIndexViewModel>> GetAllBoardsAsync(Guid? userId);
+    Task<IEnumerable<BoardAllIndexViewModel>> GetAllBoardsAsync(Guid? userId, BoardAllSortBy sortOrder);
     Task<BoardDetailsViewModel?> GetBoardDetailsAsync(Guid boardId);
     Task<BoardDetailsAdminViewModel?> GetBoardDetailsAdminAsync(Guid boardId);
     Task<BoardDeleteViewModel?> GetBoardForDeletionAsync(Guid boardId);
