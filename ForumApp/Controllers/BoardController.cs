@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 using static ForumApp.GCommon.SortEnums.Board;
+using static ForumApp.GCommon.SortEnums.Post;
 
 namespace ForumApp.Web.Controllers;
 
@@ -28,7 +29,7 @@ public class BoardController : BaseController
         try
         {
             IEnumerable<BoardAllIndexViewModel> boards = await boardService
-                .GetAllBoardsAsync(this.GetUserId(),sortOrder);
+                .GetAllBoardsAsync(this.GetUserId(), sortOrder);
 
             return View(boards);
         }
@@ -107,12 +108,12 @@ public class BoardController : BaseController
 
     [HttpGet]
     [AllowAnonymous]
-    public async Task<IActionResult> Details(Guid id)
+    public async Task<IActionResult> Details(Guid id, PostSortBy sortOrder)
     {
         try
         {
             BoardDetailsViewModel? board = await boardService
-                .GetBoardDetailsAsync(id);
+                .GetBoardDetailsAsync(id, sortOrder);
 
             if (board == null)
             {

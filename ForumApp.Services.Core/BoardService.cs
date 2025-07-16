@@ -11,6 +11,7 @@ using static ForumApp.GCommon.FilterEnums;
 
 using static ForumApp.GCommon.GlobalConstants;
 using static ForumApp.GCommon.SortEnums.Board;
+using static ForumApp.GCommon.SortEnums.Post;
 
 namespace ForumApp.Services.Core;
 
@@ -110,7 +111,7 @@ public class BoardService : IBoardService
 
         return boards;
     }
-    public async Task<BoardDetailsViewModel?> GetBoardDetailsAsync(Guid boardId)
+    public async Task<BoardDetailsViewModel?> GetBoardDetailsAsync(Guid boardId, PostSortBy sortOrder)
     {
         if (boardId == Guid.Empty)
         {
@@ -126,7 +127,7 @@ public class BoardService : IBoardService
         }
 
         IEnumerable<PostForBoardDetailsViewModel>? posts =
-            await postService.GetPostsForBoardDetailsAsync(boardId);
+            await postService.GetPostsForBoardDetailsAsync(boardId, sortOrder);
 
         IEnumerable<CategoryViewModel>? categories =
             await categoryService.GetCategoriesAsyncByBoardId(boardId);
@@ -142,7 +143,7 @@ public class BoardService : IBoardService
             Categories = categories ?? new HashSet<CategoryViewModel>(),
         };
     }
-    public async Task<BoardDetailsAdminViewModel?> GetBoardDetailsAdminAsync(Guid boardId)
+    public async Task<BoardDetailsAdminViewModel?> GetBoardDetailsAdminAsync(Guid boardId, PostSortBy sortBy)
     {
         if (boardId == Guid.Empty)
         {
@@ -160,7 +161,7 @@ public class BoardService : IBoardService
         }
 
         IEnumerable<PostForBoardDetailsViewModel>? posts =
-            await postService.GetPostsForBoardDetailsAsync(boardId);
+            await postService.GetPostsForBoardDetailsAsync(boardId, sortBy);
 
         IEnumerable<CategoryViewModel>? categories =
             await categoryService.GetCategoriesAsyncByBoardId(boardId);

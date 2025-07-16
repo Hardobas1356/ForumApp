@@ -1,12 +1,12 @@
-﻿using ForumApp.Data;
-using ForumApp.Data.Models;
+﻿using ForumApp.Data.Models;
 using ForumApp.Services.Core.Interfaces;
 using ForumApp.Web.ViewModels.Post;
-using ForumApp.Web.ViewModels.Reply;
 using ForumApp.Web.ViewModels.Tag;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+
 using static ForumApp.GCommon.GlobalConstants;
+using static ForumApp.GCommon.SortEnums.Post;
 
 namespace ForumApp.Services.Core;
 
@@ -35,15 +35,40 @@ public class PostService : IPostService
         this.tagService = tagService;
     }
 
-    public async Task<IEnumerable<PostForBoardDetailsViewModel>?> GetPostsForBoardDetailsAsync(Guid boardId)
+    public async Task<IEnumerable<PostForBoardDetailsViewModel>?> GetPostsForBoardDetailsAsync(Guid boardId, PostSortBy sortOrder)
     {
-        IEnumerable<Post> posts = await postRepository
-           .GetWhereWithIncludeAsync(p => p.BoardId == boardId,
-                                     q => q.Include(p => p.ApplicationUser)
-                                           .Include(p => p.Board)
-                                           .Include(p => p.PostTags)
-                                           .ThenInclude(pt => pt.Tag),
-                                     asNoTracking: true);
+        IQueryable<Post> query = postRepository
+            .GetQueryable()
+            .Where(p => p.BoardId == boardId)
+            .Include(p => p.Replies)
+            .Include(p => p.ApplicationUser)
+            .Include(p => p.Board)
+            .Include(p => p.PostTags)
+            .ThenInclude(pt => pt.Tag);
+
+        switch (sortOrder)
+        {
+            case PostSortBy.CreateTimeAscending:
+                query = query.OrderBy(p => p.CreatedAt);
+                break;
+            case PostSortBy.CreateTimeDescending:
+                query = query.OrderByDescending(p => p.CreatedAt);
+                break;
+            case PostSortBy.TitleAscending:
+                query = query.OrderBy(p => p.Title);
+                break;
+            case PostSortBy.TitleDescending:
+                query = query.OrderByDescending(p => p.Title);
+                break;
+            case PostSortBy.Popularity:
+                query = query.OrderByDescending(p => p.Replies.Count);
+                break;
+            case PostSortBy.Default:
+                query = query.OrderByDescending(p => p.IsPinned);
+                break;
+        }
+
+        IEnumerable<Post> posts = await query.ToListAsync();
 
         return posts
             .Select(p => new PostForBoardDetailsViewModel
@@ -145,7 +170,7 @@ public class PostService : IPostService
         Post? post = await postRepository
             .SingleOrDefaultWithIncludeAsync(p => p.Id == id,
                                              q => q.Include(p => p.Board)
-                                                   .ThenInclude(b=>b.BoardManagers)
+                                                   .ThenInclude(b => b.BoardManagers)
                                                    .Include(p => p.ApplicationUser)
                                                    .Include(p => p.PostTags)
                                                    .ThenInclude(pt => pt.Tag),

@@ -13,5 +13,20 @@ public static class SortEnums
             NameDescending,
             Popularity,
         }
+
+
+    }
+
+    public static class Post
+    {
+        public enum PostSortBy
+        {
+            Default,
+            CreateTimeAscending,
+            CreateTimeDescending,
+            TitleAscending,
+            TitleDescending,
+            Popularity,
+        }
     }
 }

@@ -4,6 +4,7 @@ using ForumApp.Web.ViewModels.ApplicationUser;
 using Microsoft.AspNetCore.Mvc;
 
 using static ForumApp.GCommon.FilterEnums;
+using static ForumApp.GCommon.SortEnums.Post;
 
 namespace ForumApp.Web.Areas.Admin.Controllers;
 
@@ -38,12 +39,12 @@ public class DashboardController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> Details(Guid id)
+    public async Task<IActionResult> Details(Guid id, PostSortBy sortBy)
     {
         try
         {
             BoardDetailsAdminViewModel? board = await boardService
-                .GetBoardDetailsAdminAsync(id);
+                .GetBoardDetailsAdminAsync(id,sortBy);
 
             if (board == null)
             {
@@ -60,7 +61,7 @@ public class DashboardController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> SearchUsers(Guid boardId, string handle)
+    public async Task<IActionResult> SearchUsers(Guid boardId, string handle, PostSortBy sortBy)
     {
         try
         {
@@ -70,7 +71,7 @@ public class DashboardController : Controller
             }
 
             BoardDetailsAdminViewModel? board = await boardService
-                .GetBoardDetailsAdminAsync(boardId);
+                .GetBoardDetailsAdminAsync(boardId, sortBy);
 
             if (board == null)
             {

@@ -1,8 +1,11 @@
-﻿@using ForumApp.Web.ViewModels.Board
+﻿@using static ForumApp.GCommon.SortEnums.Post
+@using Microsoft.AspNetCore.Mvc.Rendering
+@using ForumApp.Web.ViewModels.Board
 @model BoardDetailsViewModel
 @{
     ViewData["Title"] = Model.Name;
 }
+
 <div class="container py-4">
     <div class="mb-4 d-flex align-items-center">
         @if (!string.IsNullOrWhiteSpace(Model.ImageUrl))
@@ -43,6 +46,28 @@
         }
     </div>
 
+    <form asp-controller="Board"
+          asp-action="Details"
+          asp-route-id="@Model.Id"
+          method="get"
+          class="mb-3 d-flex justify-content-end align-items-center">
+
+        <label asp-for="Posts" class="me-2 mb-0 fw-semibold">Sort by:</label>
+
+        <select name="sortOrder"
+                class="form-select w-auto"
+                onchange="this.form.submit()">
+            @foreach (PostSortBy sortOption in Enum.GetValues(typeof(PostSortBy)))
+            {
+                <option value="@sortOption"
+                        selected="@(Context.Request.Query["sortOrder"] == sortOption.ToString())">
+                    @sortOption.ToString().Replace("Ascending", " ↑").Replace("Descending", " ↓")
+                </option>
+            }
+        </select>
+    </form>
+
+
     @if (Model.Posts == null || !Model.Posts.Any())
     {
         <p class="text-muted">No posts in this board yet.</p>
@@ -50,7 +75,7 @@
     else
     {
         <div class="list-group">
-            @foreach (var post in Model.Posts.OrderByDescending(p => p.CreatedAt))
+            @foreach (var post in Model.Posts)
             {
                 <a asp-controller="Post" asp-action="Details" asp-route-id="@post.Id"
                    class="list-group-item list-group-item-action mb-2 p-3 shadow-sm rounded border-0 text-dark text-decoration-none">

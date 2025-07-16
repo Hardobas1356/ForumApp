@@ -3,6 +3,7 @@ using ForumApp.Web.ViewModels.Board;
 
 using static ForumApp.GCommon.FilterEnums;
 using static ForumApp.GCommon.SortEnums.Board;
+using static ForumApp.GCommon.SortEnums.Post;
 
 namespace ForumApp.Services.Core.Interfaces;
 
@@ -10,8 +11,8 @@ public interface IBoardService
 {
     Task<IEnumerable<BoardAdminViewModel>?> GetAllBoardsForAdminAsync(BoardAdminFilter filter);
     Task<IEnumerable<BoardAllIndexViewModel>> GetAllBoardsAsync(Guid? userId, BoardAllSortBy sortOrder);
-    Task<BoardDetailsViewModel?> GetBoardDetailsAsync(Guid boardId);
-    Task<BoardDetailsAdminViewModel?> GetBoardDetailsAdminAsync(Guid boardId);
+    Task<BoardDetailsViewModel?> GetBoardDetailsAsync(Guid boardId, PostSortBy sortOrder);
+    Task<BoardDetailsAdminViewModel?> GetBoardDetailsAdminAsync(Guid boardId, PostSortBy sortBy);
     Task<BoardDeleteViewModel?> GetBoardForDeletionAsync(Guid boardId);
     Task<string?> GetBoardNameByIdAsync(Guid boardId);
     Task<bool> CreateBoardAsync(Guid userId,BoardCreateInputModel model);
