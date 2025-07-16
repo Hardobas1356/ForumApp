@@ -51,6 +51,8 @@ public class DashboardController : Controller
                 return RedirectToAction(nameof(Index));
             }
 
+            ViewBag.SortBy = sortBy;
+
             return View(board);
         }
         catch (Exception e)

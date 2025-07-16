@@ -1,8 +1,10 @@
-﻿@using ForumApp.Web.ViewModels.Admin.Board
+﻿@using static ForumApp.GCommon.SortEnums.Post
+@using ForumApp.Web.ViewModels.Admin.Board
 @model BoardDetailsAdminViewModel
 
 @{
 	ViewData["Title"] = "Board Admin Details";
+	PostSortBy currentSort = ViewBag.SortBy as PostSortBy? ?? PostSortBy.Default;
 }
 
 <div class="container py-4">
@@ -133,6 +135,27 @@
 
 	<div class="mb-4">
 		<h5>Posts</h5>
+
+		<form asp-area="Admin"
+			  asp-controller="Dashboard"
+			  asp-action="Details"
+			  asp-route-id="@Model.Id"
+			  method="get"
+			  class="mb-3 d-flex justify-content-end align-items-center">
+
+			<label class="me-2 fw-semibold mb-0">Sort by:</label>
+
+			<select name="sortBy"
+					class="form-select w-auto"
+					onchange="this.form.submit()">
+				@foreach (PostSortBy sortOption in Enum.GetValues(typeof(PostSortBy)))
+				{
+					<option value="@sortOption" selected="@(sortOption == currentSort)">
+						@sortOption.ToString().Replace("Ascending", " ↑").Replace("Descending", " ↓")
+					</option>
+				}
+			</select>
+		</form>
 
 		@if (Model.Posts?.Any() == true)
 		{
