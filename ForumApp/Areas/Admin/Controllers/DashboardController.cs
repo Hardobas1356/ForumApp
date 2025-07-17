@@ -24,7 +24,7 @@ public class DashboardController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> Index(BoardAdminFilter filter, BoardAllSortBy sortOrder)
+    public async Task<IActionResult> Index(BoardAdminFilter filter, BoardAllSortBy sortOrder, string? searchTerm)
     {
         try
         {
@@ -32,7 +32,7 @@ public class DashboardController : Controller
             ViewBag.CurrentSortingOrder = sortOrder;
 
             IEnumerable<BoardAdminViewModel>? model = await boardService
-                .GetAllBoardsForAdminAsync(filter, sortOrder);
+                .GetAllBoardsForAdminAsync(filter, sortOrder, searchTerm);
 
             return View(model);
         }

@@ -105,7 +105,7 @@ public class BoardService : IBoardService
 
         return result;
     }
-    public async Task<IEnumerable<BoardAdminViewModel>?> GetAllBoardsForAdminAsync(BoardAdminFilter filter, BoardAllSortBy sortOrder)
+    public async Task<IEnumerable<BoardAdminViewModel>?> GetAllBoardsForAdminAsync(BoardAdminFilter filter, BoardAllSortBy sortOrder, string? searchTerm)
     {
         IQueryable<Board> query = boardRepository.GetQueryable(ignoreQueryFilters: true);
 
@@ -116,6 +116,14 @@ public class BoardService : IBoardService
             BoardAdminFilter.Deleted => query.Where(b => b.IsDeleted),
             _ => query
         };
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            string loweredTerm = searchTerm.ToLower();
+            query = query.Where(b =>
+                b.Name.ToLower().Contains(loweredTerm) ||
+                (b.Description != null && b.Description.ToLower().Contains(loweredTerm)));
+        }
 
         switch (sortOrder)
         {
