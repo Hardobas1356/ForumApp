@@ -151,7 +151,7 @@ public class BoardService : IBoardService
 
         return boards;
     }
-    public async Task<BoardDetailsViewModel?> GetBoardDetailsAsync(Guid boardId, PostSortBy sortOrder)
+    public async Task<BoardDetailsViewModel?> GetBoardDetailsAsync(Guid boardId, PostSortBy sortOrder, string? searchTerm)
     {
         if (boardId == Guid.Empty)
         {
@@ -167,7 +167,7 @@ public class BoardService : IBoardService
         }
 
         IEnumerable<PostForBoardDetailsViewModel>? posts =
-            await postService.GetPostsForBoardDetailsAsync(boardId, sortOrder);
+            await postService.GetPostsForBoardDetailsAsync(boardId, sortOrder, searchTerm);
 
         IEnumerable<CategoryViewModel>? categories =
             await categoryService.GetCategoriesAsyncByBoardId(boardId);
@@ -201,7 +201,7 @@ public class BoardService : IBoardService
         }
 
         IEnumerable<PostForBoardDetailsViewModel>? posts =
-            await postService.GetPostsForBoardDetailsAsync(boardId, sortBy);
+            await postService.GetPostsForBoardDetailsAsync(boardId, sortBy,null);
 
         IEnumerable<CategoryViewModel>? categories =
             await categoryService.GetCategoriesAsyncByBoardId(boardId);

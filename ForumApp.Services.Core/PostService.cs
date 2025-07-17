@@ -36,7 +36,7 @@ public class PostService : IPostService
         this.tagService = tagService;
     }
 
-    public async Task<IEnumerable<PostForBoardDetailsViewModel>?> GetPostsForBoardDetailsAsync(Guid boardId, PostSortBy sortOrder)
+    public async Task<IEnumerable<PostForBoardDetailsViewModel>?> GetPostsForBoardDetailsAsync(Guid boardId, PostSortBy sortOrder, string? searchTerm)
     {
         IQueryable<Post> query = postRepository
             .GetQueryable()
@@ -46,6 +46,15 @@ public class PostService : IPostService
             .Include(p => p.Board)
             .Include(p => p.PostTags)
             .ThenInclude(pt => pt.Tag);
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            string loweredTerm = searchTerm.ToLower();
+
+            query = query.Where(p => p.Title.ToLower().Contains(loweredTerm)
+                                     || p.Content.ToLower().Contains(loweredTerm)
+                                     || p.PostTags.Any(pt => pt.Tag.Name.ToLower().Contains(loweredTerm)));
+        }
 
         switch (sortOrder)
         {

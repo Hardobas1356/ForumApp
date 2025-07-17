@@ -111,12 +111,12 @@ public class BoardController : BaseController
 
     [HttpGet]
     [AllowAnonymous]
-    public async Task<IActionResult> Details(Guid id, PostSortBy sortOrder)
+    public async Task<IActionResult> Details(Guid id, PostSortBy sortOrder, string? searchTerm)
     {
         try
         {
             BoardDetailsViewModel? board = await boardService
-                .GetBoardDetailsAsync(id, sortOrder);
+                .GetBoardDetailsAsync(id, sortOrder, searchTerm);
 
             if (board == null)
             {
