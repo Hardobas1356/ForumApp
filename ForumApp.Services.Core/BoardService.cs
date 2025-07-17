@@ -34,47 +34,31 @@ public class BoardService : IBoardService
         this.userManager = userManager;
     }
 
-    public async Task<IEnumerable<BoardAllIndexViewModel>> GetAllBoardsAsync(Guid? userId, BoardAllSortBy sortOrder)
+    public async Task<IEnumerable<BoardAllIndexViewModel>> GetAllBoardsAsync(Guid? userId, BoardAllSortBy sortOrder, string? searchTerm)
     {
         IQueryable<Board> query = boardRepository
-            .GetQueryable()
-            .Include(b => b.Posts)
-            .Include(b => b.BoardManagers)
-            .Include(b => b.BoardCategories)
-            .ThenInclude(bc => bc.Category);
+            .GetQueryable();
 
-        switch (sortOrder)
+        if (!string.IsNullOrWhiteSpace(searchTerm))
         {
-            case BoardAllSortBy.None:
-                break;
-            case BoardAllSortBy.CreateTimeAscending:
-                query = query.OrderBy(b => b.CreatedAt);
-                break;
-            case BoardAllSortBy.CreateTimeDescending:
-                query = query.OrderByDescending(b => b.CreatedAt);
-                break;
-            case BoardAllSortBy.NameAscending:
-                query = query.OrderBy(b => b.Name);
-                break;
-            case BoardAllSortBy.NameDescending:
-                query = query.OrderByDescending(b => b.Name);
-                break;
-            case BoardAllSortBy.Popularity:
-                query = query.OrderByDescending(b => b.Posts.Count);
-                break;
+            string loweredTerm = searchTerm.ToLower();
+            query = query
+                .Where(b => b.Name.ToLower().Contains(loweredTerm)
+                            || (b.Description != null && b.Description.ToLower().Contains(loweredTerm))
+                            || b.BoardCategories.Any(bc => bc.Category.Name.ToLower().Contains(searchTerm)));
         }
 
-        IEnumerable<Board> boards = await query.ToArrayAsync();
-
-        return boards
-            .Select(b => new BoardAllIndexViewModel
+        var projectedQuery = query
+            .Select(b => new
             {
-                Id = b.Id,
-                Name = b.Name,
-                ImageUrl = b.ImageUrl,
-                Description = b.Description,
-                IsModerator = userId != null && b.BoardManagers
-                    .Any(m => m.ApplicationUserId == userId),
+                b.Id,
+                b.Name,
+                b.ImageUrl,
+                b.Description,
+                b.CreatedAt,
+                PostCount = b.Posts.Count(p => !p.IsDeleted),
+                IsModerator = userId != null 
+                              && b.BoardManagers.Any(m => m.ApplicationUserId == userId),
                 Categories = b.BoardCategories
                     .Select(bc => new CategoryViewModel
                     {
@@ -83,8 +67,43 @@ public class BoardService : IBoardService
                         ColorHex = bc.Category.ColorHex,
                     })
                     .ToArray()
+            });
+
+
+        switch (sortOrder)
+        {
+            case BoardAllSortBy.None:
+                break;
+            case BoardAllSortBy.CreateTimeAscending:
+                projectedQuery = projectedQuery.OrderBy(b => b.CreatedAt);
+                break;
+            case BoardAllSortBy.CreateTimeDescending:
+                projectedQuery = projectedQuery.OrderByDescending(b => b.CreatedAt);
+                break;
+            case BoardAllSortBy.NameAscending:
+                projectedQuery = projectedQuery.OrderBy(b => b.Name);
+                break;
+            case BoardAllSortBy.NameDescending:
+                projectedQuery = projectedQuery.OrderByDescending(b => b.Name);
+                break;
+            case BoardAllSortBy.Popularity:
+                projectedQuery = projectedQuery.OrderByDescending(b => b.PostCount);
+                break;
+        }
+
+        var result = await projectedQuery
+            .Select(b => new BoardAllIndexViewModel
+            {
+                Id = b.Id,
+                Name = b.Name,
+                ImageUrl = b.ImageUrl,
+                Description = b.Description,
+                IsModerator = b.IsModerator,
+                Categories = b.Categories
             })
-            .ToArray();
+            .ToArrayAsync();
+
+        return result;
     }
     public async Task<IEnumerable<BoardAdminViewModel>?> GetAllBoardsForAdminAsync(BoardAdminFilter filter, BoardAllSortBy sortOrder)
     {
