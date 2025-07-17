@@ -17,10 +17,10 @@ public class TagService : ITagService
 
     public async Task<ICollection<TagViewModel>> GetTagsAsync()
     {
-        var tags = await repository
+        IEnumerable<Tag> tags = await repository
             .GetAllAsync(true);
 
-        var result = tags
+        ICollection<TagViewModel> result = tags
             .Select(t => new TagViewModel
             {
                 Id = t.Id,
