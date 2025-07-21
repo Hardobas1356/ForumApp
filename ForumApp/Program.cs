@@ -2,6 +2,7 @@ using ForumApp.Data;
 using ForumApp.Data.Models;
 using ForumApp.Services.Core;
 using ForumApp.Services.Core.Interfaces;
+using ForumApp.Web.Seeders;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -44,6 +45,10 @@ builder
 
 builder
     .Services
+    .AddTransient<AdminSeeder>();
+
+builder
+    .Services
     .AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder
     .Services
@@ -67,8 +72,13 @@ builder
     .Services
     .AddScoped<IApplicationUserService, ApplicationUserService>();
 
+WebApplication app = builder.Build();
 
-var app = builder.Build();
+using (var scope = app.Services.CreateScope())
+{
+    var seeder = scope.ServiceProvider.GetRequiredService<AdminSeeder>();
+    await seeder.SeedAsync();
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
