@@ -1,0 +1,70 @@
+﻿@using ForumApp.GCommon
+@model dynamic
+
+@{
+    string currentAction = ViewContext.RouteData.Values["action"]?.ToString() ?? "Index";
+    string currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? "Home";
+    string sortOrder = Context.Request.Query["sortOrder"].ToString();
+}
+
+<div class="row">
+    <div class="col-md-6">
+        <nav>
+            <ul class="pagination justify-content-end">
+                <li class="page-item @(Model.HasPreviousPage ? "" : "disabled")">
+                    <a class="page-link"
+                       asp-controller="@currentController"
+                       asp-action="@currentAction"
+                       asp-route-pageNumber="@(Model.PageIndex - 1)"
+                       asp-route-sortOrder="@sortOrder"
+                       aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+
+                @{
+                    int startPage = Math.Max(1, Model.PageIndex - 2);
+                    int endPage = Math.Min(Model.TotalPages, Model.PageIndex + 2);
+
+                    if (Model.TotalPages > 5)
+                    {
+                        if (Model.PageIndex <= 3)
+                        {
+                            startPage = 1;
+                            endPage = 5;
+                        }
+                        else if (Model.PageIndex + 2 >= Model.TotalPages)
+                        {
+                            startPage = Model.TotalPages - 4;
+                            endPage = Model.TotalPages;
+                        }
+                    }
+                }
+
+                @for (int i = startPage; i <= endPage; i++)
+                {
+                    <li class="page-item @(i == Model.PageIndex ? "active" : "")">
+                        <a class="page-link"
+                           asp-controller="@currentController"
+                           asp-action="@currentAction"
+                           asp-route-pageNumber="@i"
+                           asp-route-sortOrder="@sortOrder">
+                            @i
+                        </a>
+                    </li>
+                }
+
+                <li class="page-item @(Model.HasNextPage ? "" : "disabled")">
+                    <a class="page-link"
+                       asp-controller="@currentController"
+                       asp-action="@currentAction"
+                       asp-route-pageNumber="@(Model.PageIndex + 1)"
+                       asp-route-sortOrder="@sortOrder"
+                       aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</div>

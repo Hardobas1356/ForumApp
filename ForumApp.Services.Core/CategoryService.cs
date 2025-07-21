@@ -1,5 +1,4 @@
-﻿using ForumApp.Data;
-using ForumApp.Data.Models;
+﻿using ForumApp.Data.Models;
 using ForumApp.Services.Core.Interfaces;
 using ForumApp.Web.ViewModels.Category;
 using Microsoft.EntityFrameworkCore;

@@ -1,4 +1,5 @@
 ﻿using ForumApp.Data.Models;
+using ForumApp.GCommon;
 using ForumApp.Services.Core.Interfaces;
 using ForumApp.Web.ViewModels.Admin.Board;
 using ForumApp.Web.ViewModels.Admin.BoardModerators;
@@ -7,8 +8,8 @@ using ForumApp.Web.ViewModels.Category;
 using ForumApp.Web.ViewModels.Post;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using static ForumApp.GCommon.FilterEnums;
 
+using static ForumApp.GCommon.FilterEnums;
 using static ForumApp.GCommon.GlobalConstants;
 using static ForumApp.GCommon.SortEnums.Board;
 using static ForumApp.GCommon.SortEnums.Post;
@@ -34,7 +35,8 @@ public class BoardService : IBoardService
         this.userManager = userManager;
     }
 
-    public async Task<IEnumerable<BoardAllIndexViewModel>> GetAllBoardsAsync(Guid? userId, BoardAllSortBy sortOrder, string? searchTerm)
+    public async Task<PaginatedResult<BoardAllIndexViewModel>> GetAllBoardsAsync(Guid? userId, BoardAllSortBy sortOrder,
+        string? searchTerm, int pageNumber, int pageSize)
     {
         IQueryable<Board> query = boardRepository
             .GetQueryable();
@@ -91,7 +93,7 @@ public class BoardService : IBoardService
                 break;
         }
 
-        var result = await projectedQuery
+        var result = projectedQuery
             .Select(b => new BoardAllIndexViewModel
             {
                 Id = b.Id,
@@ -100,10 +102,14 @@ public class BoardService : IBoardService
                 Description = b.Description,
                 IsModerator = b.IsModerator,
                 Categories = b.Categories
-            })
-            .ToArrayAsync();
+            });
 
-        return result;
+        if (pageNumber < 1)
+        {
+            pageNumber = 1;
+        }
+
+        return await PaginatedResult<BoardAllIndexViewModel>.CreateAsync(result,pageNumber,pageSize);
     }
     public async Task<IEnumerable<BoardAdminViewModel>?> GetAllBoardsForAdminAsync(BoardAdminFilter filter, BoardAllSortBy sortOrder, string? searchTerm)
     {
@@ -471,7 +477,7 @@ public class BoardService : IBoardService
             throw new InvalidOperationException("Moderator relationship not found.");
         }
 
-        if (boardManager.IsDeleted==true)
+        if (boardManager.IsDeleted == true)
         {
             throw new InvalidOperationException("Moderator already deleted.");
         }

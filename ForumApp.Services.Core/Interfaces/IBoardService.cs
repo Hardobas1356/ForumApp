@@ -1,4 +1,5 @@
-﻿using ForumApp.Web.ViewModels.Admin.Board;
+﻿using ForumApp.GCommon;
+using ForumApp.Web.ViewModels.Admin.Board;
 using ForumApp.Web.ViewModels.Board;
 
 using static ForumApp.GCommon.FilterEnums;
@@ -10,7 +11,7 @@ namespace ForumApp.Services.Core.Interfaces;
 public interface IBoardService
 {
     Task<IEnumerable<BoardAdminViewModel>?> GetAllBoardsForAdminAsync(BoardAdminFilter filter, BoardAllSortBy sortOrder, string? searchTerm);
-    Task<IEnumerable<BoardAllIndexViewModel>> GetAllBoardsAsync(Guid? userId, BoardAllSortBy sortOrder, string? searchTerm);
+    Task<PaginatedResult<BoardAllIndexViewModel>> GetAllBoardsAsync(Guid? userId, BoardAllSortBy sortOrder, string? searchTerm, int pageNumber, int pageSize);
     Task<BoardDetailsViewModel?> GetBoardDetailsAsync(Guid boardId, PostSortBy sortOrder, string? searchTerm);
     Task<BoardDetailsAdminViewModel?> GetBoardDetailsAdminAsync(Guid boardId, PostSortBy sortBy);
     Task<BoardDeleteViewModel?> GetBoardForDeletionAsync(Guid boardId);

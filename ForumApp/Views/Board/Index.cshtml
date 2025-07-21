@@ -1,5 +1,6 @@
 ﻿@using ForumApp.Web.ViewModels.Board
-@model IEnumerable<BoardAllIndexViewModel>
+@using ForumApp.GCommon
+@model PaginatedResult<BoardAllIndexViewModel>
 
 @{
     ViewData["Title"] = "All Boards";
@@ -41,7 +42,7 @@
     </div>
 </div>
 
-@if (!Model.Any())
+@if (!Model.Items.Any())
 {
     <div class="alert alert-info">
         There are no boards to display.
@@ -51,7 +52,7 @@ else
 {
     <div class="container" style="padding-top: 2rem;">
         <div class="list-group">
-            @foreach (BoardAllIndexViewModel board in Model)
+            @foreach (BoardAllIndexViewModel board in Model.Items)
             {
                 <a asp-controller="Board"
                    asp-action="Details"
@@ -98,3 +99,5 @@ else
         </div>
     </div>
 }
+
+@await Html.PartialAsync("_Pagination", Model)

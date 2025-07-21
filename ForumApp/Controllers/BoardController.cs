@@ -24,15 +24,16 @@ public class BoardController : BaseController
 
     [HttpGet]
     [AllowAnonymous]
-    public async Task<IActionResult> Index(string? searchTerm, BoardAllSortBy sortOrder = BoardAllSortBy.CreateTimeDescending)
+    public async Task<IActionResult> Index(string? searchTerm, BoardAllSortBy sortOrder = BoardAllSortBy.CreateTimeDescending,
+        int pageNumber = 1, int pageSize = 10)
     {
         try
         {
             ViewBag.CurrentSortingOrder = sortOrder;
             ViewBag.SearchTerm = searchTerm;
 
-            IEnumerable<BoardAllIndexViewModel> boards = await boardService
-                .GetAllBoardsAsync(this.GetUserId(), sortOrder, searchTerm);
+            var boards = await boardService
+                .GetAllBoardsAsync(this.GetUserId(), sortOrder, searchTerm, pageNumber, pageSize);
 
             return View(boards);
         }
