@@ -9,6 +9,8 @@ namespace ForumApp.Web.Areas.Admin.Controllers
 {
     public class ModeratorController : BaseController
     {
+        private const int pageSize = 10;
+
         private readonly IBoardService boardService;
         private readonly IApplicationUserService applicationUserService;
         private readonly ILogger<DashboardController> logger;
@@ -22,7 +24,7 @@ namespace ForumApp.Web.Areas.Admin.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> SearchUsers(Guid boardId, string handle, PostSortBy sortBy)
+        public async Task<IActionResult> SearchUsers(Guid boardId, string handle, PostSortBy sortBy, int pageNumber = 1)
         {
             try
             {
@@ -33,7 +35,7 @@ namespace ForumApp.Web.Areas.Admin.Controllers
                 }
 
                 BoardDetailsAdminViewModel? board = await boardService
-                    .GetBoardDetailsAdminAsync(boardId, sortBy);
+                    .GetBoardDetailsAdminAsync(boardId, sortBy,pageNumber, pageSize);
 
                 if (board == null)
                 {

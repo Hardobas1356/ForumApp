@@ -10,6 +10,8 @@ namespace ForumApp.Web.Areas.Admin.Controllers
 {
     public class BoardController : BaseController
     {
+        private const int pageSize = 10;
+
         private IBoardService boardService;
         private ILogger<BoardController> logger;
 
@@ -40,12 +42,12 @@ namespace ForumApp.Web.Areas.Admin.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Details(Guid id, PostSortBy sortBy)
+        public async Task<IActionResult> Details(Guid id, PostSortBy sortBy, int pageNumber = 1)
         {
             try
             {
                 BoardDetailsAdminViewModel? board = await boardService
-                    .GetBoardDetailsAdminAsync(id, sortBy);
+                    .GetBoardDetailsAdminAsync(id, sortBy, pageNumber, pageSize);
 
                 if (board == null)
                 {

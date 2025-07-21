@@ -86,14 +86,14 @@
         </div>
     </form>
 
-    @if (Model.Posts == null || !Model.Posts.Any())
+    @if (Model.Posts == null || !Model.Posts.Items.Any())
     {
         <p class="text-muted fst-italic">No posts found.</p>
     }
     else
     {
         <div class="list-group">
-            @foreach (var post in Model.Posts)
+            @foreach (var post in Model.Posts.Items)
             {
                 <a asp-controller="Post" asp-action="Details" asp-route-id="@post.Id"
                    class="list-group-item list-group-item-action mb-3 p-3 shadow-sm rounded border-0 text-dark text-decoration-none">
@@ -118,3 +118,5 @@
         </div>
     }
 </div>
+
+ @await Html.PartialAsync("_Pagination", Model.Posts)

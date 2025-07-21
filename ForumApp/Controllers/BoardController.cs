@@ -11,6 +11,8 @@ namespace ForumApp.Web.Controllers;
 
 public class BoardController : BaseController
 {
+    private const int pageSize = 10;
+
     private readonly IBoardService boardService;
     private readonly ICategoryService categoryService;
     private readonly ILogger<BoardController> logger;
@@ -25,7 +27,7 @@ public class BoardController : BaseController
     [HttpGet]
     [AllowAnonymous]
     public async Task<IActionResult> Index(string? searchTerm, BoardAllSortBy sortOrder = BoardAllSortBy.CreateTimeDescending,
-        int pageNumber = 1, int pageSize = 10)
+        int pageNumber = 1)
     {
         try
         {
@@ -112,12 +114,12 @@ public class BoardController : BaseController
 
     [HttpGet]
     [AllowAnonymous]
-    public async Task<IActionResult> Details(Guid id, PostSortBy sortOrder, string? searchTerm)
+    public async Task<IActionResult> Details(Guid id, PostSortBy sortOrder, string? searchTerm, int pageNumber = 1)
     {
         try
         {
             BoardDetailsViewModel? board = await boardService
-                .GetBoardDetailsAsync(id, sortOrder, searchTerm);
+                .GetBoardDetailsAsync(id, sortOrder, searchTerm, pageNumber, pageSize);
 
             if (board == null)
             {

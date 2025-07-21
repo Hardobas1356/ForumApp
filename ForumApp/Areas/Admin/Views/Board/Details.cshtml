@@ -157,10 +157,10 @@
 			</select>
 		</form>
 
-		@if (Model.Posts?.Any() == true)
+		@if (Model.Posts?.Items.Any() == true)
 		{
 			<ul class="list-group">
-				@foreach (var post in Model.Posts)
+				@foreach (var post in Model.Posts.Items)
 				{
 					<li class="list-group-item">
 						<strong>@post.Title</strong> —
@@ -176,3 +176,5 @@
 		}
 	</div>
 </div>
+
+@await Html.PartialAsync("_Pagination", Model.Posts)

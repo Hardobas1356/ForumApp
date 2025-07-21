@@ -109,7 +109,7 @@ public class BoardService : IBoardService
             pageNumber = 1;
         }
 
-        return await PaginatedResult<BoardAllIndexViewModel>.CreateAsync(result,pageNumber,pageSize);
+        return await PaginatedResult<BoardAllIndexViewModel>.CreateAsync(result, pageNumber, pageSize);
     }
     public async Task<IEnumerable<BoardAdminViewModel>?> GetAllBoardsForAdminAsync(BoardAdminFilter filter, BoardAllSortBy sortOrder, string? searchTerm)
     {
@@ -165,7 +165,8 @@ public class BoardService : IBoardService
 
         return boards;
     }
-    public async Task<BoardDetailsViewModel?> GetBoardDetailsAsync(Guid boardId, PostSortBy sortOrder, string? searchTerm)
+    public async Task<BoardDetailsViewModel?> GetBoardDetailsAsync(Guid boardId, PostSortBy sortOrder,
+        string? searchTerm, int pageNumber, int pageSize)
     {
         if (boardId == Guid.Empty)
         {
@@ -180,8 +181,8 @@ public class BoardService : IBoardService
             throw new ArgumentException("Board not found", nameof(boardId));
         }
 
-        IEnumerable<PostForBoardDetailsViewModel>? posts =
-            await postService.GetPostsForBoardDetailsAsync(boardId, sortOrder, searchTerm);
+        PaginatedResult<PostForBoardDetailsViewModel>? posts =
+            await postService.GetPostsForBoardDetailsAsync(boardId, sortOrder, searchTerm, pageNumber, pageSize);
 
         IEnumerable<CategoryViewModel>? categories =
             await categoryService.GetCategoriesAsyncByBoardId(boardId);
@@ -193,11 +194,11 @@ public class BoardService : IBoardService
             ImageUrl = board.ImageUrl,
             Description = board.Description,
             CreatedAt = board.CreatedAt.ToString(ApplicationDateTimeFormat),
-            Posts = posts ?? new HashSet<PostForBoardDetailsViewModel>(),
+            Posts = posts,
             Categories = categories ?? new HashSet<CategoryViewModel>(),
         };
     }
-    public async Task<BoardDetailsAdminViewModel?> GetBoardDetailsAdminAsync(Guid boardId, PostSortBy sortBy)
+    public async Task<BoardDetailsAdminViewModel?> GetBoardDetailsAdminAsync(Guid boardId, PostSortBy sortBy, int pageNumber, int pageSize)
     {
         if (boardId == Guid.Empty)
         {
@@ -214,8 +215,8 @@ public class BoardService : IBoardService
             throw new ArgumentException("Board not found with Id", nameof(boardId));
         }
 
-        IEnumerable<PostForBoardDetailsViewModel>? posts =
-            await postService.GetPostsForBoardDetailsAsync(boardId, sortBy, null);
+        PaginatedResult<PostForBoardDetailsViewModel>? posts =
+            await postService.GetPostsForBoardDetailsAsync(boardId, sortBy, null, pageNumber, pageSize);
 
         IEnumerable<CategoryViewModel>? categories =
             await categoryService.GetCategoriesAsyncByBoardId(boardId);
@@ -227,7 +228,7 @@ public class BoardService : IBoardService
             ImageUrl = board.ImageUrl,
             Description = board.Description,
             CreatedAt = board.CreatedAt.ToString(ApplicationDateTimeFormat),
-            Posts = posts ?? new HashSet<PostForBoardDetailsViewModel>(),
+            Posts = posts,
             Categories = categories ?? new HashSet<CategoryViewModel>(),
             Moderators = board.BoardManagers
                 .Where(bm => !bm.IsDeleted)

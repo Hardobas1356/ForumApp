@@ -1,4 +1,5 @@
 ﻿using ForumApp.Data.Models;
+using ForumApp.GCommon;
 using ForumApp.Services.Core.Interfaces;
 using ForumApp.Web.ViewModels.Post;
 using ForumApp.Web.ViewModels.Tag;
@@ -36,7 +37,9 @@ public class PostService : IPostService
         this.tagService = tagService;
     }
 
-    public async Task<IEnumerable<PostForBoardDetailsViewModel>?> GetPostsForBoardDetailsAsync(Guid boardId, PostSortBy sortOrder, string? searchTerm)
+    public async Task<PaginatedResult<PostForBoardDetailsViewModel>?> GetPostsForBoardDetailsAsync(Guid boardId,
+        PostSortBy sortOrder, string? searchTerm,
+        int pageNumber, int pageSize)
     {
         IQueryable<Post> query = postRepository
             .GetQueryable()
@@ -78,9 +81,7 @@ public class PostService : IPostService
                 break;
         }
 
-        IEnumerable<Post> posts = await query.ToListAsync();
-
-        return posts
+        var posts = query
             .Select(p => new PostForBoardDetailsViewModel
             {
                 Id = p.Id,
@@ -96,8 +97,9 @@ public class PostService : IPostService
                             ColorHex = pt.Tag.ColorHex,
                         })
                         .ToArray()
-            })
-            .ToArray();
+            });
+        
+        return await PaginatedResult<PostForBoardDetailsViewModel>.CreateAsync(posts, pageNumber, pageSize);
     }
     public async Task<PostEditInputModel?> GetPostForEditAsync(Guid userId, Guid id)
     {
