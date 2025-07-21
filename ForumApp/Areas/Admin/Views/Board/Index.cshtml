@@ -50,7 +50,7 @@
 		<div class="col">
 			<div class="card h-100 shadow-sm border-@((board.IsDeleted ? "danger" : board.IsApproved ? "success" : "warning"))">
 				<a asp-area="Admin"
-				   asp-controller="Dashboard"
+				   asp-controller="Board"
 				   asp-action="Details"
 				   asp-route-id="@board.Id"
 				   class="stretched-link text-decoration-none text-dark"
@@ -77,7 +77,7 @@
 							<form method="post"
 								  asp-route-id="@board.Id"
 								  asp-action="Approve"
-								  asp-controller="Dashboard"
+								  asp-controller="Board"
 								  asp-area="Admin">
 								@Html.AntiForgeryToken()
 								<button type="submit" class="btn btn-sm btn-success">
@@ -87,7 +87,7 @@
 						}
 
 						<a asp-area="Admin"
-						   asp-controller="Dashboard"
+						   asp-controller="Board"
 						   asp-action="Delete"
 						   asp-route-id="@board.Id"
 						   class="btn btn-sm btn-danger">
@@ -98,7 +98,7 @@
 						{
 							<form method="post"
 								  asp-area="Admin"
-								  asp-controller="Dashboard"
+								  asp-controller="Board"
 								  asp-action="RestoreDeletedBoard"
 								  asp-route-id="@board.Id"
 								  style="display:inline">

@@ -12,7 +12,7 @@
 		<h2 class="mb-0">
 			<i class="fas fa-shield-alt me-2"></i>@Model.Name
 		</h2>
-		<a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="btn btn-outline-secondary">
+		<a asp-area="Admin" asp-controller="Board" asp-action="Index" class="btn btn-outline-secondary">
 			<i class="fas fa-arrow-left me-1"></i>Back to All Boards
 		</a>
 	</div>
@@ -60,7 +60,7 @@
 							<strong>@mod.DisplayName</strong>
 							<span class="text-muted">(@mod.Handle)</span>
 						</div>
-						<form asp-area="Admin" asp-controller="Dashboard" asp-action="RemoveModerator" method="post" class="d-inline">
+						<form asp-area="Admin" asp-controller="Moderator" asp-action="RemoveModerator" method="post" class="d-inline">
 							<input type="hidden" name="boardId" value="@Model.Id" />
 							<input type="hidden" name="userId" value="@mod.Id" />
 							<button type="submit" class="btn btn-sm btn-outline-danger">
@@ -77,7 +77,7 @@
 		}
 
 		<div class="mt-3">
-			<form asp-area="Admin" asp-controller="Dashboard" asp-action="SearchUsers" method="get" class="d-flex gap-2">
+			<form asp-area="Admin" asp-controller="Moderator" asp-action="SearchUsers" method="get" class="d-flex gap-2">
 				<input type="hidden" name="boardId" value="@Model.Id" />
 				<input type="text" name="handle" class="form-control" placeholder="Search by @@handle..." />
 				<button type="submit" class="btn btn-outline-primary">
@@ -101,7 +101,7 @@
 								</div>
 								@if (user.IsModerator)
 								{
-									<form asp-area="Admin" asp-controller="Dashboard" asp-action="RemoveModerator" method="post" class="d-inline">
+									<form asp-area="Admin" asp-controller="Moderator" asp-action="RemoveModerator" method="post" class="d-inline">
 										<input type="hidden" name="boardId" value="@Model.Id" />
 										<input type="hidden" name="userId" value="@user.Id" />
 										<button type="submit" class="btn btn-sm btn-outline-danger">
@@ -111,7 +111,7 @@
 								}
 								else
 								{
-									<form asp-area="Admin" asp-controller="Dashboard" asp-action="AddModerator" method="post" class="d-inline">
+									<form asp-area="Admin" asp-controller="Moderator" asp-action="AddModerator" method="post" class="d-inline">
 										<input type="hidden" name="boardId" value="@Model.Id" />
 										<input type="hidden" name="userId" value="@user.Id" />
 										<button type="submit" class="btn btn-sm btn-outline-success">
@@ -137,7 +137,7 @@
 		<h5>Posts</h5>
 
 		<form asp-area="Admin"
-			  asp-controller="Dashboard"
+			  asp-controller="Board"
 			  asp-action="Details"
 			  asp-route-id="@Model.Id"
 			  method="get"

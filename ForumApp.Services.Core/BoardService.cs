@@ -57,7 +57,7 @@ public class BoardService : IBoardService
                 b.Description,
                 b.CreatedAt,
                 PostCount = b.Posts.Count(p => !p.IsDeleted),
-                IsModerator = userId != null 
+                IsModerator = userId != null
                               && b.BoardManagers.Any(m => m.ApplicationUserId == userId),
                 Categories = b.BoardCategories
                     .Select(bc => new CategoryViewModel
@@ -209,7 +209,7 @@ public class BoardService : IBoardService
         }
 
         IEnumerable<PostForBoardDetailsViewModel>? posts =
-            await postService.GetPostsForBoardDetailsAsync(boardId, sortBy,null);
+            await postService.GetPostsForBoardDetailsAsync(boardId, sortBy, null);
 
         IEnumerable<CategoryViewModel>? categories =
             await categoryService.GetCategoriesAsyncByBoardId(boardId);
@@ -407,7 +407,8 @@ public class BoardService : IBoardService
         }
 
         Board? board = await boardRepository
-            .SingleOrDefaultAsync(b => b.Id == boardId);
+            .SingleOrDefaultAsync(b => b.Id == boardId,
+                                  ignoreQueryFilters: true);
 
         if (board == null)
         {
@@ -462,11 +463,17 @@ public class BoardService : IBoardService
         BoardManager? boardManager = await boardManagerRepository
             .SingleOrDefaultAsync(bm => bm.BoardId == boardId
                                   && bm.ApplicationUserId == userId,
+                                  ignoreQueryFilters: true,
                                   asNoTracking: false);
 
         if (boardManager == null)
         {
             throw new InvalidOperationException("Moderator relationship not found.");
+        }
+
+        if (boardManager.IsDeleted==true)
+        {
+            throw new InvalidOperationException("Moderator already deleted.");
         }
 
         boardManager.IsDeleted = true;

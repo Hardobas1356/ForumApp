@@ -23,7 +23,8 @@ public class ApplicationUserService : IApplicationUserService
             .SingleOrDefaultWithIncludeAsync(
                 b => b.Id == boardId,
                 q => q.Include(b => b.BoardManagers),
-                asNoTracking: true);
+                asNoTracking: true,
+                ignoreQueryFilters: true);
 
         if (board == null)
         {
@@ -31,12 +32,13 @@ public class ApplicationUserService : IApplicationUserService
         }
 
         HashSet<Guid> moderatorIds = board.BoardManagers
+            .Where(m => m.IsDeleted == false)
             .Select(m => m.ApplicationUserId)
             .ToHashSet();
 
         ICollection<UserModeratorViewModel> users = await userManager
             .Users
-            .Where(u => u.UserName != null 
+            .Where(u => u.UserName != null
                         && u.UserName.Contains(handle))
             .Select(u => new UserModeratorViewModel
             {
