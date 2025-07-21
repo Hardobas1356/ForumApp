@@ -41,6 +41,12 @@
                         <li class="nav-item">
                             <a class="nav-link text-light" asp-area="" asp-controller="Board" asp-action="Index">Boards</a>
                         </li>
+                        @if (User.Identity?.IsAuthenticated==true && User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-light" asp-area="Admin" asp-controller="Board" asp-action="Index">Admin</a>
+                            </li>
+                        }
                     </ul>
 
                     <div class="d-flex align-items-center">
