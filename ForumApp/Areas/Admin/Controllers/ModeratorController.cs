@@ -43,7 +43,7 @@ namespace ForumApp.Web.Areas.Admin.Controllers
                 }
 
                 ICollection<UserModeratorViewModel>? searchResults = await applicationUserService
-                    .SearchUsersWithModeratorStatusAsync(boardId, handle);
+                    .SearchUsersByHandleFirstTenAsync(boardId, handle);
 
                 board.SearchResults = searchResults;
                 board.SearchPerformed = true;

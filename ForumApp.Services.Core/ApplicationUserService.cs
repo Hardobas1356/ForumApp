@@ -8,6 +8,8 @@ namespace ForumApp.Services.Core;
 
 public class ApplicationUserService : IApplicationUserService
 {
+    public const int MAX_SEARCH_RESULTS = 10;
+
     private IGenericRepository<Board> boardRepository;
     private UserManager<ApplicationUser> userManager;
 
@@ -17,7 +19,7 @@ public class ApplicationUserService : IApplicationUserService
         this.userManager = userManager;
     }
 
-    public async Task<ICollection<UserModeratorViewModel>?> SearchUsersWithModeratorStatusAsync(Guid boardId, string handle)
+    public async Task<ICollection<UserModeratorViewModel>?> SearchUsersByHandleFirstTenAsync(Guid boardId, string handle)
     {
         Board? board = await boardRepository
             .SingleOrDefaultWithIncludeAsync(
@@ -40,6 +42,7 @@ public class ApplicationUserService : IApplicationUserService
             .Users
             .Where(u => u.UserName != null
                         && u.UserName.Contains(handle))
+            .Take(MAX_SEARCH_RESULTS)
             .Select(u => new UserModeratorViewModel
             {
                 Id = u.Id,
