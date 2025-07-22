@@ -170,6 +170,9 @@
 					</li>
 				}
 			</ul>
+
+			
+			@await Html.PartialAsync("_Pagination", Model.Posts)
 		}
 		else
 		{
@@ -178,4 +181,3 @@
 	</div>
 </div>
 
-@await Html.PartialAsync("_Pagination", Model.Posts)

@@ -117,7 +117,7 @@
                 </a>
             }
         </div>
+        
+        @await Html.PartialAsync("_Pagination", Model.Posts)
     }
 </div>
-
- @await Html.PartialAsync("_Pagination", Model.Posts)
