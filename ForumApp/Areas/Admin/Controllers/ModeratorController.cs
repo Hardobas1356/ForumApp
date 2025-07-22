@@ -6,98 +6,97 @@ using Microsoft.AspNetCore.Mvc;
 using static ForumApp.GCommon.Enums.SortEnums.Post;
 using static ForumApp.GCommon.GlobalConstants.Pages;
 
-namespace ForumApp.Web.Areas.Admin.Controllers
+namespace ForumApp.Web.Areas.Admin.Controllers;
+
+public class ModeratorController : BaseController
 {
-    public class ModeratorController : BaseController
+    private readonly IBoardService boardService;
+    private readonly IApplicationUserService applicationUserService;
+    private readonly ILogger<DashboardController> logger;
+
+    public ModeratorController(IBoardService boardService, IApplicationUserService applicationUserService,
+        ILogger<DashboardController> logger)
     {
-        private readonly IBoardService boardService;
-        private readonly IApplicationUserService applicationUserService;
-        private readonly ILogger<DashboardController> logger;
+        this.boardService = boardService;
+        this.applicationUserService = applicationUserService;
+        this.logger = logger;
+    }
 
-        public ModeratorController(IBoardService boardService, IApplicationUserService applicationUserService,
-            ILogger<DashboardController> logger)
+    [HttpGet]
+    public async Task<IActionResult> SearchUsers(Guid boardId, string handle, PostSortBy sortBy, int postPageNumber = 1)
+    {
+        try
         {
-            this.boardService = boardService;
-            this.applicationUserService = applicationUserService;
-            this.logger = logger;
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> SearchUsers(Guid boardId, string handle, PostSortBy sortBy, int postPageNumber = 1)
-        {
-            try
+            if (string.IsNullOrWhiteSpace(handle))
             {
-                if (string.IsNullOrWhiteSpace(handle))
-                {
-                    logger.LogWarning("No handle provided");
-                    return RedirectToAction("Details", "Board", new { id = boardId });
-                }
-
-                BoardDetailsAdminViewModel? board = await boardService
-                    .GetBoardDetailsAdminAsync(boardId, sortBy, postPageNumber, POST_PAGE_SIZE);
-
-                if (board == null)
-                {
-                    logger.LogWarning("No board found ID: {id}", boardId);
-                    return RedirectToAction("Index", "Board");
-                }
-
-                ICollection<UserModeratorViewModel>? searchResults = await applicationUserService
-                    .SearchUsersByHandleFirstTenAsync(boardId, handle);
-
-                board.SearchResults = searchResults;
-                board.SearchPerformed = true;
-                return View("~/Areas/Admin/Views/Board/Details.cshtml", board);
+                logger.LogWarning("No handle provided");
+                return RedirectToAction("Details", "Board", new { id = boardId });
             }
-            catch (Exception e)
+
+            BoardDetailsAdminViewModel? board = await boardService
+                .GetBoardDetailsAdminAsync(boardId, sortBy, postPageNumber, POST_PAGE_SIZE);
+
+            if (board == null)
             {
-                logger.LogError(e, "Error occurred while searching for users in dashboard board details.");
+                logger.LogWarning("No board found ID: {id}", boardId);
                 return RedirectToAction("Index", "Board");
             }
+
+            ICollection<UserModeratorViewModel>? searchResults = await applicationUserService
+                .SearchUsersByHandleFirstTenAsync(boardId, handle);
+
+            board.SearchResults = searchResults;
+            board.SearchPerformed = true;
+            return View("~/Areas/Admin/Views/Board/Details.cshtml", board);
         }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddModerator(Guid boardId, Guid userId)
+        catch (Exception e)
         {
-            try
-            {
-                bool addResult = await boardService.AddModeratorAsync(userId, boardId);
-
-                if (!addResult)
-                {
-                    logger.LogWarning("Failed to add moderator. UserId: {UserId}, BoardId: {BoardId}", userId, boardId);
-                }
-
-                return RedirectToAction("Details", "Board", new { id = boardId });
-            }
-            catch (Exception e)
-            {
-                logger.LogError(e, "Error occcured while adding moderator");
-                return RedirectToAction("Details", "Board", new { id = boardId });
-            }
+            logger.LogError(e, "Error occurred while searching for users in dashboard board details.");
+            return RedirectToAction("Index", "Board");
         }
+    }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> RemoveModerator(Guid boardId, Guid userId)
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> AddModerator(Guid boardId, Guid userId)
+    {
+        try
         {
-            try
-            {
-                bool removeResult = await boardService.RemoveModeratorAsync(userId, boardId);
+            bool addResult = await boardService.AddModeratorAsync(userId, boardId);
 
-                if (!removeResult)
-                {
-                    logger.LogWarning("Failed to remove moderator. UserId: {UserId}, BoardId: {BoardId}", userId, boardId);
-                }
-
-                return RedirectToAction("Details", "Board", new { id = boardId });
-            }
-            catch (Exception e)
+            if (!addResult)
             {
-                logger.LogError(e, "Error occcured while removing moderator");
-                return RedirectToAction("Details", "Board", new { id = boardId });
+                logger.LogWarning("Failed to add moderator. UserId: {UserId}, BoardId: {BoardId}", userId, boardId);
             }
+
+            return RedirectToAction("Details", "Board", new { id = boardId });
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Error occcured while adding moderator");
+            return RedirectToAction("Details", "Board", new { id = boardId });
+        }
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> RemoveModerator(Guid boardId, Guid userId)
+    {
+        try
+        {
+            bool removeResult = await boardService.RemoveModeratorAsync(userId, boardId);
+
+            if (!removeResult)
+            {
+                logger.LogWarning("Failed to remove moderator. UserId: {UserId}, BoardId: {BoardId}", userId, boardId);
+            }
+
+            return RedirectToAction("Details", "Board", new { id = boardId });
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Error occcured while removing moderator");
+            return RedirectToAction("Details", "Board", new { id = boardId });
         }
     }
 }

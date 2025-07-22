@@ -7,150 +7,149 @@ using static ForumApp.GCommon.Enums.SortEnums.Board;
 using static ForumApp.GCommon.Enums.SortEnums.Post;
 using static ForumApp.GCommon.GlobalConstants.Pages;
 
-namespace ForumApp.Web.Areas.Admin.Controllers
+namespace ForumApp.Web.Areas.Admin.Controllers;
+
+public class BoardController : BaseController
 {
-    public class BoardController : BaseController
+    private IBoardService boardService;
+    private ILogger<BoardController> logger;
+
+    public BoardController(IBoardService boardService, ILogger<BoardController> logger)
     {
-        private IBoardService boardService;
-        private ILogger<BoardController> logger;
+        this.boardService = boardService;
+        this.logger = logger;
+    }
 
-        public BoardController(IBoardService boardService, ILogger<BoardController> logger)
+    [HttpGet]
+    public async Task<IActionResult> Index(BoardAdminFilter filter, BoardAllSortBy sortOrder, string? searchTerm)
+    {
+        try
         {
-            this.boardService = boardService;
-            this.logger = logger;
+            ViewBag.CurrentFilter = filter;
+            ViewBag.CurrentSortingOrder = sortOrder;
+
+            IEnumerable<BoardAdminViewModel>? model = await boardService
+                .GetAllBoardsForAdminAsync(filter, sortOrder, searchTerm);
+
+            return View(model);
         }
-
-        [HttpGet]
-        public async Task<IActionResult> Index(BoardAdminFilter filter, BoardAllSortBy sortOrder, string? searchTerm)
+        catch (Exception e)
         {
-            try
+            logger.LogError(e,"Error occurred while getting dashboard Index.");
+            return RedirectToAction(nameof(Index));
+        }
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Details(Guid id, PostSortBy sortBy, int pageNumber = 1)
+    {
+        try
+        {
+            BoardDetailsAdminViewModel? board = await boardService
+                .GetBoardDetailsAdminAsync(id, sortBy, pageNumber, POST_PAGE_SIZE);
+
+            if (board == null)
             {
-                ViewBag.CurrentFilter = filter;
-                ViewBag.CurrentSortingOrder = sortOrder;
+                logger.LogWarning("No board was found with ID: {id}", id);
+                return RedirectToAction(nameof(Index));
+            }
 
-                IEnumerable<BoardAdminViewModel>? model = await boardService
-                    .GetAllBoardsForAdminAsync(filter, sortOrder, searchTerm);
+            ViewBag.SortBy = sortBy;
 
+            return View(board);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Error occurred while getting board details.");
+            return RedirectToAction(nameof(Index));
+        }
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Approve(Guid id)
+    {
+        try
+        {
+            await boardService
+                .ApproveBoardAsync(id);
+
+            return RedirectToAction(nameof(Index));
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Error occcured while approving board");
+            return RedirectToAction(nameof(Index));
+        }
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        try
+        {
+            BoardDeleteViewModel? model = await boardService
+                 .GetBoardForDeletionAsync(id);
+
+            if (model == null)
+            {
+                logger.LogWarning("Could not find board. ID: {id}", id);
+                return NotFound();
+            }
+
+            return View(model);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Error occurred while deleting board");
+            return RedirectToAction(nameof(Index));
+        }
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> SoftDeleteConfirm(BoardDeleteViewModel model)
+    {
+        try
+        {
+            bool deleteResult = await boardService.SoftDeleteBoardAsync(model);
+
+            if (!deleteResult)
+            {
+                logger.LogWarning("Could not delete board. ID: {id}", model.Id);
                 return View(model);
             }
-            catch (Exception e)
-            {
-                logger.LogError("Error occurred while getting dashboard Index.");
-                return RedirectToAction(nameof(Index));
-            }
+
+            return RedirectToAction(nameof(Index));
         }
-
-        [HttpGet]
-        public async Task<IActionResult> Details(Guid id, PostSortBy sortBy, int pageNumber = 1)
+        catch (Exception e)
         {
-            try
-            {
-                BoardDetailsAdminViewModel? board = await boardService
-                    .GetBoardDetailsAdminAsync(id, sortBy, pageNumber, POST_PAGE_SIZE);
-
-                if (board == null)
-                {
-                    logger.LogWarning("No board was found with ID: {id}", id);
-                    return RedirectToAction(nameof(Index));
-                }
-
-                ViewBag.SortBy = sortBy;
-
-                return View(board);
-            }
-            catch (Exception e)
-            {
-                logger.LogError(e, "Error occurred while getting board details.");
-                return RedirectToAction(nameof(Index));
-            }
+            logger.LogError(e, "Error occurred while deleting board");
+            return RedirectToAction(nameof(Index));
         }
+    }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Approve(Guid id)
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> RestoreDeletedBoard(Guid id)
+    {
+        try
         {
-            try
-            {
-                await boardService
-                    .ApproveBoardAsync(id);
+            bool actionResult = await boardService
+                .RestoreBoardAsync(id);
 
-                return RedirectToAction(nameof(Index));
-            }
-            catch (Exception e)
+            if (!actionResult)
             {
-                logger.LogError(e, "Error occcured while approving board");
+                logger.LogWarning("Could not restore board. ID: {id}", id);
                 return RedirectToAction(nameof(Index));
             }
+
+            return RedirectToAction(nameof(Index));
         }
-
-        [HttpGet]
-        public async Task<IActionResult> Delete(Guid id)
+        catch (Exception e)
         {
-            try
-            {
-                BoardDeleteViewModel? model = await boardService
-                     .GetBoardForDeletionAsync(id);
-
-                if (model == null)
-                {
-                    logger.LogWarning("Could not find board. ID: {id}", id);
-                    return NotFound();
-                }
-
-                return View(model);
-            }
-            catch (Exception e)
-            {
-                logger.LogError(e, "Error occurred while deleting board");
-                return RedirectToAction(nameof(Index));
-            }
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SoftDeleteConfirm(BoardDeleteViewModel model)
-        {
-            try
-            {
-                bool deleteResult = await boardService.SoftDeleteBoardAsync(model);
-
-                if (!deleteResult)
-                {
-                    logger.LogWarning("Could not delete board. ID: {id}", model.Id);
-                    return View(model);
-                }
-
-                return RedirectToAction(nameof(Index));
-            }
-            catch (Exception e)
-            {
-                logger.LogError(e, "Error occurred while deleting board");
-                return RedirectToAction(nameof(Index));
-            }
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> RestoreDeletedBoard(Guid id)
-        {
-            try
-            {
-                bool actionResult = await boardService
-                    .RestoreBoardAsync(id);
-
-                if (!actionResult)
-                {
-                    logger.LogWarning("Could not restore board. ID: {id}", id);
-                    return RedirectToAction(nameof(Index));
-                }
-
-                return RedirectToAction(nameof(Index));
-            }
-            catch (Exception e)
-            {
-                logger.LogError(e, "Error occurred while restoring board");
-                return RedirectToAction(nameof(Index));
-            }
+            logger.LogError(e, "Error occurred while restoring board");
+            return RedirectToAction(nameof(Index));
         }
     }
 }

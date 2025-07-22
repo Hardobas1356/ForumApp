@@ -1,8 +1,12 @@
 ﻿using ForumApp.Data.Models;
+using ForumApp.GCommon;
 using ForumApp.Services.Core.Interfaces;
+using ForumApp.Web.ViewModels.Admin.ApplicationUser;
 using ForumApp.Web.ViewModels.ApplicationUser;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+
+using static ForumApp.GCommon.GlobalConstants;
 
 namespace ForumApp.Services.Core;
 
@@ -18,7 +22,6 @@ public class ApplicationUserService : IApplicationUserService
         this.boardRepository = boardRepository;
         this.userManager = userManager;
     }
-
     public async Task<ICollection<UserModeratorViewModel>?> SearchUsersByHandleFirstTenAsync(Guid boardId, string handle)
     {
         Board? board = await boardRepository
@@ -53,5 +56,25 @@ public class ApplicationUserService : IApplicationUserService
             .ToArrayAsync();
 
         return users;
+    }
+    public async Task<PaginatedResult<UserAdminViewModel>> GetAllUsersAdminAsync(int pageNumber, int pageSize)
+    {
+        IQueryable<UserAdminViewModel> users = userManager
+            .Users
+            .AsNoTracking()
+            .IgnoreQueryFilters()
+            .Select(u => new UserAdminViewModel
+            {
+                Id = u.Id,
+                DisplayName = u.DisplayName,
+                UserName = u.UserName!,
+                Email = u.Email!,
+                JoinDate = u.JoinDate.ToString(APPLICATION_DATE_TIME_FORMAT),
+                IsDeleted = u.IsDeleted,
+                IsModerator = u.BoardManagers.Any(),
+            });
+
+        return await PaginatedResult<UserAdminViewModel>
+            .CreateAsync(users, pageNumber, pageSize);
     }
 }
