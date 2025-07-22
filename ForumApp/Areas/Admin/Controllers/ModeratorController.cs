@@ -4,7 +4,7 @@ using ForumApp.Web.ViewModels.ApplicationUser;
 using Microsoft.AspNetCore.Mvc;
 
 using static ForumApp.GCommon.Enums.SortEnums.Post;
-using static ForumApp.GCommon.GlobalConstants;
+using static ForumApp.GCommon.GlobalConstants.Pages;
 
 namespace ForumApp.Web.Areas.Admin.Controllers
 {
@@ -23,7 +23,7 @@ namespace ForumApp.Web.Areas.Admin.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> SearchUsers(Guid boardId, string handle, PostSortBy sortBy, int pageNumber = 1)
+        public async Task<IActionResult> SearchUsers(Guid boardId, string handle, PostSortBy sortBy, int postPageNumber = 1)
         {
             try
             {
@@ -34,7 +34,7 @@ namespace ForumApp.Web.Areas.Admin.Controllers
                 }
 
                 BoardDetailsAdminViewModel? board = await boardService
-                    .GetBoardDetailsAdminAsync(boardId, sortBy, pageNumber, PostPageSize);
+                    .GetBoardDetailsAdminAsync(boardId, sortBy, postPageNumber, PostPageSize);
 
                 if (board == null)
                 {
