@@ -108,14 +108,14 @@
 		}
 	</div>
 
-	@if (Model.Replies == null || !Model.Replies.Any())
+	@if (Model.Replies == null || !Model.Replies.Items.Any())
 	{
 		<p class="fst-italic text-muted">No replies in this post yet.</p>
 	}
 	else
 	{
 		<ul class="list-group">
-			@foreach (var reply in Model.Replies)
+			@foreach (var reply in Model.Replies.Items)
 			{
 				<li class="list-group-item">
 					<div class="d-flex justify-content-between align-items-start flex-wrap">
@@ -148,5 +148,7 @@
 				</li>
 			}
 		</ul>
+
+		@await Html.PartialAsync("_Pagination",Model.Replies);
 	}
 </div>

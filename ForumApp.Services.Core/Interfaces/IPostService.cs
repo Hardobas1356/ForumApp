@@ -8,7 +8,7 @@ namespace ForumApp.Services.Core.Interfaces;
 
 public interface IPostService
 {
-    Task<PostDetailsViewModel?> GetPostDetailsAsync(Guid? userId, Guid id, ReplySortBy sortBy);
+    Task<PostDetailsViewModel?> GetPostDetailsAsync(Guid? userId, Guid id, ReplySortBy sortBy, int pageNumber, int pageSize);
     Task<PaginatedResult<PostForBoardDetailsViewModel>?> GetPostsForBoardDetailsAsync(Guid boardId, PostSortBy sortOrder, string? searchTerm, int pageNumber, int pageSize);
     Task<PostEditInputModel?> GetPostForEditAsync(Guid userId, Guid id);
     Task<bool> EditPostAsync(Guid userId, PostEditInputModel model);

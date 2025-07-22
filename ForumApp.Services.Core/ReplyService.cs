@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 using static ForumApp.GCommon.GlobalConstants;
 using static ForumApp.GCommon.Enums.SortEnums.Reply;
+using ForumApp.GCommon;
 
 namespace ForumApp.Services.Core;
 
@@ -52,8 +53,9 @@ public class ReplyService : IReplyService
 
         return true;
     }
-
-    public async Task<ICollection<ReplyForPostDetailViewModel>?> GetRepliesForPostDetailsAsync(Guid? userId, Guid postId, bool canModerate, ReplySortBy sortBy)
+    public async Task<PaginatedResult<ReplyForPostDetailViewModel>?> GetRepliesForPostDetailsAsync(Guid? userId,
+        Guid postId, bool canModerate, ReplySortBy sortBy,
+        int pageNumber, int pageSize)
     {
         IQueryable<Reply> query = replyRepository
             .GetQueryable()
@@ -79,19 +81,19 @@ public class ReplyService : IReplyService
                 break;
         }
 
-        IEnumerable<Reply> replies = await query.ToArrayAsync();
-
-        return replies
+        IQueryable<ReplyForPostDetailViewModel> replies = query
             .Select(r => new ReplyForPostDetailViewModel
             {
                 Id = r.Id,
                 Content = r.Content,
-                Author = r.ApplicationUser?.DisplayName ?? "Unknown",
+                Author = r.ApplicationUser.DisplayName ?? "Unknown",
                 CreatedAt = r.CreatedAt.ToString(ApplicationDateTimeFormat),
                 IsPublisher = userId != null && r.ApplicationUserId == userId,
                 CanModerate = canModerate
-            })
-            .ToArray();
+            });
+
+        return await PaginatedResult<ReplyForPostDetailViewModel>
+            .CreateAsync(replies, pageNumber, pageSize);
     }
 
     public async Task<ReplyDeleteViewModel?> GetReplyForDeleteAsync(Guid userId, Guid postId, Guid id)

@@ -1,4 +1,5 @@
-﻿using ForumApp.Web.ViewModels.Reply;
+﻿using ForumApp.GCommon;
+using ForumApp.Web.ViewModels.Reply;
 using ForumApp.Web.ViewModels.Tag;
 using System.Collections;
 
@@ -17,8 +18,7 @@ public class PostDetailsViewModel
     public string BoardName { get; set; } = null!;
     public bool IsPublisher { get; set; } = false;
     public bool CanModerate { get; set; }
-    public ICollection<ReplyForPostDetailViewModel>? Replies { get; set; }
-        = new HashSet<ReplyForPostDetailViewModel>();
+    public PaginatedResult<ReplyForPostDetailViewModel>? Replies { get; set; }
     public ICollection<TagViewModel>? Tags { get; set; }
         = new HashSet<TagViewModel>();
 }

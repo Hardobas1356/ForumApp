@@ -98,7 +98,7 @@ public class PostService : IPostService
                         })
                         .ToArray()
             });
-        
+
         return await PaginatedResult<PostForBoardDetailsViewModel>.CreateAsync(posts, pageNumber, pageSize);
     }
     public async Task<PostEditInputModel?> GetPostForEditAsync(Guid userId, Guid id)
@@ -177,7 +177,8 @@ public class PostService : IPostService
         await postRepository.SaveChangesAsync();
         return true;
     }
-    public async Task<PostDetailsViewModel?> GetPostDetailsAsync(Guid? userId, Guid id, ReplySortBy sortBy)
+    public async Task<PostDetailsViewModel?> GetPostDetailsAsync(Guid? userId, Guid id,
+        ReplySortBy sortBy, int pageNumber, int pageSize)
     {
         Post? post = await postRepository
             .SingleOrDefaultWithIncludeAsync(p => p.Id == id,
@@ -215,7 +216,8 @@ public class PostService : IPostService
                        })
                        .ToArray(),
             Replies = await replyService
-                            .GetRepliesForPostDetailsAsync(userId, post.Id, canModerate, sortBy)
+                            .GetRepliesForPostDetailsAsync(userId, post.Id,
+                                canModerate, sortBy, pageNumber, pageSize)
         };
 
         return model;

@@ -30,12 +30,14 @@ public class PostController : BaseController
 
     [HttpGet]
     [AllowAnonymous]
-    public async Task<IActionResult> Details(Guid id, ReplySortBy sortBy)
+    public async Task<IActionResult> Details(Guid id, ReplySortBy sortBy, int pageNumber = 1)
     {
         try
         {
+            pageNumber = Math.Max(1, pageNumber);
+
             PostDetailsViewModel? model = await postService
-                .GetPostDetailsAsync(this.GetUserId(), id, sortBy);
+                .GetPostDetailsAsync(this.GetUserId(), id, sortBy, pageNumber, ReplyPageSize);
 
             if (model == null)
             {
