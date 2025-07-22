@@ -20,6 +20,8 @@ public class PostService : IPostService
     private readonly UserManager<ApplicationUser> userManager;
     private readonly IReplyService replyService;
     private readonly ITagService tagService;
+    private readonly IPermissionService permissionService;
+
 
     public PostService(
         IGenericRepository<Post> postRepository,
@@ -27,7 +29,8 @@ public class PostService : IPostService
         IGenericRepository<PostTag> postTagRepository,
         UserManager<ApplicationUser> userManager,
         IReplyService replyService,
-        ITagService tagService)
+        ITagService tagService,
+        IPermissionService permissionService)
     {
         this.postRepository = postRepository;
         this.boardRepository = boardRepository;
@@ -35,6 +38,7 @@ public class PostService : IPostService
         this.userManager = userManager;
         this.replyService = replyService;
         this.tagService = tagService;
+        this.permissionService = permissionService;
     }
 
     public async Task<PaginatedResult<PostForBoardDetailsViewModel>?> GetPostsForBoardDetailsAsync(Guid boardId,
@@ -81,14 +85,14 @@ public class PostService : IPostService
                 break;
         }
 
-        var posts = query
+        IQueryable<PostForBoardDetailsViewModel> posts = query
             .Select(p => new PostForBoardDetailsViewModel
             {
                 Id = p.Id,
                 Title = p.Title,
                 CreatedAt = p.CreatedAt.ToString(ApplicationDateTimeFormat),
                 Author = p.ApplicationUser.DisplayName,
-                Handle = p.ApplicationUser.UserName,
+                Handle = p.ApplicationUser.UserName ?? "Unknown",
                 Tags = p.PostTags
                         .Select(pt => new TagViewModel
                         {
@@ -101,6 +105,8 @@ public class PostService : IPostService
 
         return await PaginatedResult<PostForBoardDetailsViewModel>.CreateAsync(posts, pageNumber, pageSize);
     }
+
+    //Only authors can edit their own posts — not admins or mods.
     public async Task<PostEditInputModel?> GetPostForEditAsync(Guid userId, Guid id)
     {
         Post? post = await postRepository
@@ -141,6 +147,7 @@ public class PostService : IPostService
                 .ToHashSet(),
         };
     }
+    //Only authors can edit their own posts — not admins or mods.
     public async Task<bool> EditPostAsync(Guid userId, PostEditInputModel model)
     {
         Post? post = await postRepository
@@ -192,7 +199,7 @@ public class PostService : IPostService
             return null;
         }
 
-        bool canModerate = userId != null ? await UserHasRights(post, (Guid)userId) : false;
+        bool canModerate = userId != null ? await permissionService.CanManagePostAsync((Guid)userId, post.Id) : false;
 
         PostDetailsViewModel model = new PostDetailsViewModel
         {
@@ -274,7 +281,7 @@ public class PostService : IPostService
             return null;
         }
 
-        bool canDelete = await UserHasRights(post, userId);
+        bool canDelete = await permissionService.CanManagePostAsync(userId, post.Id);
 
         if (!canDelete)
         {
@@ -307,7 +314,7 @@ public class PostService : IPostService
             return false;
         }
 
-        bool canDelete = await UserHasRights(post, userId);
+        bool canDelete = await permissionService.CanManagePostAsync(userId, post.Id);
 
         if (!canDelete)
         {
@@ -328,24 +335,5 @@ public class PostService : IPostService
         await postRepository.SaveChangesAsync();
 
         return true;
-    }
-
-    private async Task<bool> UserHasRights(Post post, Guid userId)
-    {
-        if (post.ApplicationUserId == userId)
-        {
-            return true;
-        }
-
-        if (post.Board.BoardManagers.Any(m => m.ApplicationUserId == userId))
-        {
-            return true;
-        }
-
-        ApplicationUser? user = await userManager
-            .FindByIdAsync(userId.ToString());
-
-        return await userManager
-            .IsInRoleAsync(user, "Admin");
     }
 }
