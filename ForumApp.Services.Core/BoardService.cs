@@ -9,10 +9,10 @@ using ForumApp.Web.ViewModels.Post;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-using static ForumApp.GCommon.FilterEnums;
+using static ForumApp.GCommon.Enums.FilterEnums;
 using static ForumApp.GCommon.GlobalConstants;
-using static ForumApp.GCommon.SortEnums.Board;
-using static ForumApp.GCommon.SortEnums.Post;
+using static ForumApp.GCommon.Enums.SortEnums.Board;
+using static ForumApp.GCommon.Enums.SortEnums.Post;
 
 namespace ForumApp.Services.Core;
 

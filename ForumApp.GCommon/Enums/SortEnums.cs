@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace ForumApp.GCommon;
+namespace ForumApp.GCommon.Enums;
 
 public static class SortEnums
 {

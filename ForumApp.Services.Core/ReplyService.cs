@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 using static ForumApp.GCommon.GlobalConstants;
-using static ForumApp.GCommon.SortEnums.Reply;
+using static ForumApp.GCommon.Enums.SortEnums.Reply;
 
 namespace ForumApp.Services.Core;
 

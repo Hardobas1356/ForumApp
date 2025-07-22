@@ -1,8 +1,8 @@
 ﻿using ForumApp.GCommon;
 using ForumApp.Web.ViewModels.Post;
 
-using static ForumApp.GCommon.SortEnums.Post;
-using static ForumApp.GCommon.SortEnums.Reply;
+using static ForumApp.GCommon.Enums.SortEnums.Post;
+using static ForumApp.GCommon.Enums.SortEnums.Reply;
 
 namespace ForumApp.Services.Core.Interfaces;
 

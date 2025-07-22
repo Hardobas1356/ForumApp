@@ -3,14 +3,13 @@ using ForumApp.Web.ViewModels.Admin.Board;
 using ForumApp.Web.ViewModels.ApplicationUser;
 using Microsoft.AspNetCore.Mvc;
 
-using static ForumApp.GCommon.SortEnums.Post;
+using static ForumApp.GCommon.Enums.SortEnums.Post;
+using static ForumApp.GCommon.GlobalConstants;
 
 namespace ForumApp.Web.Areas.Admin.Controllers
 {
     public class ModeratorController : BaseController
     {
-        private const int pageSize = 10;
-
         private readonly IBoardService boardService;
         private readonly IApplicationUserService applicationUserService;
         private readonly ILogger<DashboardController> logger;
@@ -35,7 +34,7 @@ namespace ForumApp.Web.Areas.Admin.Controllers
                 }
 
                 BoardDetailsAdminViewModel? board = await boardService
-                    .GetBoardDetailsAdminAsync(boardId, sortBy,pageNumber, pageSize);
+                    .GetBoardDetailsAdminAsync(boardId, sortBy, pageNumber, PostPageSize);
 
                 if (board == null)
                 {

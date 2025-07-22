@@ -4,15 +4,14 @@ using ForumApp.Web.ViewModels.Category;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-using static ForumApp.GCommon.SortEnums.Board;
-using static ForumApp.GCommon.SortEnums.Post;
+using static ForumApp.GCommon.Enums.SortEnums.Board;
+using static ForumApp.GCommon.Enums.SortEnums.Post;
+using static ForumApp.GCommon.GlobalConstants;
 
 namespace ForumApp.Web.Controllers;
 
 public class BoardController : BaseController
 {
-    private const int pageSize = 10;
-
     private readonly IBoardService boardService;
     private readonly ICategoryService categoryService;
     private readonly ILogger<BoardController> logger;
@@ -35,7 +34,7 @@ public class BoardController : BaseController
             ViewBag.SearchTerm = searchTerm;
 
             var boards = await boardService
-                .GetAllBoardsAsync(this.GetUserId(), sortOrder, searchTerm, pageNumber, pageSize);
+                .GetAllBoardsAsync(this.GetUserId(), sortOrder, searchTerm, pageNumber, BoardPageSize);
 
             return View(boards);
         }
@@ -119,7 +118,7 @@ public class BoardController : BaseController
         try
         {
             BoardDetailsViewModel? board = await boardService
-                .GetBoardDetailsAsync(id, sortOrder, searchTerm, pageNumber, pageSize);
+                .GetBoardDetailsAsync(id, sortOrder, searchTerm, pageNumber, BoardPageSize);
 
             if (board == null)
             {

@@ -1,17 +1,16 @@
-﻿using ForumApp.Services.Core;
-using ForumApp.Services.Core.Interfaces;
+﻿using ForumApp.Services.Core.Interfaces;
 using ForumApp.Web.ViewModels.Admin.Board;
 using Microsoft.AspNetCore.Mvc;
-using static ForumApp.GCommon.FilterEnums;
-using static ForumApp.GCommon.SortEnums.Board;
-using static ForumApp.GCommon.SortEnums.Post;
+
+using static ForumApp.GCommon.Enums.FilterEnums;
+using static ForumApp.GCommon.Enums.SortEnums.Board;
+using static ForumApp.GCommon.Enums.SortEnums.Post;
+using static ForumApp.GCommon.GlobalConstants;
 
 namespace ForumApp.Web.Areas.Admin.Controllers
 {
     public class BoardController : BaseController
     {
-        private const int pageSize = 10;
-
         private IBoardService boardService;
         private ILogger<BoardController> logger;
 
@@ -47,7 +46,7 @@ namespace ForumApp.Web.Areas.Admin.Controllers
             try
             {
                 BoardDetailsAdminViewModel? board = await boardService
-                    .GetBoardDetailsAdminAsync(id, sortBy, pageNumber, pageSize);
+                    .GetBoardDetailsAdminAsync(id, sortBy, pageNumber, PostPageSize);
 
                 if (board == null)
                 {
