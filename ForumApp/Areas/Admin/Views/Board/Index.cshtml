@@ -93,13 +93,16 @@
 							</form>
 						}
 
-						<a asp-area="Admin"
-						   asp-controller="Board"
-						   asp-action="Delete"
-						   asp-route-id="@board.Id"
-						   class="btn btn-sm btn-danger">
-							<i class="bi bi-trash"></i> Delete
-						</a>
+						@if (!board.IsDeleted)
+						{
+							<a asp-area="Admin"
+							   asp-controller="Board"
+							   asp-action="Delete"
+							   asp-route-id="@board.Id"
+							   class="btn btn-sm btn-danger">
+								<i class="bi bi-trash"></i> Delete
+							</a>
+						}
 
 						@if (board.IsDeleted)
 						{
