@@ -193,7 +193,7 @@ public class BoardService : IBoardService
             Name = board.Name,
             ImageUrl = board.ImageUrl,
             Description = board.Description,
-            CreatedAt = board.CreatedAt.ToString(ApplicationDateTimeFormat),
+            CreatedAt = board.CreatedAt.ToString(APPLICATION_DATE_TIME_FORMAT),
             Posts = posts,
             Categories = categories ?? new HashSet<CategoryViewModel>(),
         };
@@ -227,7 +227,7 @@ public class BoardService : IBoardService
             Name = board.Name,
             ImageUrl = board.ImageUrl,
             Description = board.Description,
-            CreatedAt = board.CreatedAt.ToString(ApplicationDateTimeFormat),
+            CreatedAt = board.CreatedAt.ToString(APPLICATION_DATE_TIME_FORMAT),
             Posts = posts,
             Categories = categories ?? new HashSet<CategoryViewModel>(),
             Moderators = board.BoardManagers

@@ -34,7 +34,7 @@ namespace ForumApp.Web.Areas.Admin.Controllers
                 }
 
                 BoardDetailsAdminViewModel? board = await boardService
-                    .GetBoardDetailsAdminAsync(boardId, sortBy, postPageNumber, PostPageSize);
+                    .GetBoardDetailsAdminAsync(boardId, sortBy, postPageNumber, POST_PAGE_SIZE);
 
                 if (board == null)
                 {

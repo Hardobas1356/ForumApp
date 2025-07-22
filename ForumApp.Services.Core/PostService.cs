@@ -90,7 +90,7 @@ public class PostService : IPostService
             {
                 Id = p.Id,
                 Title = p.Title,
-                CreatedAt = p.CreatedAt.ToString(ApplicationDateTimeFormat),
+                CreatedAt = p.CreatedAt.ToString(APPLICATION_DATE_TIME_FORMAT),
                 Author = p.ApplicationUser.DisplayName,
                 Handle = p.ApplicationUser.UserName ?? "Unknown",
                 Tags = p.PostTags
@@ -206,8 +206,8 @@ public class PostService : IPostService
             Id = post.Id,
             Title = post.Title,
             Content = post.Content,
-            CreatedAt = post.CreatedAt.ToString(ApplicationDateTimeFormat),
-            ModifiedAt = post.ModifiedAt.ToString(ApplicationDateTimeFormat),
+            CreatedAt = post.CreatedAt.ToString(APPLICATION_DATE_TIME_FORMAT),
+            ModifiedAt = post.ModifiedAt.ToString(APPLICATION_DATE_TIME_FORMAT),
             Author = post.ApplicationUser.DisplayName,
             ImageUrl = post.ImageUrl,
             BoardId = post.BoardId,
@@ -293,7 +293,7 @@ public class PostService : IPostService
             Id = post.Id,
             Content = post.Content,
             Title = post.Title,
-            CreatedAt = post.CreatedAt.ToString(ApplicationDateTimeFormat),
+            CreatedAt = post.CreatedAt.ToString(APPLICATION_DATE_TIME_FORMAT),
             ImageUrl = post.ImageUrl,
             BoardId = post.BoardId,
             BoardName = post.Board.Name,

@@ -34,7 +34,7 @@ public class BoardController : BaseController
             ViewBag.SearchTerm = searchTerm;
 
             var boards = await boardService
-                .GetAllBoardsAsync(this.GetUserId(), sortOrder, searchTerm, pageNumber, BoardPageSize);
+                .GetAllBoardsAsync(this.GetUserId(), sortOrder, searchTerm, pageNumber, BOARD_PAGE_SIZE);
 
             return View(boards);
         }
@@ -118,7 +118,7 @@ public class BoardController : BaseController
         try
         {
             BoardDetailsViewModel? board = await boardService
-                .GetBoardDetailsAsync(id, sortOrder, searchTerm, pageNumber, BoardPageSize);
+                .GetBoardDetailsAsync(id, sortOrder, searchTerm, pageNumber, BOARD_PAGE_SIZE);
 
             if (board == null)
             {

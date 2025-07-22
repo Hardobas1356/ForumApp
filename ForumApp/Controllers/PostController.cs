@@ -37,7 +37,7 @@ public class PostController : BaseController
             pageNumber = Math.Max(1, pageNumber);
 
             PostDetailsViewModel? model = await postService
-                .GetPostDetailsAsync(this.GetUserId(), id, sortBy, pageNumber, ReplyPageSize);
+                .GetPostDetailsAsync(this.GetUserId(), id, sortBy, pageNumber, REPLU_PAGE_SIZE);
 
             if (model == null)
             {

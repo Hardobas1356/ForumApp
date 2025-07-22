@@ -76,6 +76,6 @@ public class PermissionService : IPermissionService
     {
         ApplicationUser? user = await userManager.FindByIdAsync(userId.ToString());
 
-        return user != null && await userManager.IsInRoleAsync(user, AdminRoleName);
+        return user != null && await userManager.IsInRoleAsync(user, ADMIN_ROLE_NAME);
     }
 }
