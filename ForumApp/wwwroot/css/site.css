@@ -1,22 +1,37 @@
-html {
-  font-size: 14px;
-}
-
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
+html, body {
+    height: 100%;
+    margin: 0;
 }
 
 body {
-  margin-bottom: 60px;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh; /* Full viewport height */
+    margin-bottom: 0; /* Remove old margin */
+}
+
+.container {
+    flex: 1 0 auto; /* Grow and take available space */
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1 0 auto; /* Grow inside container */
+}
+
+/* Footer styling */
+footer.footer {
+    flex-shrink: 0; /* Prevent footer from shrinking */
+    height: 60px; /* Keep footer height consistent */
+    line-height: 60px; /* Vertically center text */
+    background-color: transparent; /* Optional light background */
+    border-top: 1px solid #dee2e6; /* Match bootstrap border-top */
+    padding: 0 1rem;
+    text-align: center;
+    color: #6c757d;
+    font-size: 0.875rem;
+    position: relative; /* default positioning */
+    bottom: 0;
+    width: 100%;
 }

@@ -1,8 +1,43 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Welcome";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container py-3">
+    <div class="text-center mb-5">
+        <h1 class="display-4 fw-bold">
+            Welcome to ForumApp!
+        </h1>
+        <p class="lead text-muted">
+            Discover boards, share your thoughts, and join the conversation.
+        </p>
+        <a asp-controller="Board" asp-action="Index" class="btn btn-primary btn-lg mt-3">
+            Explore Boards
+        </a>
+    </div>
+
+    <div class="row text-center">
+        <div class="col-md-4">
+            <i class="fas fa-comments fa-3x text-primary mb-3"></i>
+            <h5>Join Discussions</h5>
+            <p class="text-muted">Browse posts and share your opinion on topics that matter to you.</p>
+        </div>
+        <div class="col-md-4">
+            <i class="fas fa-lightbulb fa-3x text-success mb-3"></i>
+            <h5>Create Boards</h5>
+            <p class="text-muted">Start your own community board and lead meaningful conversations.</p>
+        </div>
+        <div class="col-md-4">
+            <i class="fas fa-user-friends fa-3x text-info mb-3"></i>
+            <h5>Meet People</h5>
+            <p class="text-muted">Connect with others who share your interests and values.</p>
+        </div>
+    </div>
 </div>
+
+
+@if (User.Identity?.IsAuthenticated ?? false)
+{
+    <p class="text-muted text-center mt-3">
+        Logged in as <strong>@User.Identity.Name</strong>
+    </p>
+}
