@@ -5,7 +5,7 @@ using ForumApp.Web.ViewModels.Admin.ApplicationUser;
 using ForumApp.Web.ViewModels.ApplicationUser;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-
+using Microsoft.VisualBasic;
 using static ForumApp.GCommon.Enums.SortEnums.User;
 using static ForumApp.GCommon.GlobalConstants;
 
@@ -118,5 +118,31 @@ public class ApplicationUserService : IApplicationUserService
 
         return await PaginatedResult<UserAdminViewModel>
             .CreateAsync(users, pageNumber, pageSize);
+    }
+
+    public async Task SoftDeleteUser(Guid id)
+    {
+        ApplicationUser? user = await userManager
+            .FindByIdAsync(id.ToString());
+
+        if (user == null)
+        {
+            throw new ArgumentException($"User with id {id} not found");
+        }
+
+        if (user.IsDeleted == true)
+        {
+            throw new ArgumentException($"User with id {id} already deleted");
+        }
+
+        user.IsDeleted = true;
+
+        IdentityResult result = await userManager
+            .UpdateAsync(user);
+
+        if (!result.Succeeded)
+        {
+            throw new InvalidOperationException($"Failed to delete user with id {id}");
+        }
     }
 }
