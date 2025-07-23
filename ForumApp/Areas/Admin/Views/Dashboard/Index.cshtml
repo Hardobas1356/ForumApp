@@ -1,0 +1,44 @@
+﻿@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<div class="container py-5">
+    <h1 class="mb-3">
+        <i class="fas fa-tools me-2"></i>Admin Dashboard
+    </h1>
+
+    <p class="text-muted mb-4">
+        Welcome to the control center. From here, you can manage boards, assign moderators, and keep the forum running smoothly.
+        Use the tools below to jump straight into administration tasks.
+    </p>
+
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="card border-primary shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-chalkboard me-2 text-primary"></i>Manage Boards
+                    </h5>
+                    <p class="card-text">View, approve, or delete boards submitted by users.</p>
+                    <a asp-area="Admin" asp-controller="Board" asp-action="Index" class="btn btn-primary">
+                        Go to Boards
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card border-success shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-user-shield me-2 text-success"></i>Users
+                    </h5>
+                    <p class="card-text">Manage users in the app.</p>
+                    <a asp-area="Admin" asp-controller="User" asp-action="Index" class="btn btn-success">
+                        Manage Users
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
