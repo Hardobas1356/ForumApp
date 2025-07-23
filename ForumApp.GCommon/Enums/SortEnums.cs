@@ -4,6 +4,21 @@ namespace ForumApp.GCommon.Enums;
 
 public static class SortEnums
 {
+    public static class User
+    {
+        public enum UserSortBy
+        {
+            JoinDateAsc,
+            JoinDateDesc,
+            UsernameAsc,
+            UsernameDesc,
+            EmailAsc,
+            EmailDesc,
+            IsDeletedFirst,
+            IsModeratorFirst
+        }
+    }
+
     public static class Board
     {
         public enum BoardAllSortBy

@@ -1,8 +1,9 @@
-﻿using ForumApp.Services.Core.Interfaces;
-using Microsoft.AspNetCore.Mvc;
+﻿using ForumApp.GCommon;
+using ForumApp.Services.Core.Interfaces;
 using ForumApp.Web.ViewModels.Admin.ApplicationUser;
-using ForumApp.GCommon;
+using Microsoft.AspNetCore.Mvc;
 
+using static ForumApp.GCommon.Enums.SortEnums.User;
 using static ForumApp.GCommon.GlobalConstants.Pages;
 
 namespace ForumApp.Web.Areas.Admin.Controllers;
@@ -17,12 +18,13 @@ public class UserController : BaseController
         this.logger = logger;
     }
 
-    public async Task<IActionResult> Index(int pageNumber = 1)
+    public async Task<IActionResult> Index(
+        string? searchTerm, UserSortBy sortOrder = UserSortBy.IsModeratorFirst, int pageNumber = 1)
     {
         try
         {
             PaginatedResult<UserAdminViewModel> users = await applicationUserService
-                .GetAllUsersAdminAsync(pageNumber, USER_PAGE_SIZE);
+                .GetAllUsersAdminAsync(pageNumber, USER_PAGE_SIZE, searchTerm, sortOrder);
 
             return View(users);
         }

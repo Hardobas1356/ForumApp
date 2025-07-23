@@ -6,6 +6,7 @@ using ForumApp.Web.ViewModels.ApplicationUser;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
+using static ForumApp.GCommon.Enums.SortEnums.User;
 using static ForumApp.GCommon.GlobalConstants;
 
 namespace ForumApp.Services.Core;
@@ -22,7 +23,8 @@ public class ApplicationUserService : IApplicationUserService
         this.boardRepository = boardRepository;
         this.userManager = userManager;
     }
-    public async Task<ICollection<UserModeratorViewModel>?> SearchUsersByHandleFirstTenAsync(Guid boardId, string handle)
+    public async Task<ICollection<UserModeratorViewModel>?> SearchUsersByHandleFirstTenAsync(
+        Guid boardId, string handle)
     {
         Board? board = await boardRepository
             .SingleOrDefaultWithIncludeAsync(
@@ -57,12 +59,52 @@ public class ApplicationUserService : IApplicationUserService
 
         return users;
     }
-    public async Task<PaginatedResult<UserAdminViewModel>> GetAllUsersAdminAsync(int pageNumber, int pageSize)
+    public async Task<PaginatedResult<UserAdminViewModel>> GetAllUsersAdminAsync(
+        int pageNumber, int pageSize, string? searchTerm, UserSortBy sortOrder)
     {
-        IQueryable<UserAdminViewModel> users = userManager
+        IQueryable<ApplicationUser> query = userManager
             .Users
             .AsNoTracking()
-            .IgnoreQueryFilters()
+            .IgnoreQueryFilters();
+
+        if (!String.IsNullOrWhiteSpace(searchTerm))
+        {
+            string loweredSearchTerm = searchTerm.ToLower();
+
+            query = query
+                .Where(u => u.NormalizedUserName.Contains(loweredSearchTerm)
+                    || u.NormalizedEmail.Contains(loweredSearchTerm));
+        }
+
+        switch (sortOrder)
+        {
+            case UserSortBy.JoinDateAsc:
+                query = query.OrderBy(u => u.JoinDate);
+                break;
+            case UserSortBy.JoinDateDesc:
+                query = query.OrderByDescending(u => u.JoinDate);
+                break;
+            case UserSortBy.UsernameAsc:
+                query = query.OrderBy(u => u.UserName);
+                break;
+            case UserSortBy.UsernameDesc:
+                query = query.OrderByDescending(u => u.UserName);
+                break;
+            case UserSortBy.EmailAsc:
+                query = query.OrderBy(u => u.Email);
+                break;
+            case UserSortBy.EmailDesc:
+                query = query.OrderByDescending(u => u.Email);
+                break;
+            case UserSortBy.IsDeletedFirst:
+                query = query.OrderByDescending(u => u.IsDeleted);
+                break;
+            case UserSortBy.IsModeratorFirst:
+                query = query.OrderByDescending(u => u.BoardManagers.Any());
+                break;
+        }
+
+        IQueryable<UserAdminViewModel> users = query
             .Select(u => new UserAdminViewModel
             {
                 Id = u.Id,

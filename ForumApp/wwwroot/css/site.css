@@ -7,7 +7,7 @@ body {
     display: flex;
     flex-direction: column;
     min-height: 100vh; /* Full viewport height */
-    margin-bottom: 0; /* Remove old margin */
+    margin-bottom: 0;
 }
 
 .container {
@@ -35,3 +35,15 @@ footer.footer {
     bottom: 0;
     width: 100%;
 }
+
+.sortable-link {
+    text-decoration: none; /* Removes underline */
+    font-weight: 500; /* Slightly bolder */
+    color: white; /* Matches table-dark header */
+    transition: color 0.2s;
+}
+
+    .sortable-link:hover {
+        color: #ffc107; /* Bootstrap warning color on hover */
+        font-weight: 600;
+    }
