@@ -120,7 +120,7 @@ public class ApplicationUserService : IApplicationUserService
             .CreateAsync(users, pageNumber, pageSize);
     }
 
-    public async Task SoftDeleteUser(Guid id)
+    public async Task SoftDeleteUserAsync(Guid id)
     {
         ApplicationUser? user = await userManager
             .FindByIdAsync(id.ToString());
@@ -142,7 +142,32 @@ public class ApplicationUserService : IApplicationUserService
 
         if (!result.Succeeded)
         {
-            throw new InvalidOperationException($"Failed to delete user with id {id}");
+            throw new InvalidOperationException($"Failed to delete user with id: {id}");
+        }
+    }
+
+    public async Task RestoreUserAsync(Guid id)
+    {
+        ApplicationUser? user = await userManager
+                    .FindByIdAsync(id.ToString());
+
+        if (user == null)
+        {
+            throw new ArgumentException($"User with id {id} not found");
+        }
+
+        if (!user.IsDeleted)
+        {
+            throw new InvalidOperationException($"User not deleted");
+        }
+
+        user.IsDeleted = false;
+        IdentityResult result = await userManager
+            .UpdateAsync(user);
+    
+        if (!result.Succeeded)
+        {
+            throw new InvalidOperationException($"Failed to restore user with id: {id}");
         }
     }
 }

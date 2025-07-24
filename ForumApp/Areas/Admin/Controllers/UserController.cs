@@ -42,14 +42,33 @@ public class UserController : BaseController
     {
         try
         {
-            await applicationUserService.SoftDeleteUser(id);
+            await applicationUserService.SoftDeleteUserAsync(id);
             TempData["SuccessMessage"] = "User deleted successfully.";
 
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Error while deleting user");
+            logger.LogError(e, "Error while deleting user with ID {id}", id);
             TempData["ErrorMessage"] = "An error occurred while deleting the user.";
+        }
+
+        return RedirectToAction(nameof(Index));
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Restore(Guid id)
+    {
+        try
+        {
+            await applicationUserService.RestoreUserAsync(id);
+            TempData["SuccessMessage"] = "User restored successfully.";
+
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Error while restoring user with ID {id}", id);
+            TempData["ErrorMessage"] = "An error occurred while restoring the user.";
         }
 
         return RedirectToAction(nameof(Index));

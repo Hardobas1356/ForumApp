@@ -12,5 +12,6 @@ public interface IApplicationUserService
         string handle);
     public Task<PaginatedResult<UserAdminViewModel>> GetAllUsersAdminAsync(
         int pageNumber, int pageSize, string? searchTerm, UserSortBy sortOrder);
-    public Task SoftDeleteUser(Guid id);
+    public Task SoftDeleteUserAsync(Guid id);
+    public Task RestoreUserAsync(Guid id);
 }
