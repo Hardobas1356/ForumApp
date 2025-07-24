@@ -75,7 +75,7 @@ public class RegisterModel : PageModel
         public string DisplayName { get; set; }
         [Required]
         [Display(Name = "Handle (Username)")]
-        [StringLength(UserNameMaxLength, MinimumLength = UserNameMinLenth)]
+        [StringLength(UserNameMaxLength, MinimumLength = UserNameMinLength)]
         [RegularExpression(UserNameRegex, ErrorMessage = UserNameRegexError)]
         public string UserName { get; set; }
         /// <summary>

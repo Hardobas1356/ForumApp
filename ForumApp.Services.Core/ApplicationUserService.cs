@@ -5,6 +5,7 @@ using ForumApp.Web.ViewModels.Admin.ApplicationUser;
 using ForumApp.Web.ViewModels.ApplicationUser;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Abstractions;
 using Microsoft.VisualBasic;
 using static ForumApp.GCommon.Enums.SortEnums.User;
 using static ForumApp.GCommon.GlobalConstants;
@@ -120,6 +121,20 @@ public class ApplicationUserService : IApplicationUserService
             .CreateAsync(users, pageNumber, pageSize);
     }
 
+    public async Task<UserEditInputModel> GetUserForEditAsync(Guid id)
+    {
+        ApplicationUser user = await ValidateUserExists(id);
+
+        UserEditInputModel model = new UserEditInputModel()
+        {
+            Id = id,
+            Email = user.Email!,
+            DisplayName = user.DisplayName,
+            UserName = user.UserName!,
+        };
+
+        return model;
+    }
     public async Task SoftDeleteUserAsync(Guid id)
     {
         ApplicationUser user = await ValidateUserExists(id);
@@ -214,6 +229,57 @@ public class ApplicationUserService : IApplicationUserService
             throw new InvalidOperationException($"Failed to change username for user with id: {user.Id}");
         }
     }
+    public async Task EditUserAsync(UserEditInputModel model)
+    {
+        bool displayNameChanged = false;
+        ApplicationUser user = await ValidateUserExists(model.Id);
+
+        if (!string.Equals(model.UserName, user.UserName, StringComparison.OrdinalIgnoreCase))
+        {
+            ApplicationUser? existingUser = await userManager.FindByNameAsync(model.UserName);
+            if (existingUser != null && existingUser.Id != user.Id)
+            {
+                throw new InvalidOperationException("Username already taken");
+            }
+
+            IdentityResult userNameResult = await userManager.SetUserNameAsync(user, model.UserName);
+            if (!userNameResult.Succeeded)
+            {
+                throw new InvalidOperationException("Failed to update username");
+            }
+        }
+
+        if (!string.Equals(model.DisplayName, user.DisplayName))
+        {
+            if (string.IsNullOrWhiteSpace(model.DisplayName))
+            {
+                throw new ArgumentException("DisplayName cannot be empty");
+            }
+
+            user.DisplayName = model.DisplayName;
+            displayNameChanged = true;
+        }
+
+        if (!string.Equals(model.Email, user.Email, StringComparison.OrdinalIgnoreCase))
+        {
+            ApplicationUser? existingUserWithEmail = await userManager.FindByEmailAsync(model.Email);
+            if (existingUserWithEmail != null && existingUserWithEmail.Id != user.Id)
+            {
+                throw new InvalidOperationException("Email already used");
+            }
+
+            IdentityResult emailResult = await userManager.SetEmailAsync(user, model.Email);
+            if (!emailResult.Succeeded)
+            {
+                throw new InvalidOperationException("Failed to update email");
+            }
+        }
+
+        if (displayNameChanged)
+        {
+            await SaveChangesForUser(user);
+        }
+    }
 
     private async Task<ApplicationUser> ValidateUserExists(Guid id)
     {
@@ -237,5 +303,4 @@ public class ApplicationUserService : IApplicationUserService
             throw new InvalidOperationException($"Failed to update data for user with id: {user.Id}");
         }
     }
-
 }

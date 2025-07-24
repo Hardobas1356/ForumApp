@@ -73,4 +73,44 @@ public class UserController : BaseController
 
         return RedirectToAction(nameof(Index));
     }
+
+    [HttpGet]
+    public async Task<IActionResult> Edit(Guid id)
+    {
+        try
+        {
+            UserEditInputModel model = await applicationUserService.GetUserForEditAsync(id);
+
+            return View(model);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Error while getting user with ID {id}", id);
+            TempData["ErrorMessage"] = "An error occurred while getting user.";
+            return RedirectToAction(nameof(Index));
+        }
+    }
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(UserEditInputModel model)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        try
+        {
+            await applicationUserService.EditUserAsync(model);
+
+            TempData["SuccessMessage"] = "User updated successfully.";
+            return RedirectToAction(nameof(Index));
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error updating user");
+            ModelState.AddModelError(string.Empty, ex.Message);
+            return View(model);
+        }
+    }
 }
