@@ -4,7 +4,7 @@ namespace ForumApp.GCommon.Enums;
 
 public static class SortEnums
 {
-    public static class User
+    public static class UserSort
     {
         public enum UserSortBy
         {
@@ -19,7 +19,7 @@ public static class SortEnums
         }
     }
 
-    public static class Board
+    public static class BoardSort
     {
         public enum BoardAllSortBy
         {
@@ -34,7 +34,7 @@ public static class SortEnums
 
     }
 
-    public static class Post
+    public static class PostSort
     {
         public enum PostSortBy
         {
@@ -47,7 +47,7 @@ public static class SortEnums
         }
     }
 
-    public static class Reply
+    public static class ReplySort
     {
         public enum ReplySortBy
         {

@@ -1,7 +1,7 @@
 ﻿using ForumApp.GCommon;
 using ForumApp.Web.ViewModels.Reply;
 
-using static ForumApp.GCommon.Enums.SortEnums.Reply;
+using static ForumApp.GCommon.Enums.SortEnums.ReplySort;
 
 namespace ForumApp.Services.Core.Interfaces;
 

@@ -5,7 +5,7 @@ using ForumApp.Web.ViewModels.Admin.ApplicationUser;
 using ForumApp.Web.ViewModels.ApplicationUser;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using static ForumApp.GCommon.Enums.SortEnums.User;
+using static ForumApp.GCommon.Enums.SortEnums.UserSort;
 using static ForumApp.GCommon.GlobalConstants;
 
 namespace ForumApp.Services.Core;

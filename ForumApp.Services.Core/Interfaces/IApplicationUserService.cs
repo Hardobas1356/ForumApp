@@ -2,7 +2,7 @@
 using ForumApp.Web.ViewModels.Admin.ApplicationUser;
 using ForumApp.Web.ViewModels.ApplicationUser;
 
-using static ForumApp.GCommon.Enums.SortEnums.User;
+using static ForumApp.GCommon.Enums.SortEnums.UserSort;
 
 namespace ForumApp.Services.Core.Interfaces;
 

@@ -4,8 +4,8 @@ using ForumApp.Web.ViewModels.ApplicationUser;
 using Microsoft.AspNetCore.Mvc;
 
 using static ForumApp.GCommon.Enums.FilterEnums;
-using static ForumApp.GCommon.Enums.SortEnums.Board;
-using static ForumApp.GCommon.Enums.SortEnums.Post;
+using static ForumApp.GCommon.Enums.SortEnums.BoardSort;
+using static ForumApp.GCommon.Enums.SortEnums.PostSort;
 
 namespace ForumApp.Web.Areas.Admin.Controllers;
 

@@ -7,8 +7,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 using static ForumApp.GCommon.GlobalConstants;
-using static ForumApp.GCommon.Enums.SortEnums.Post;
-using static ForumApp.GCommon.Enums.SortEnums.Reply;
+using static ForumApp.GCommon.GlobalConstants.DeletedUser;
+using static ForumApp.GCommon.Enums.SortEnums.PostSort;
+using static ForumApp.GCommon.Enums.SortEnums.ReplySort;
 
 namespace ForumApp.Services.Core;
 
@@ -199,7 +200,8 @@ public class PostService : IPostService
             return null;
         }
 
-        bool canModerate = userId != null ? await permissionService.CanManagePostAsync((Guid)userId, post.Id) : false;
+        bool canModerate = userId != null
+            ? await permissionService.CanManagePostAsync((Guid)userId, post.Id) : false;
 
         PostDetailsViewModel model = new PostDetailsViewModel
         {
@@ -208,7 +210,8 @@ public class PostService : IPostService
             Content = post.Content,
             CreatedAt = post.CreatedAt.ToString(APPLICATION_DATE_TIME_FORMAT),
             ModifiedAt = post.ModifiedAt.ToString(APPLICATION_DATE_TIME_FORMAT),
-            Author = post.ApplicationUser.DisplayName,
+            Author = post.ApplicationUser == null || post.ApplicationUser.IsDeleted
+                    ? DeletedUser.DELETED_DISPLAYNAME : post.ApplicationUser.DisplayName!,
             ImageUrl = post.ImageUrl,
             BoardId = post.BoardId,
             BoardName = post.Board.Name,

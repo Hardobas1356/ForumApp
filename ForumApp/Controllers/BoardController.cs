@@ -4,8 +4,8 @@ using ForumApp.Web.ViewModels.Category;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-using static ForumApp.GCommon.Enums.SortEnums.Board;
-using static ForumApp.GCommon.Enums.SortEnums.Post;
+using static ForumApp.GCommon.Enums.SortEnums.BoardSort;
+using static ForumApp.GCommon.Enums.SortEnums.PostSort;
 using static ForumApp.GCommon.GlobalConstants.Pages;
 
 namespace ForumApp.Web.Controllers;

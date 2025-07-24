@@ -1,13 +1,12 @@
-﻿using ForumApp.Data;
-using ForumApp.Data.Models;
+﻿using ForumApp.Data.Models;
+using ForumApp.GCommon;
 using ForumApp.Services.Core.Interfaces;
 using ForumApp.Web.ViewModels.Reply;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
+using static ForumApp.GCommon.Enums.SortEnums.ReplySort;
 using static ForumApp.GCommon.GlobalConstants;
-using static ForumApp.GCommon.Enums.SortEnums.Reply;
-using ForumApp.GCommon;
 
 namespace ForumApp.Services.Core;
 
@@ -86,7 +85,8 @@ public class ReplyService : IReplyService
             {
                 Id = r.Id,
                 Content = r.Content,
-                Author = r.ApplicationUser.DisplayName ?? "Unknown",
+                Author = r.ApplicationUser == null || r.ApplicationUser.IsDeleted
+                        ? DeletedUser.DELETED_DISPLAYNAME : r.ApplicationUser.DisplayName!,
                 CreatedAt = r.CreatedAt.ToString(APPLICATION_DATE_TIME_FORMAT),
                 IsPublisher = userId != null && r.ApplicationUserId == userId,
                 CanModerate = canModerate

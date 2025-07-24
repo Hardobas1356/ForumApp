@@ -4,7 +4,7 @@ using ForumApp.Web.ViewModels.Tag;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-using static ForumApp.GCommon.Enums.SortEnums.Reply;
+using static ForumApp.GCommon.Enums.SortEnums.ReplySort;
 using static ForumApp.GCommon.GlobalConstants.Pages;
 
 namespace ForumApp.Web.Controllers;

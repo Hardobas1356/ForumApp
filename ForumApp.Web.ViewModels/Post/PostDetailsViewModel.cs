@@ -1,7 +1,6 @@
 ﻿using ForumApp.GCommon;
 using ForumApp.Web.ViewModels.Reply;
 using ForumApp.Web.ViewModels.Tag;
-using System.Collections;
 
 namespace ForumApp.Web.ViewModels.Post;
 
@@ -13,6 +12,7 @@ public class PostDetailsViewModel
     public string CreatedAt { get; set; } = null!;
     public string ModifiedAt { get; set; } = null!;
     public string Author { get; set; } = null!;
+    public bool IsDeleted { get; set; } = false;
     public string? ImageUrl { get; set; }
     public Guid BoardId { get; set; }
     public string BoardName { get; set; } = null!;

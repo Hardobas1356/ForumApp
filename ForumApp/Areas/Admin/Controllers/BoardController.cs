@@ -3,8 +3,8 @@ using ForumApp.Web.ViewModels.Admin.Board;
 using Microsoft.AspNetCore.Mvc;
 
 using static ForumApp.GCommon.Enums.FilterEnums;
-using static ForumApp.GCommon.Enums.SortEnums.Board;
-using static ForumApp.GCommon.Enums.SortEnums.Post;
+using static ForumApp.GCommon.Enums.SortEnums.BoardSort;
+using static ForumApp.GCommon.Enums.SortEnums.PostSort;
 using static ForumApp.GCommon.GlobalConstants.Pages;
 
 namespace ForumApp.Web.Areas.Admin.Controllers;

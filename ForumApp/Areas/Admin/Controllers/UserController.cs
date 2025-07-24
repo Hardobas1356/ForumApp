@@ -3,7 +3,7 @@ using ForumApp.Services.Core.Interfaces;
 using ForumApp.Web.ViewModels.Admin.ApplicationUser;
 using Microsoft.AspNetCore.Mvc;
 
-using static ForumApp.GCommon.Enums.SortEnums.User;
+using static ForumApp.GCommon.Enums.SortEnums.UserSort;
 using static ForumApp.GCommon.GlobalConstants.Pages;
 
 namespace ForumApp.Web.Areas.Admin.Controllers;

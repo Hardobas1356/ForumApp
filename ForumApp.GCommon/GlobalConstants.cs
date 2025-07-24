@@ -4,6 +4,12 @@ public static class GlobalConstants
 {
     public static string APPLICATION_DATE_TIME_FORMAT = "yyyy-MM-dd";
 
+    public static class DeletedUser
+    {
+        public const string DELETED_USERNAME = "Deleted user";
+        public const string DELETED_DISPLAYNAME = "Deleted user";
+        public const string DELETED_EMAIL = "Deleted user";
+    }
 
     public static class Roles
     {

@@ -3,8 +3,8 @@ using ForumApp.Web.ViewModels.Admin.Board;
 using ForumApp.Web.ViewModels.Board;
 
 using static ForumApp.GCommon.Enums.FilterEnums;
-using static ForumApp.GCommon.Enums.SortEnums.Board;
-using static ForumApp.GCommon.Enums.SortEnums.Post;
+using static ForumApp.GCommon.Enums.SortEnums.BoardSort;
+using static ForumApp.GCommon.Enums.SortEnums.PostSort;
 
 namespace ForumApp.Services.Core.Interfaces;
 
