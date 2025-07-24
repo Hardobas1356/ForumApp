@@ -122,13 +122,7 @@ public class ApplicationUserService : IApplicationUserService
 
     public async Task SoftDeleteUserAsync(Guid id)
     {
-        ApplicationUser? user = await userManager
-            .FindByIdAsync(id.ToString());
-
-        if (user == null)
-        {
-            throw new ArgumentException($"User with id {id} not found");
-        }
+        ApplicationUser user = await ValidateUserExists(id);
 
         if (user.IsDeleted == true)
         {
@@ -137,24 +131,12 @@ public class ApplicationUserService : IApplicationUserService
 
         user.IsDeleted = true;
 
-        IdentityResult result = await userManager
-            .UpdateAsync(user);
-
-        if (!result.Succeeded)
-        {
-            throw new InvalidOperationException($"Failed to delete user with id: {id}");
-        }
+        await SaveChangesForUser(user);
     }
 
     public async Task RestoreUserAsync(Guid id)
     {
-        ApplicationUser? user = await userManager
-                    .FindByIdAsync(id.ToString());
-
-        if (user == null)
-        {
-            throw new ArgumentException($"User with id {id} not found");
-        }
+        ApplicationUser user = await ValidateUserExists(id);
 
         if (!user.IsDeleted)
         {
@@ -162,12 +144,44 @@ public class ApplicationUserService : IApplicationUserService
         }
 
         user.IsDeleted = false;
+
+        await SaveChangesForUser(user);
+    }
+
+    public async Task ChangeDisplayNameAsync(Guid id,string newDisplayName)
+    {
+        ApplicationUser user = await ValidateUserExists(id);
+
+        if (String.IsNullOrWhiteSpace(newDisplayName))
+        {
+            throw new ArgumentException($"Provided display name null or white space {newDisplayName}");
+        }
+
+        user.DisplayName = newDisplayName.Trim();
+
+        await SaveChangesForUser(user);
+    }
+
+    private async Task<ApplicationUser> ValidateUserExists(Guid id)
+    {
+        ApplicationUser? user = await userManager
+            .FindByIdAsync(id.ToString());
+
+        if (user == null)
+        {
+            throw new ArgumentException($"User with id {id} not found");
+        }
+
+        return user;
+    }
+    private async Task SaveChangesForUser(ApplicationUser user)
+    {
         IdentityResult result = await userManager
             .UpdateAsync(user);
-    
+
         if (!result.Succeeded)
         {
-            throw new InvalidOperationException($"Failed to restore user with id: {id}");
+            throw new InvalidOperationException($"Failed to update data for user with id: {user.Id}");
         }
     }
 }
