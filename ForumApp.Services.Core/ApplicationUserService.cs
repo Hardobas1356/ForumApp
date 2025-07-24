@@ -148,7 +148,7 @@ public class ApplicationUserService : IApplicationUserService
         await SaveChangesForUser(user);
     }
 
-    public async Task ChangeDisplayNameAsync(Guid id,string newDisplayName)
+    public async Task ChangeDisplayNameAsync(Guid id, string newDisplayName)
     {
         ApplicationUser user = await ValidateUserExists(id);
 
@@ -160,6 +160,33 @@ public class ApplicationUserService : IApplicationUserService
         user.DisplayName = newDisplayName.Trim();
 
         await SaveChangesForUser(user);
+    }
+    public async Task ChangeEmailAsync(Guid id, string newEmail)
+    {
+        ApplicationUser user = await ValidateUserExists(id);
+
+        if (String.IsNullOrWhiteSpace(newEmail))
+        {
+            throw new ArgumentException($"Provided email null or white space {newEmail}");
+        }
+
+        newEmail = newEmail.Trim();
+
+        ApplicationUser? userWithEmailExists = await userManager.FindByEmailAsync(newEmail);
+
+        if (userWithEmailExists != null)
+        {
+            throw new ArgumentException(
+                $"Provided email already used by user: {userWithEmailExists.UserName}, {newEmail}");
+        }
+
+        //SetEmailAsync updates user
+        IdentityResult result = await userManager.SetEmailAsync(user, newEmail);
+
+        if (!result.Succeeded)
+        {
+            throw new InvalidOperationException($"Failed to change email for user with id: {user.Id}");
+        }
     }
 
     private async Task<ApplicationUser> ValidateUserExists(Guid id)

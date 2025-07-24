@@ -14,5 +14,6 @@ public interface IApplicationUserService
         int pageNumber, int pageSize, string? searchTerm, UserSortBy sortOrder);
     public Task SoftDeleteUserAsync(Guid id);
     public Task RestoreUserAsync(Guid id);
-    public Task ChangeDisplayNameAsync(Guid id,string newDisplayName);
+    public Task ChangeDisplayNameAsync(Guid id, string newDisplayName);
+    public Task ChangeEmailAsync(Guid id, string newEmail);
 }
