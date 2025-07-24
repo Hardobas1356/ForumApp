@@ -21,7 +21,7 @@ public class BoardManagerConfiguration : IEntityTypeConfiguration<BoardManager>
             .HasOne(bm => bm.ApplicationUser)
             .WithMany(au => au.BoardManagers)
             .HasForeignKey(bm => bm.ApplicationUserId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder
             .HasQueryFilter(bm => !bm.IsDeleted
