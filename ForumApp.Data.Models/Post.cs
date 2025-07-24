@@ -33,8 +33,8 @@ public class Post
     public virtual Board Board { get; set; } = null!;
 
     [Comment("Id of user which posted this post")]
-    public Guid ApplicationUserId { get; set; }
-    public virtual ApplicationUser ApplicationUser { get; set; } = null!;
+    public Guid? ApplicationUserId { get; set; }
+    public virtual ApplicationUser? ApplicationUser { get; set; } 
 
     public virtual ICollection<Reply> Replies { get; set; } = new HashSet<Reply>();
     public virtual ICollection<PostTag> PostTags { get; set; } = new HashSet<PostTag>();

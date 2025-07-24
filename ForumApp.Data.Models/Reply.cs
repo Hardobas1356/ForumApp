@@ -22,6 +22,6 @@ public class Reply
     public virtual Post Post { get; set; } = null!;
 
     [Comment("Id of user which posted this reply")]
-    public Guid ApplicationUserId { get; set; }
-    public virtual ApplicationUser ApplicationUser { get; set; } = null!;
+    public Guid? ApplicationUserId { get; set; }
+    public virtual ApplicationUser? ApplicationUser { get; set; }
 }

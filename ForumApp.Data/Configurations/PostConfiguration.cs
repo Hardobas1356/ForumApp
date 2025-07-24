@@ -42,10 +42,10 @@ public class PostConfiguration : IEntityTypeConfiguration<Post>
             .OnDelete(DeleteBehavior.Restrict);
 
         builder
-            .HasOne(p=>p.ApplicationUser)
-            .WithMany(au=>au.Posts)
+            .HasOne(p => p.ApplicationUser)
+            .WithMany(au => au.Posts)
             .HasForeignKey(p => p.ApplicationUserId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.SetNull);
 
         builder
             .HasQueryFilter(p => !p.IsDeleted);

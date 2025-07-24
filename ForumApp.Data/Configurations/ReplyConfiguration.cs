@@ -40,7 +40,7 @@ public class ReplyConfiguration : IEntityTypeConfiguration<Reply>
             .HasOne(r=>r.ApplicationUser)
             .WithMany(au=>au.Replies)
             .HasForeignKey(r=>r.ApplicationUserId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.SetNull);
 
         builder
             .HasQueryFilter(r => !r.IsDeleted);
