@@ -1,28 +1,21 @@
 ﻿#nullable disable
 
 using System.ComponentModel.DataAnnotations;
-using System.Text;
-using System.Text.Encodings.Web;
 using ForumApp.Data.Models;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.WebUtilities;
 
 namespace ForumApp.Web.Areas.Identity.Pages.Account.Manage;
 
 public class EmailModel : PageModel
 {
     private readonly UserManager<ApplicationUser> _userManager;
-    private readonly IEmailSender _emailSender;
 
     public EmailModel(
-        UserManager<ApplicationUser> userManager,
-        IEmailSender emailSender)
+        UserManager<ApplicationUser> userManager)
     {
         _userManager = userManager;
-        _emailSender = emailSender;
     }
     public string Email { get; set; }
     [TempData]
