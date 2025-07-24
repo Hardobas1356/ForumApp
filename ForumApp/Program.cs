@@ -6,6 +6,8 @@ using ForumApp.Web.Seeders;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
+using static ForumApp.GCommon.ValidationConstants.ApplicationUserConstants;
+
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -27,10 +29,10 @@ builder.Services
     .AddIdentity<ApplicationUser, IdentityRole<Guid>>(options =>
     {
         options.SignIn.RequireConfirmedEmail = false;
-        options.SignIn.RequireConfirmedAccount = true;
+        options.SignIn.RequireConfirmedAccount = false;
         options.Password.RequireDigit = false;
         options.Password.RequireNonAlphanumeric = false;
-        options.Password.RequiredLength = 5;
+        options.Password.RequiredLength = PasswordMinLength;
         options.Password.RequireUppercase = false;
         options.Password.RequireLowercase = false;
     })

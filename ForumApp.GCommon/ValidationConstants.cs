@@ -52,8 +52,8 @@
             public const string UserNameRegex = "^[a-zA-Z0-9_.-]+$";
             public const int UserNameMinLength = 3;
             public const int UserNameMaxLength = 50;
-            public const int PassworkMinLength = 5;
-            public const int PassworkMaxLength = 80;
+            public const int PasswordMinLength = 5;
+            public const int PasswordMaxLength = 80;
         }
     }
 }
