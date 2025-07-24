@@ -5,8 +5,6 @@ using ForumApp.Web.ViewModels.Admin.ApplicationUser;
 using ForumApp.Web.ViewModels.ApplicationUser;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Abstractions;
-using Microsoft.VisualBasic;
 using static ForumApp.GCommon.Enums.SortEnums.User;
 using static ForumApp.GCommon.GlobalConstants;
 
@@ -161,73 +159,6 @@ public class ApplicationUserService : IApplicationUserService
         user.IsDeleted = false;
 
         await SaveChangesForUser(user);
-    }
-
-    public async Task ChangeDisplayNameAsync(Guid id, string newDisplayName)
-    {
-        ApplicationUser user = await ValidateUserExists(id);
-
-        if (String.IsNullOrWhiteSpace(newDisplayName))
-        {
-            throw new ArgumentException($"Provided display name null or white space {newDisplayName}");
-        }
-
-        user.DisplayName = newDisplayName.Trim();
-
-        await SaveChangesForUser(user);
-    }
-    public async Task ChangeEmailAsync(Guid id, string newEmail)
-    {
-        ApplicationUser user = await ValidateUserExists(id);
-
-        if (String.IsNullOrWhiteSpace(newEmail))
-        {
-            throw new ArgumentException($"Provided email null or white space {newEmail}");
-        }
-
-        newEmail = newEmail.Trim();
-
-        ApplicationUser? userWithEmailExists = await userManager.FindByEmailAsync(newEmail);
-
-        if (userWithEmailExists != null)
-        {
-            throw new ArgumentException(
-                $"Provided email already used by user: {userWithEmailExists.UserName}, {newEmail}");
-        }
-
-        //SetEmailAsync updates user
-        IdentityResult result = await userManager.SetEmailAsync(user, newEmail);
-
-        if (!result.Succeeded)
-        {
-            throw new InvalidOperationException($"Failed to change email for user with id: {user.Id}");
-        }
-    }
-    public async Task ChangeUsernameAsync(Guid id, string newUsername)
-    {
-        ApplicationUser user = await ValidateUserExists(id);
-
-        if (String.IsNullOrWhiteSpace(newUsername))
-        {
-            throw new ArgumentException($"Provided username null or white space {newUsername}");
-        }
-
-        newUsername = newUsername.Trim().ToLower();
-
-        ApplicationUser? userWithUsernameExists = await userManager.FindByNameAsync(newUsername);
-        if (userWithUsernameExists != null && userWithUsernameExists.Id != user.Id)
-        {
-            throw new InvalidOperationException(
-                $"Provided username already used by user: {userWithUsernameExists.UserName}, {userWithUsernameExists.Email}");
-        }
-
-        //SetUserName saved user
-        IdentityResult result = await userManager.SetUserNameAsync(user, newUsername);
-
-        if (!result.Succeeded)
-        {
-            throw new InvalidOperationException($"Failed to change username for user with id: {user.Id}");
-        }
     }
     public async Task EditUserAsync(UserEditInputModel model)
     {

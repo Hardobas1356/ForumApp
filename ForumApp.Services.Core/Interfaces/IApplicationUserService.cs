@@ -15,8 +15,5 @@ public interface IApplicationUserService
     public Task<UserEditInputModel> GetUserForEditAsync(Guid id);
     public Task SoftDeleteUserAsync(Guid id);
     public Task RestoreUserAsync(Guid id);
-    public Task ChangeDisplayNameAsync(Guid id, string newDisplayName);
-    public Task ChangeEmailAsync(Guid id, string newEmail);
-    public Task ChangeUsernameAsync(Guid id, string newUsername);
     public Task EditUserAsync(UserEditInputModel model);
 }
