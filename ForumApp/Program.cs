@@ -26,6 +26,7 @@ builder
 builder.Services
     .AddIdentity<ApplicationUser, IdentityRole<Guid>>(options =>
     {
+        options.SignIn.RequireConfirmedEmail = false;
         options.SignIn.RequireConfirmedAccount = true;
         options.Password.RequireDigit = false;
         options.Password.RequireNonAlphanumeric = false;
