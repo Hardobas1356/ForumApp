@@ -12,8 +12,11 @@ public class ApplicationUserConfiguration : IEntityTypeConfiguration<Application
     {
         builder
             .Property(au => au.DisplayName)
-            .HasMaxLength(DisplayNameMaxLength)
-            .IsRequired();
+            .HasMaxLength(DisplayNameMaxLength);
+
+        builder
+            .Property(au=>au.UserName)
+            .HasMaxLength(UserNameMaxLength);
 
         builder
             .Property(au => au.JoinDate)

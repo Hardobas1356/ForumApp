@@ -12,7 +12,7 @@ public class ApplicationUser : IdentityUser<Guid>
     public DateTime JoinDate { get; set; } = DateTime.UtcNow;
 
     [Comment("Name with which user is displayed in app")]
-    public string DisplayName { get; set; } = null!;
+    public string? DisplayName { get; set; }
     [Comment("Shows whether the user is deleted")]
     public bool IsDeleted { get; set; } = false;
 
