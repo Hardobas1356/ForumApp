@@ -188,6 +188,32 @@ public class ApplicationUserService : IApplicationUserService
             throw new InvalidOperationException($"Failed to change email for user with id: {user.Id}");
         }
     }
+    public async Task ChangeUsernameAsync(Guid id, string newUsername)
+    {
+        ApplicationUser user = await ValidateUserExists(id);
+
+        if (String.IsNullOrWhiteSpace(newUsername))
+        {
+            throw new ArgumentException($"Provided username null or white space {newUsername}");
+        }
+
+        newUsername = newUsername.Trim().ToLower();
+
+        ApplicationUser? userWithUsernameExists = await userManager.FindByNameAsync(newUsername);
+        if (userWithUsernameExists != null && userWithUsernameExists.Id != user.Id)
+        {
+            throw new InvalidOperationException(
+                $"Provided username already used by user: {userWithUsernameExists.UserName}, {userWithUsernameExists.Email}");
+        }
+
+        //SetUserName saved user
+        IdentityResult result = await userManager.SetUserNameAsync(user, newUsername);
+
+        if (!result.Succeeded)
+        {
+            throw new InvalidOperationException($"Failed to change username for user with id: {user.Id}");
+        }
+    }
 
     private async Task<ApplicationUser> ValidateUserExists(Guid id)
     {
@@ -211,4 +237,5 @@ public class ApplicationUserService : IApplicationUserService
             throw new InvalidOperationException($"Failed to update data for user with id: {user.Id}");
         }
     }
+
 }

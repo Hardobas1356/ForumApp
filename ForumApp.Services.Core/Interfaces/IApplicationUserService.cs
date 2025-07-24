@@ -16,4 +16,5 @@ public interface IApplicationUserService
     public Task RestoreUserAsync(Guid id);
     public Task ChangeDisplayNameAsync(Guid id, string newDisplayName);
     public Task ChangeEmailAsync(Guid id, string newEmail);
+    public Task ChangeUsernameAsync(Guid id, string newUsername);
 }
