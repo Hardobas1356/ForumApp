@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 using static ForumApp.GCommon.GlobalConstants;
-using static ForumApp.GCommon.GlobalConstants.DeletedUser;
 using static ForumApp.GCommon.Enums.SortEnums.PostSort;
 using static ForumApp.GCommon.Enums.SortEnums.ReplySort;
 
@@ -18,7 +17,6 @@ public class PostService : IPostService
     private readonly IGenericRepository<Post> postRepository;
     private readonly IGenericRepository<Board> boardRepository;
     private readonly IGenericRepository<PostTag> postTagRepository;
-    private readonly UserManager<ApplicationUser> userManager;
     private readonly IReplyService replyService;
     private readonly ITagService tagService;
     private readonly IPermissionService permissionService;
@@ -28,7 +26,6 @@ public class PostService : IPostService
         IGenericRepository<Post> postRepository,
         IGenericRepository<Board> boardRepository,
         IGenericRepository<PostTag> postTagRepository,
-        UserManager<ApplicationUser> userManager,
         IReplyService replyService,
         ITagService tagService,
         IPermissionService permissionService)
@@ -36,7 +33,6 @@ public class PostService : IPostService
         this.postRepository = postRepository;
         this.boardRepository = boardRepository;
         this.postTagRepository = postTagRepository;
-        this.userManager = userManager;
         this.replyService = replyService;
         this.tagService = tagService;
         this.permissionService = permissionService;
@@ -92,8 +88,10 @@ public class PostService : IPostService
                 Id = p.Id,
                 Title = p.Title,
                 CreatedAt = p.CreatedAt.ToString(APPLICATION_DATE_TIME_FORMAT),
-                Author = p.ApplicationUser.DisplayName,
-                Handle = p.ApplicationUser.UserName ?? "Unknown",
+                Author = p.ApplicationUser == null || p.ApplicationUser.IsDeleted
+                        ? DeletedUser.DELETED_DISPLAYNAME : p.ApplicationUser.DisplayName!,
+                Handle = p.ApplicationUser == null || p.ApplicationUser.IsDeleted
+                        ? DeletedUser.DELETED_USERNAME : p.ApplicationUser.UserName!,
                 Tags = p.PostTags
                         .Select(pt => new TagViewModel
                         {

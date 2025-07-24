@@ -235,8 +235,10 @@ public class BoardService : IBoardService
                 .Select(bm => new BoardModeratorViewModel
                 {
                     Id = bm.ApplicationUserId,
-                    DisplayName = bm.ApplicationUser.DisplayName,
-                    Handle = bm.ApplicationUser.UserName ?? "Unknown",
+                    DisplayName = bm.ApplicationUser == null
+                            ? DeletedUser.DELETED_DISPLAYNAME : bm.ApplicationUser.DisplayName!,
+                    Handle = bm.ApplicationUser == null
+                            ? DeletedUser.DELETED_USERNAME : bm.ApplicationUser.UserName!,
                 })
                 .ToArray()
         };

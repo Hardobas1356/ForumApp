@@ -5,6 +5,7 @@ using ForumApp.Web.ViewModels.Admin.ApplicationUser;
 using ForumApp.Web.ViewModels.ApplicationUser;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+
 using static ForumApp.GCommon.Enums.SortEnums.UserSort;
 using static ForumApp.GCommon.GlobalConstants;
 
@@ -50,8 +51,10 @@ public class ApplicationUserService : IApplicationUserService
             .Select(u => new UserModeratorViewModel
             {
                 Id = u.Id,
-                DisplayName = u.DisplayName ?? "(No Display Name)",
-                UserName = u.UserName!,
+                DisplayName = u.DisplayName == null
+                              ? DeletedUser.DELETED_DISPLAYNAME : u.DisplayName,
+                UserName = u.UserName == null
+                              ? DeletedUser.DELETED_USERNAME : u.UserName!,
                 IsModerator = moderatorIds.Contains(u.Id)
             })
             .ToArrayAsync();
@@ -71,8 +74,9 @@ public class ApplicationUserService : IApplicationUserService
             string loweredSearchTerm = searchTerm.ToLower();
 
             query = query
-                .Where(u => u.NormalizedUserName.Contains(loweredSearchTerm)
-                    || u.NormalizedEmail.Contains(loweredSearchTerm));
+                .Where(u => !String.IsNullOrWhiteSpace(u.DisplayName)
+                    && (u.NormalizedUserName!.Contains(loweredSearchTerm)
+                        || u.NormalizedEmail!.Contains(loweredSearchTerm)));
         }
 
         switch (sortOrder)
@@ -107,8 +111,10 @@ public class ApplicationUserService : IApplicationUserService
             .Select(u => new UserAdminViewModel
             {
                 Id = u.Id,
-                DisplayName = u.DisplayName,
-                UserName = u.UserName!,
+                DisplayName = u.DisplayName == null
+                              ? DeletedUser.DELETED_DISPLAYNAME : u.DisplayName,
+                UserName = u.UserName == null
+                              ? DeletedUser.DELETED_USERNAME : u.UserName,
                 Email = u.Email!,
                 JoinDate = u.JoinDate.ToString(APPLICATION_DATE_TIME_FORMAT),
                 IsDeleted = u.IsDeleted,
@@ -127,8 +133,10 @@ public class ApplicationUserService : IApplicationUserService
         {
             Id = id,
             Email = user.Email!,
-            DisplayName = user.DisplayName,
-            UserName = user.UserName!,
+            DisplayName = user.DisplayName == null
+                        ? DeletedUser.DELETED_DISPLAYNAME : user.DisplayName,
+            UserName = user.UserName == null
+                        ? DeletedUser.DELETED_USERNAME : user.UserName,
         };
 
         return model;
