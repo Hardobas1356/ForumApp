@@ -71,6 +71,14 @@ public class LoginModel : PageModel
                 ModelState.AddModelError(string.Empty, "Invalid login attempt.");
                 return Page();
             }
+
+            if (user.IsDeleted==true)
+            {
+                _logger.LogInformation($"User with deleted account tried to log in. ID: {user.Id}");
+                ModelState.AddModelError(string.Empty, "Your account has been deleted by an administrator.");
+                return Page();
+            }
+
             // This doesn't count login failures towards account lockout
             // To enable password failures to trigger account lockout, set lockoutOnFailure: true
             var result = await _signInManager
