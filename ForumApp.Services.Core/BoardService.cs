@@ -111,7 +111,8 @@ public class BoardService : IBoardService
         return await PaginatedResult<BoardAllIndexViewModel>
             .CreateAsync(result, pageNumber, pageSize);
     }
-    public async Task<IEnumerable<BoardAdminViewModel>?> GetAllBoardsForAdminAsync(BoardAdminFilter filter, BoardAllSortBy sortOrder, string? searchTerm)
+    public async Task<PaginatedResult<BoardAdminViewModel>> GetAllBoardsForAdminAsync(BoardAdminFilter filter,
+        BoardAllSortBy sortOrder, string? searchTerm, int pageNumber, int pageSize)
     {
         IQueryable<Board> query = boardRepository.GetQueryable(ignoreQueryFilters: true);
 
@@ -152,7 +153,7 @@ public class BoardService : IBoardService
                 break;
         }
 
-        IEnumerable<BoardAdminViewModel> boards = await query
+        var source = query
                 .Select(b => new BoardAdminViewModel
                 {
                     Id = b.Id,
@@ -160,10 +161,9 @@ public class BoardService : IBoardService
                     Description = b.Description,
                     IsApproved = b.IsApproved,
                     IsDeleted = b.IsDeleted,
-                })
-                .ToListAsync();
+                });
 
-        return boards;
+        return await PaginatedResult<BoardAdminViewModel>.CreateAsync(source, pageNumber, pageSize);
     }
     public async Task<BoardDetailsViewModel> GetBoardDetailsAsync(Guid boardId, PostSortBy sortOrder,
         string? searchTerm, int pageNumber, int pageSize)

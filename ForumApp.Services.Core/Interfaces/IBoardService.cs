@@ -10,8 +10,8 @@ namespace ForumApp.Services.Core.Interfaces;
 
 public interface IBoardService
 {
-    Task<IEnumerable<BoardAdminViewModel>?> GetAllBoardsForAdminAsync(BoardAdminFilter filter, BoardAllSortBy sortOrder,
-        string? searchTerm);
+    Task<PaginatedResult<BoardAdminViewModel>> GetAllBoardsForAdminAsync(BoardAdminFilter filter, BoardAllSortBy sortOrder,
+        string? searchTerm, int pageNumber, int pageSize);
     Task<PaginatedResult<BoardAllIndexViewModel>> GetAllBoardsAsync(Guid? userId, BoardAllSortBy sortOrder,
         string? searchTerm, int pageNumber, int pageSize);
     Task<BoardDetailsViewModel> GetBoardDetailsAsync(Guid boardId, PostSortBy sortOrder,

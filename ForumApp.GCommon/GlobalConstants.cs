@@ -20,6 +20,7 @@ public static class GlobalConstants
     public static class Pages
     {
         public static int USER_PAGE_SIZE = 10;
+        public static int ADMIN_BOARD_PAGE_SIZE = 12;
         public static int BOARD_PAGE_SIZE = 10;
         public static int POST_PAGE_SIZE = 10;
         public static int REPLY_PAGE_SIZE = 10;

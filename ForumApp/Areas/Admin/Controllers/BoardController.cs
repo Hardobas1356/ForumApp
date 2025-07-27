@@ -1,4 +1,5 @@
-﻿using ForumApp.Services.Core.Interfaces;
+﻿using ForumApp.GCommon;
+using ForumApp.Services.Core.Interfaces;
 using ForumApp.Web.ViewModels.Admin.Board;
 using Microsoft.AspNetCore.Mvc;
 
@@ -21,21 +22,23 @@ public class BoardController : BaseController
     }
 
     [HttpGet]
-    public async Task<IActionResult> Index(BoardAdminFilter filter, BoardAllSortBy sortOrder, string? searchTerm)
+    public async Task<IActionResult> Index(BoardAdminFilter filter,
+        BoardAllSortBy sortOrder, string? searchTerm, int pageNumber = 1)
     {
         try
         {
             ViewBag.CurrentFilter = filter;
             ViewBag.CurrentSortingOrder = sortOrder;
 
-            IEnumerable<BoardAdminViewModel>? model = await boardService
-                .GetAllBoardsForAdminAsync(filter, sortOrder, searchTerm);
+            PaginatedResult<BoardAdminViewModel> model = await boardService
+                .GetAllBoardsForAdminAsync(filter, sortOrder,
+                    searchTerm, pageNumber, ADMIN_BOARD_PAGE_SIZE);
 
             return View(model);
         }
         catch (Exception e)
         {
-            logger.LogError(e,"Error occurred while getting dashboard Index.");
+            logger.LogError(e, "Error occurred while getting dashboard Index.");
             return RedirectToAction(nameof(Index));
         }
     }
@@ -116,7 +119,7 @@ public class BoardController : BaseController
     public async Task<IActionResult> RestoreDeletedBoard(Guid id)
     {
         try
-        {       
+        {
             await boardService.RestoreBoardAsync(id);
 
             return RedirectToAction(nameof(Index));

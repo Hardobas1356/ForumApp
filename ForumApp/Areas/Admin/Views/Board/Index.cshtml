@@ -1,8 +1,9 @@
-﻿@using ForumApp.GCommon.Enums
-@using ForumApp.Web.ViewModels.Admin.Board
-@using static ForumApp.GCommon.Enums.FilterEnums
+﻿@using static ForumApp.GCommon.Enums.FilterEnums
 @using static ForumApp.GCommon.Enums.SortEnums.BoardSort
-@model IEnumerable<BoardAdminViewModel>
+@using ForumApp.GCommon.Enums
+@using ForumApp.Web.ViewModels.Admin.Board
+@using ForumApp.GCommon
+@model PaginatedResult<BoardAdminViewModel>
 
 @{
 	ViewData["Title"] = "Admin Dashboard";
@@ -12,11 +13,11 @@
 		: BoardAllSortBy.CreateTimeDescending;
 }
 
-<h2 class="mb-4">Admin Dashboard</h2>
+<h2 class="m-4">Admin Dashboard</h2>
 
 <form method="get" asp-action="Index" class="mb-4">
-	<div class="row g-2 align-items-center">
-		<div class="col-md-4">
+	<div class="row gy-3 gx-2">
+		<div class="col-md-3 col-sm-6">
 			<select class="form-select" name="filter">
 				@foreach (BoardAdminFilter filter in Enum.GetValues(typeof(BoardAdminFilter)))
 				{
@@ -26,7 +27,8 @@
 				}
 			</select>
 		</div>
-		<div class="col-md-4">
+
+		<div class="col-md-3 col-sm-6">
 			<select class="form-select" name="sortOrder">
 				@foreach (BoardAllSortBy sort in Enum.GetValues(typeof(BoardAllSortBy)))
 				{
@@ -36,23 +38,25 @@
 				}
 			</select>
 		</div>
-		<div class="col-md-4">
+
+		<div class="col-md-4 col-sm-8">
 			<input type="text"
 				   class="form-control"
 				   name="searchTerm"
 				   value="@Context.Request.Query["searchTerm"]"
 				   placeholder="Search boards..." />
 		</div>
-		<div class="col-md-4">
-			<button class="btn btn-outline-secondary w-100" type="submit">
-				<i class="bi bi-filter-circle me-1"></i> Apply Filters
+
+		<div class="col-md-2 col-sm-4 d-grid">
+			<button class="btn btn-outline-primary" type="submit">
+				<i class="bi bi-filter-circle me-1"></i> Filter
 			</button>
 		</div>
 	</div>
 </form>
 
-<div class="row row-cols-1 row-cols-md-2 g-4">
-	@foreach (var board in Model)
+<div class="row row-cols-1 row-cols-md-2 g-4 mb-4">
+	@foreach (var board in Model.Items)
 	{
 		<div class="col">
 			<div class="card h-100 shadow-sm border-@((board.IsDeleted ? "danger" : board.IsApproved ? "success" : "warning"))">
@@ -71,7 +75,6 @@
 						<span class="badge bg-@(board.IsApproved ? "success" : "secondary")">
 							@(board.IsApproved ? "Approved" : "Pending")
 						</span>
-
 						@if (board.IsDeleted)
 						{
 							<span class="badge bg-danger">Deleted</span>
@@ -110,8 +113,7 @@
 								  asp-area="Admin"
 								  asp-controller="Board"
 								  asp-action="RestoreDeletedBoard"
-								  asp-route-id="@board.Id"
-								  style="display:inline">
+								  asp-route-id="@board.Id">
 								@Html.AntiForgeryToken()
 								<button type="submit" class="btn btn-sm btn-warning">
 									<i class="bi bi-arrow-counterclockwise"></i> Restore
@@ -123,4 +125,8 @@
 			</div>
 		</div>
 	}
+</div>
+
+<div class="d-flex justify-content-center my-4">
+	@await Html.PartialAsync("_Pagination", Model)
 </div>
