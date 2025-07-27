@@ -84,29 +84,27 @@ public class BoardController : BaseController
                 return View(model);
             }
 
-            bool createResult = await boardService
+            await boardService
                 .CreateBoardAsync((Guid)this.GetUserId()!, model);
 
-            if (!createResult)
-            {
-                logger.LogWarning("Board creation failed. BoardService returned false.");
-
-                IEnumerable<CategoryViewModel> categories = await this.categoryService
-                    .GetCategoriesAsync();
-                model.AvailableCategories = categories;
-
-                ModelState.AddModelError(nameof(model.Name), "A board with this name already exists.");
-
-                return View(model);
-            }
-
             return RedirectToAction(nameof(Index));
+        }
+        catch (ArgumentException ex) when (ex.ParamName == nameof(model.ImageUrl))
+        {
+            logger.LogWarning(ex, "Invalid image URL: {ImageUrl}", model.ImageUrl);
+
+            ModelState.AddModelError(nameof(model.ImageUrl), ex.Message);
+            model.AvailableCategories = await categoryService.GetCategoriesAsync();
+
+            return View(model);
         }
         catch (Exception e)
         {
             logger.LogError(e, "Unexpected error while creating a board.");
+
             ModelState.AddModelError(string.Empty, "Unexpected error occurred while creating the board.");
             model.AvailableCategories = await categoryService.GetCategoriesAsync();
+
             return View(model);
         }
     }
@@ -117,14 +115,8 @@ public class BoardController : BaseController
     {
         try
         {
-            BoardDetailsViewModel? board = await boardService
+            BoardDetailsViewModel board = await boardService
                 .GetBoardDetailsAsync(id, sortOrder, searchTerm, pageNumber, BOARD_PAGE_SIZE);
-
-            if (board == null)
-            {
-                logger.LogWarning("Board with ID {BoardId} not found.", id);
-                return RedirectToAction(nameof(Index));
-            }
 
             return View(board);
         }

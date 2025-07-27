@@ -71,7 +71,6 @@ public class BoardService : IBoardService
                     .ToArray()
             });
 
-
         switch (sortOrder)
         {
             case BoardAllSortBy.None:
@@ -93,7 +92,7 @@ public class BoardService : IBoardService
                 break;
         }
 
-        var result = projectedQuery
+        IQueryable<BoardAllIndexViewModel> result = projectedQuery
             .Select(b => new BoardAllIndexViewModel
             {
                 Id = b.Id,
@@ -109,7 +108,8 @@ public class BoardService : IBoardService
             pageNumber = 1;
         }
 
-        return await PaginatedResult<BoardAllIndexViewModel>.CreateAsync(result, pageNumber, pageSize);
+        return await PaginatedResult<BoardAllIndexViewModel>
+            .CreateAsync(result, pageNumber, pageSize);
     }
     public async Task<IEnumerable<BoardAdminViewModel>?> GetAllBoardsForAdminAsync(BoardAdminFilter filter, BoardAllSortBy sortOrder, string? searchTerm)
     {
@@ -165,7 +165,7 @@ public class BoardService : IBoardService
 
         return boards;
     }
-    public async Task<BoardDetailsViewModel?> GetBoardDetailsAsync(Guid boardId, PostSortBy sortOrder,
+    public async Task<BoardDetailsViewModel> GetBoardDetailsAsync(Guid boardId, PostSortBy sortOrder,
         string? searchTerm, int pageNumber, int pageSize)
     {
         if (boardId == Guid.Empty)
@@ -198,7 +198,7 @@ public class BoardService : IBoardService
             Categories = categories ?? new HashSet<CategoryViewModel>(),
         };
     }
-    public async Task<BoardDetailsAdminViewModel?> GetBoardDetailsAdminAsync(Guid boardId, PostSortBy sortBy, int pageNumber, int pageSize)
+    public async Task<BoardDetailsAdminViewModel> GetBoardDetailsAdminAsync(Guid boardId, PostSortBy sortBy, int pageNumber, int pageSize)
     {
         if (boardId == Guid.Empty)
         {
@@ -245,7 +245,7 @@ public class BoardService : IBoardService
 
         return model;
     }
-    public async Task<BoardDeleteViewModel?> GetBoardForDeletionAsync(Guid boardId)
+    public async Task<BoardDeleteViewModel> GetBoardForDeletionAsync(Guid boardId)
     {
         if (boardId == Guid.Empty)
         {
@@ -270,7 +270,7 @@ public class BoardService : IBoardService
 
         return model;
     }
-    public async Task<bool> RestoreBoardAsync(Guid boardId)
+    public async Task RestoreBoardAsync(Guid boardId)
     {
         if (boardId == Guid.Empty)
         {
@@ -287,12 +287,17 @@ public class BoardService : IBoardService
             throw new ArgumentException("Board not found with Id", nameof(boardId));
         }
 
-        board.IsDeleted = false;
-        await boardRepository.SaveChangesAsync();
-
-        return true;
+        try
+        {
+            board.IsDeleted = false;
+            await boardRepository.SaveChangesAsync();
+        }
+        catch (Exception e)
+        {
+            throw new Exception("Failed to restore board", e);
+        }
     }
-    public async Task<bool> ApproveBoardAsync(Guid boardId)
+    public async Task ApproveBoardAsync(Guid boardId)
     {
         if (boardId == Guid.Empty)
         {
@@ -309,13 +314,17 @@ public class BoardService : IBoardService
             throw new ArgumentException("Board not found", nameof(boardId));
         }
 
-        board.IsApproved = true;
-
-        await boardRepository.SaveChangesAsync();
-
-        return true;
+        try
+        {
+            board.IsApproved = true;
+            await boardRepository.SaveChangesAsync();
+        }
+        catch (Exception e)
+        {
+            throw new Exception("Failed to approve board", e);
+        }
     }
-    public async Task<bool> SoftDeleteBoardAsync(BoardDeleteViewModel model)
+    public async Task SoftDeleteBoardAsync(BoardDeleteViewModel model)
     {
         Board? board = await boardRepository
             .GetByIdAsync(model.Id,
@@ -326,12 +335,17 @@ public class BoardService : IBoardService
             throw new ArgumentException("Board not found", nameof(model.Id));
         }
 
-        board.IsDeleted = true;
-        await boardRepository.SaveChangesAsync();
-
-        return true;
+        try
+        {
+            board.IsDeleted = true;
+            await boardRepository.SaveChangesAsync();
+        }
+        catch (Exception e)
+        {
+            throw new Exception("Failed to soft delete board", e);
+        }
     }
-    public async Task<bool> CreateBoardAsync(Guid userId, BoardCreateInputModel model)
+    public async Task CreateBoardAsync(Guid userId, BoardCreateInputModel model)
     {
         if (userId == Guid.Empty)
             throw new ArgumentException("User ID cannot be empty", nameof(userId));
@@ -342,8 +356,18 @@ public class BoardService : IBoardService
         if (string.IsNullOrWhiteSpace(model.Name))
             throw new ArgumentException("Board name is required", nameof(model));
 
+        if (!string.IsNullOrWhiteSpace(model.ImageUrl))
+        {
+            if (!Uri.TryCreate(model.ImageUrl, UriKind.Absolute, out Uri? uriResult) ||
+                !(uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps))
+            {
+                throw new ArgumentException("Image URL is not a valid HTTP or HTTPS URL", nameof(model.ImageUrl));
+            }
+        }
+
         IEnumerable<CategoryViewModel> categories = await categoryService
             .GetCategoriesAsync();
+
         HashSet<Guid> validCategoryIds = categories
             .Select(c => c.Id).ToHashSet();
 
@@ -385,14 +409,13 @@ public class BoardService : IBoardService
         {
             await boardRepository.AddAsync(board);
             await boardRepository.SaveChangesAsync();
-            return true;
         }
         catch (Exception e)
         {
             throw new Exception("Failed to create board in database", e);
         }
     }
-    public async Task<string?> GetBoardNameByIdAsync(Guid boardId)
+    public async Task<string> GetBoardNameByIdAsync(Guid boardId)
     {
         if (boardId == Guid.Empty)
         {
@@ -408,7 +431,7 @@ public class BoardService : IBoardService
 
         return board.Name;
     }
-    public async Task<bool> AddModeratorAsync(Guid userId, Guid boardId)
+    public async Task AddModeratorAsync(Guid userId, Guid boardId)
     {
         if (boardId == Guid.Empty)
         {
@@ -427,7 +450,7 @@ public class BoardService : IBoardService
         ApplicationUser? user = await userManager
             .FindByIdAsync(userId.ToString());
 
-        if (board == null)
+        if (user == null)
         {
             throw new ArgumentException("User not found", nameof(userId));
         }
@@ -452,17 +475,22 @@ public class BoardService : IBoardService
         {
             if (!boardManager.IsDeleted)
             {
-                return false;
+                throw new InvalidOperationException("Board manager already exists");
             }
 
             boardManager.IsDeleted = false;
         }
 
-        await boardManagerRepository.SaveChangesAsync();
-
-        return true;
+        try
+        {
+            await boardManagerRepository.SaveChangesAsync();
+        }
+        catch (Exception e)
+        {
+            throw new Exception("Failed to save db", e);
+        }
     }
-    public async Task<bool> RemoveModeratorAsync(Guid userId, Guid boardId)
+    public async Task RemoveModeratorAsync(Guid userId, Guid boardId)
     {
         if (boardId == Guid.Empty || userId == Guid.Empty)
         {
@@ -487,8 +515,13 @@ public class BoardService : IBoardService
 
         boardManager.IsDeleted = true;
 
-        await boardManagerRepository.SaveChangesAsync();
-
-        return true;
+        try
+        {
+            await boardManagerRepository.SaveChangesAsync();
+        }
+        catch (Exception e)
+        {
+            throw new Exception("Failed to remove moderator", e);
+        }
     }
 }

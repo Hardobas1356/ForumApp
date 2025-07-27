@@ -14,16 +14,16 @@ public interface IBoardService
         string? searchTerm);
     Task<PaginatedResult<BoardAllIndexViewModel>> GetAllBoardsAsync(Guid? userId, BoardAllSortBy sortOrder,
         string? searchTerm, int pageNumber, int pageSize);
-    Task<BoardDetailsViewModel?> GetBoardDetailsAsync(Guid boardId, PostSortBy sortOrder,
+    Task<BoardDetailsViewModel> GetBoardDetailsAsync(Guid boardId, PostSortBy sortOrder,
         string? searchTerm, int pageNumber, int pageSize);
-    Task<BoardDetailsAdminViewModel?> GetBoardDetailsAdminAsync(Guid boardId, PostSortBy sortBy,
+    Task<BoardDetailsAdminViewModel> GetBoardDetailsAdminAsync(Guid boardId, PostSortBy sortBy,
         int postPageNumber, int postPageSize);
-    Task<BoardDeleteViewModel?> GetBoardForDeletionAsync(Guid boardId);
-    Task<string?> GetBoardNameByIdAsync(Guid boardId);
-    Task<bool> CreateBoardAsync(Guid userId, BoardCreateInputModel model);
-    Task<bool> RestoreBoardAsync(Guid boardId);
-    Task<bool> SoftDeleteBoardAsync(BoardDeleteViewModel model);
-    Task<bool> ApproveBoardAsync(Guid boardId);
-    Task<bool> AddModeratorAsync(Guid userId, Guid boardId);
-    Task<bool> RemoveModeratorAsync(Guid userId, Guid boardId);
+    Task<BoardDeleteViewModel> GetBoardForDeletionAsync(Guid boardId);
+    Task<string> GetBoardNameByIdAsync(Guid boardId);
+    Task CreateBoardAsync(Guid userId, BoardCreateInputModel model);
+    Task RestoreBoardAsync(Guid boardId);
+    Task SoftDeleteBoardAsync(BoardDeleteViewModel model);
+    Task ApproveBoardAsync(Guid boardId);
+    Task AddModeratorAsync(Guid userId, Guid boardId);
+    Task RemoveModeratorAsync(Guid userId, Guid boardId);
 }

@@ -48,12 +48,6 @@ public class BoardController : BaseController
             BoardDetailsAdminViewModel? board = await boardService
                 .GetBoardDetailsAdminAsync(id, sortBy, pageNumber, POST_PAGE_SIZE);
 
-            if (board == null)
-            {
-                logger.LogWarning("No board was found with ID: {id}", id);
-                return RedirectToAction(nameof(Index));
-            }
-
             ViewBag.SortBy = sortBy;
 
             return View(board);
@@ -91,12 +85,6 @@ public class BoardController : BaseController
             BoardDeleteViewModel? model = await boardService
                  .GetBoardForDeletionAsync(id);
 
-            if (model == null)
-            {
-                logger.LogWarning("Could not find board. ID: {id}", id);
-                return NotFound();
-            }
-
             return View(model);
         }
         catch (Exception e)
@@ -112,20 +100,14 @@ public class BoardController : BaseController
     {
         try
         {
-            bool deleteResult = await boardService.SoftDeleteBoardAsync(model);
-
-            if (!deleteResult)
-            {
-                logger.LogWarning("Could not delete board. ID: {id}", model.Id);
-                return View(model);
-            }
+            await boardService.SoftDeleteBoardAsync(model);
 
             return RedirectToAction(nameof(Index));
         }
         catch (Exception e)
         {
             logger.LogError(e, "Error occurred while deleting board");
-            return RedirectToAction(nameof(Index));
+            return View(model);
         }
     }
 
@@ -134,15 +116,8 @@ public class BoardController : BaseController
     public async Task<IActionResult> RestoreDeletedBoard(Guid id)
     {
         try
-        {
-            bool actionResult = await boardService
-                .RestoreBoardAsync(id);
-
-            if (!actionResult)
-            {
-                logger.LogWarning("Could not restore board. ID: {id}", id);
-                return RedirectToAction(nameof(Index));
-            }
+        {       
+            await boardService.RestoreBoardAsync(id);
 
             return RedirectToAction(nameof(Index));
         }

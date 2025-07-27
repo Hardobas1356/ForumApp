@@ -62,12 +62,7 @@ public class ModeratorController : BaseController
     {
         try
         {
-            bool addResult = await boardService.AddModeratorAsync(userId, boardId);
-
-            if (!addResult)
-            {
-                logger.LogWarning("Failed to add moderator. UserId: {UserId}, BoardId: {BoardId}", userId, boardId);
-            }
+            await boardService.AddModeratorAsync(userId, boardId);
 
             return RedirectToAction("Details", "Board", new { id = boardId });
         }
@@ -84,12 +79,7 @@ public class ModeratorController : BaseController
     {
         try
         {
-            bool removeResult = await boardService.RemoveModeratorAsync(userId, boardId);
-
-            if (!removeResult)
-            {
-                logger.LogWarning("Failed to remove moderator. UserId: {UserId}, BoardId: {BoardId}", userId, boardId);
-            }
+            await boardService.RemoveModeratorAsync(userId, boardId);
 
             return RedirectToAction("Details", "Board", new { id = boardId });
         }
