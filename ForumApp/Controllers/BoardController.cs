@@ -1,4 +1,5 @@
-﻿using ForumApp.Services.Core.Interfaces;
+﻿using ForumApp.GCommon;
+using ForumApp.Services.Core.Interfaces;
 using ForumApp.Web.ViewModels.Board;
 using ForumApp.Web.ViewModels.Category;
 using Microsoft.AspNetCore.Authorization;
@@ -33,7 +34,7 @@ public class BoardController : BaseController
             ViewBag.CurrentSortingOrder = sortOrder;
             ViewBag.SearchTerm = searchTerm;
 
-            var boards = await boardService
+            PaginatedResult<BoardAllIndexViewModel> boards = await boardService
                 .GetAllBoardsAsync(this.GetUserId(), sortOrder, searchTerm, pageNumber, BOARD_PAGE_SIZE);
 
             return View(boards);

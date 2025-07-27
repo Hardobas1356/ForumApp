@@ -1,4 +1,5 @@
-﻿using ForumApp.Services.Core.Interfaces;
+﻿using ForumApp.Services.Core;
+using ForumApp.Services.Core.Interfaces;
 using ForumApp.Web.ViewModels.Post;
 using ForumApp.Web.ViewModels.Tag;
 using Microsoft.AspNetCore.Authorization;
@@ -36,14 +37,8 @@ public class PostController : BaseController
         {
             pageNumber = Math.Max(1, pageNumber);
 
-            PostDetailsViewModel? model = await postService
+            PostDetailsViewModel model = await postService
                 .GetPostDetailsAsync(this.GetUserId(), id, sortBy, pageNumber, REPLY_PAGE_SIZE);
-
-            if (model == null)
-            {
-                logger.LogWarning("Post with id {postId} not found", id);
-                return RedirectToAction("Index", "Board");
-            }
 
             ViewBag.ReplySortBy = sortBy;
 
@@ -67,12 +62,6 @@ public class PostController : BaseController
             if (!await permissionService.CanManagePostAsync((Guid)this.GetUserId()!, id))
             {
                 logger.LogWarning("User does not permission to edit");
-                return RedirectToAction("Index", "Board");
-            }
-
-            if (model == null)
-            {
-                logger.LogWarning("Post not found");
                 return RedirectToAction("Index", "Board");
             }
 
@@ -106,20 +95,27 @@ public class PostController : BaseController
                 return this.View(model);
             }
 
-            if (!await postService.EditPostAsync((Guid)this.GetUserId()!, model))
-            {
-                logger.LogWarning("Edit post failed");
-                model.AvailableTags = await tagService
-                    .GetTagsAsync();
-                return this.View(model);
-            }
+            await postService.EditPostAsync((Guid)this.GetUserId()!, model);
 
             return RedirectToAction("Details", new { Id = model.Id });
+        }
+        catch (ArgumentException ex) when (ex.ParamName == model.ImageUrl)
+        {
+            logger.LogWarning(ex, "Invalid image URL: {ImageUrl}", model.ImageUrl);
+
+            ModelState.AddModelError(nameof(model.ImageUrl), ex.Message);
+            model.AvailableTags = await tagService.GetTagsAsync();
+
+            return View(model);
         }
         catch (Exception e)
         {
             logger.LogError(e, "Error while editing post");
-            return RedirectToAction("Index", "Board");
+
+            model.AvailableTags = await tagService
+                .GetTagsAsync();
+             ModelState.AddModelError(string.Empty, "Unexpected error occurred while editing the post.");
+            return this.View(model);
         }
     }
 
@@ -128,7 +124,7 @@ public class PostController : BaseController
     {
         try
         {
-            string? boardName = await boardService.GetBoardNameByIdAsync(id);
+            string boardName = await boardService.GetBoardNameByIdAsync(id);
 
             ICollection<TagViewModel> tags = await tagService
                 .GetTagsAsync();
@@ -163,24 +159,27 @@ public class PostController : BaseController
                 return View(model);
             }
 
-            bool CreateResult =
-                await postService.AddPostAsync((Guid)this.GetUserId()!, model);
-
-            if (!CreateResult)
-            {
-                model.AvailableTags = await tagService
-                    .GetTagsAsync();
-                logger.LogWarning("Post could not be created");
-                ModelState.AddModelError(String.Empty, "Error occured while adding post to board");
-                return View(model);
-            }
+            await postService.AddPostAsync((Guid)this.GetUserId()!, model);
 
             return RedirectToAction(nameof(Details), "Board", new { Id = model.BoardId });
+        }
+        catch (ArgumentException ex) when (ex.ParamName == model.ImageUrl)
+        {
+            logger.LogWarning(ex, "Invalid image URL: {ImageUrl}", model.ImageUrl);
+
+            ModelState.AddModelError(nameof(model.ImageUrl), ex.Message);
+            model.AvailableTags = await tagService.GetTagsAsync();
+
+            return View(model);
         }
         catch (Exception e)
         {
             logger.LogError(e, "Error occured while creating post");
-            return RedirectToAction(nameof(Details), "Board", new { Id = model.BoardId });
+            ModelState.AddModelError(String.Empty, "Error occured while adding post to board");
+
+            model.AvailableTags = await tagService
+                .GetTagsAsync();
+            return View(model);
         }
     }
 
@@ -197,12 +196,6 @@ public class PostController : BaseController
 
             PostDeleteViewModel? model = await postService
                 .GetPostForDeleteAsync((Guid)this.GetUserId()!, id);
-
-            if (model == null)
-            {
-                logger.LogWarning("Post with id {postId} not found", id);
-                return RedirectToAction("Index", "Board");
-            }
 
             return View(model);
         }
@@ -225,21 +218,15 @@ public class PostController : BaseController
                 return RedirectToAction("Index", "Board");
             }
 
-            bool postDeletionResult = await postService
+            await postService
                 .DeletePostAsync((Guid)this.GetUserId()!, model);
-
-            if (!postDeletionResult)
-            {
-                logger.LogWarning("Post could not be deleted");
-                return RedirectToAction("Details", "Board", new { Id = model.BoardId });
-            }
 
             return RedirectToAction("Index", "Board");
         }
         catch (Exception e)
         {
             logger.LogError(e, "Error occured while deleting post");
-            return RedirectToAction("Index", "Board");
+            return RedirectToAction("Details", "Board", new { Id = model.BoardId });
         }
     }
 }

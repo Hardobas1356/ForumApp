@@ -37,7 +37,7 @@ public class PostService : IPostService
         this.permissionService = permissionService;
     }
 
-    public async Task<PaginatedResult<PostForBoardDetailsViewModel>?> GetPostsForBoardDetailsAsync(Guid boardId,
+    public async Task<PaginatedResult<PostForBoardDetailsViewModel>> GetPostsForBoardDetailsAsync(Guid boardId,
         PostSortBy sortOrder, string? searchTerm,
         int pageNumber, int pageSize)
     {
@@ -105,7 +105,7 @@ public class PostService : IPostService
     }
 
     //Only authors can edit their own posts — not admins or mods.
-    public async Task<PostEditInputModel?> GetPostForEditAsync(Guid userId, Guid id)
+    public async Task<PostEditInputModel> GetPostForEditAsync(Guid userId, Guid id)
     {
         Post? post = await postRepository
             .SingleOrDefaultWithIncludeAsync(p => p.ApplicationUserId == userId
@@ -117,7 +117,7 @@ public class PostService : IPostService
 
         if (post == null)
         {
-            return null;
+            throw new ArgumentException($"Post not found. Id:{id}");
         }
 
         ICollection<TagViewModel> tags = await tagService
@@ -146,7 +146,7 @@ public class PostService : IPostService
         };
     }
     //Only authors can edit their own posts — not admins or mods.
-    public async Task<bool> EditPostAsync(Guid userId, PostEditInputModel model)
+    public async Task EditPostAsync(Guid userId, PostEditInputModel model)
     {
         Post? post = await postRepository
             .SingleOrDefaultWithIncludeAsync(p => p.Id == model.Id
@@ -157,7 +157,12 @@ public class PostService : IPostService
 
         if (post == null)
         {
-            return false;
+            throw new ArgumentException($"Post not found. Id:{model.Id}");
+        }
+
+        if (!IsValidImageUrl(model.ImageUrl))
+        {
+            throw new ArgumentException("Image url is not valid or supported.", model.ImageUrl);
         }
 
         post.Title = model.Title;
@@ -179,10 +184,16 @@ public class PostService : IPostService
             }
         }
 
-        await postRepository.SaveChangesAsync();
-        return true;
+        try
+        {
+            await postRepository.SaveChangesAsync();
+        }
+        catch (Exception e)
+        {
+            throw new Exception($"Error while editing post", e);
+        }
     }
-    public async Task<PostDetailsViewModel?> GetPostDetailsAsync(Guid? userId, Guid id,
+    public async Task<PostDetailsViewModel> GetPostDetailsAsync(Guid? userId, Guid id,
         ReplySortBy sortBy, int pageNumber, int pageSize)
     {
         Post? post = await postRepository
@@ -194,7 +205,7 @@ public class PostService : IPostService
                                                    .ThenInclude(pt => pt.Tag));
         if (post == null)
         {
-            return null;
+            throw new ArgumentException($"Post not found. Id:{id}");
         }
 
         bool canModerate = userId != null
@@ -229,14 +240,19 @@ public class PostService : IPostService
 
         return model;
     }
-    public async Task<bool> AddPostAsync(Guid userId, PostCreateInputModel model)
+    public async Task AddPostAsync(Guid userId, PostCreateInputModel model)
     {
         bool boardExists = await boardRepository
             .AnyAsync(b => b.Id == model.BoardId);
 
         if (!boardExists)
         {
-            return false;
+            throw new ArgumentException($"Board not found. Id:{model.BoardId}");
+        }
+
+        if (!IsValidImageUrl(model.ImageUrl))
+        {
+            throw new ArgumentException("Image url is not valid or supported.", model.ImageUrl);
         }
 
         Post post = new Post()
@@ -265,27 +281,31 @@ public class PostService : IPostService
             }
         }
 
-        await postRepository.SaveChangesAsync();
-
-        return true;
+        try
+        {
+            await postRepository.SaveChangesAsync();
+        }
+        catch (Exception e)
+        {
+            throw new Exception($"Error occurred while adding post", e);
+        }
     }
-    public async Task<PostDeleteViewModel?> GetPostForDeleteAsync(Guid userId, Guid id)
+    public async Task<PostDeleteViewModel> GetPostForDeleteAsync(Guid userId, Guid id)
     {
         Post? post = await postRepository
             .SingleOrDefaultWithIncludeAsync(p => p.Id == id,
-                                             q => q.Include(p => p.Board)
-                                                   .ThenInclude(b => b.BoardManagers));
+                                        q => q.Include(p => p.Board));
 
-        if (post == null || post.Board == null)
+        if (post == null)
         {
-            return null;
+            throw new ArgumentException($"Post not found. Post id: {id}");
         }
 
         bool canDelete = await permissionService.CanManagePostAsync(userId, post.Id);
 
         if (!canDelete)
         {
-            return null;
+            throw new OperationCanceledException("User does not have permission to remove post");
         }
 
         PostDeleteViewModel? model = new PostDeleteViewModel
@@ -301,39 +321,50 @@ public class PostService : IPostService
 
         return model;
     }
-    public async Task<bool> DeletePostAsync(Guid userId, PostDeleteViewModel model)
+    public async Task DeletePostAsync(Guid userId, PostDeleteViewModel model)
     {
         Post? post = await postRepository
-            .SingleOrDefaultWithIncludeAsync(p => p.Id == model.Id,
-                                             q => q.Include(p => p.Board)
-                                                   .ThenInclude(b => b.BoardManagers),
-                                             asNoTracking: false);
+            .SingleOrDefaultAsync(p => p.Id == model.Id,
+                                       asNoTracking: false);
 
         if (post == null)
         {
-            return false;
+            throw new ArgumentException($"Post not found. Id: {model.Id}");
         }
 
         bool canDelete = await permissionService.CanManagePostAsync(userId, post.Id);
 
         if (!canDelete)
         {
-            return false;
-        }
-
-        bool boardExists =
-            await boardRepository
-            .AnyAsync(b => b.Id == model.BoardId);
-
-        if (!boardExists)
-        {
-            return false;
+            throw new OperationCanceledException("User does not have permission to remove post");
         }
 
         post.IsDeleted = true;
 
-        await postRepository.SaveChangesAsync();
+        try
+        {
+            await postRepository.SaveChangesAsync();
+        }
+        catch (Exception e)
+        {
+            throw new Exception($"Error occured while deleting post", e);
+        }
+    }
 
-        return true;
+    private bool IsValidImageUrl(string? url)
+    {
+        if (string.IsNullOrWhiteSpace(url))
+            return false;
+
+        if (!Uri.TryCreate(url, UriKind.Absolute, out var uriResult))
+            return false;
+
+        if (uriResult.Scheme != Uri.UriSchemeHttp && uriResult.Scheme != Uri.UriSchemeHttps)
+            return false;
+
+        string[] validExtensions = { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp" };
+        string urlLower = url.ToLowerInvariant();
+
+        return validExtensions.Any(ext => urlLower.EndsWith(ext));
     }
 }
