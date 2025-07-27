@@ -23,7 +23,6 @@ public class ReplyController : BaseController
     {
         try
         {
-            //TODO: check if Post exists
             ReplyCreateInputModel model = new ReplyCreateInputModel()
             {
                 PostId = postId,
@@ -50,22 +49,16 @@ public class ReplyController : BaseController
                 return View(model);
             }
 
-            bool createResult = await replyService
+            await replyService
                 .CreateReplyForPostAsync((Guid)GetUserId()!, model);
-
-            if (!createResult)
-            {
-                logger.LogWarning("Failed to create reply for post {PostId} by user {UserId}", model.PostId, this.GetUserId());
-                ModelState.AddModelError(String.Empty, "Fatal error while creating reply");
-                return NotFound();
-            }
 
             return RedirectToAction("Details", "Post", new { id = model.PostId });
         }
         catch (Exception e)
         {
             logger.LogError(e, "Error occurred while creating reply for post {PostId}", model.PostId);
-            return RedirectToAction("Details", "Post", new { id = model.PostId });
+            ModelState.AddModelError(String.Empty, "Fatal error while creating reply");
+            return View(model);
         }
     }
 
@@ -82,12 +75,6 @@ public class ReplyController : BaseController
 
             ReplyDeleteViewModel? model = await replyService
                 .GetReplyForDeleteAsync((Guid)this.GetUserId()!, postId, id);
-
-            if (model == null)
-            {
-                logger.LogWarning("Reply {ReplyId} not found for deletion", id);
-                return RedirectToAction("Details", "Post", new { id = postId });
-            }
 
             return View(model);
         }
@@ -110,16 +97,7 @@ public class ReplyController : BaseController
                 return RedirectToAction("Details", "Post", new { id = model.PostId });
             }
 
-            bool deleteResult = await replyService.SoftDeleteReplyAsync((Guid)this.GetUserId()!, model);
-            if (!deleteResult)
-            {
-                logger.LogWarning("Failed to delete reply {ReplyId}", model.Id);
-                ModelState.AddModelError(string.Empty, "Error while deleting reply!");
-            }
-            else
-            {
-                logger.LogInformation("Reply {ReplyId} deleted by user {UserId}", model.Id, this.GetUserId());
-            }
+            await replyService.SoftDeleteReplyAsync((Guid)this.GetUserId()!, model);
 
             return RedirectToAction("Details", "Post", new { id = model.PostId });
         }
@@ -143,12 +121,6 @@ public class ReplyController : BaseController
 
             ReplyEditInputModel? model = await replyService
                 .GetReplyForEditAsync((Guid)this.GetUserId()!, postId, id);
-
-            if (model == null)
-            {
-                logger.LogWarning("Reply {ReplyId} not found for editing", id);
-                return RedirectToAction("Details", "Post", new { id = postId });
-            }
 
             return View(model);
         }
@@ -178,21 +150,16 @@ public class ReplyController : BaseController
                 return View(model);
             }
 
-            bool editResult = await replyService
+            await replyService
                 .EditReplyAsync((Guid)this.GetUserId()!,model);
-
-            if (!editResult)
-            {
-                ModelState.AddModelError(String.Empty, "Error while editing reply");
-                return View(model);
-            }
 
             return RedirectToAction("Details", "Post", new { id = model.PostId });
         }
         catch (Exception e)
         {
-            Console.WriteLine(e.Message);
-            return RedirectToAction("Details", "Post", new { id = model.PostId });
+            logger.LogError(e, "Error editing reply {ReplyId} by user {UserId}", model.Id, this.GetUserId());
+            ModelState.AddModelError(string.Empty, "Unexpected error occurred while editing reply.");
+            return View(model);
         }
     }
 }

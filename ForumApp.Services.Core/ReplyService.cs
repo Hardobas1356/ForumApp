@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 using static ForumApp.GCommon.Enums.SortEnums.ReplySort;
+using static ForumApp.GCommon.GlobalConstants.Roles;
 using static ForumApp.GCommon.GlobalConstants;
 
 namespace ForumApp.Services.Core;
@@ -26,17 +27,22 @@ public class ReplyService : IReplyService
         this.userManager = userManager;
     }
 
-    public async Task<bool> CreateReplyForPostAsync(Guid userId, ReplyCreateInputModel model)
+    public async Task CreateReplyForPostAsync(Guid userId, ReplyCreateInputModel model)
     {
         Post? post = await postRepository
             .GetByIdAsync(model.PostId, true);
 
+        if (post == null)
+        {
+            throw new ArgumentException($"Post not found {model.PostId}");
+        }
+
         ApplicationUser? user = await userManager
             .FindByIdAsync(userId.ToString());
 
-        if (post == null || user == null)
+        if (user == null)
         {
-            return false;
+            throw new ArgumentException($"User not found {userId}");
         }
 
         Reply reply = new Reply()
@@ -47,12 +53,17 @@ public class ReplyService : IReplyService
             CreatedAt = DateTime.UtcNow,
         };
 
-        await replyRepository.AddAsync(reply);
-        await replyRepository.SaveChangesAsync();
-
-        return true;
+        try
+        {
+            await replyRepository.AddAsync(reply);
+            await replyRepository.SaveChangesAsync();
+        }
+        catch (Exception e)
+        {
+            throw new Exception("Error while creating reply", e);
+        }
     }
-    public async Task<PaginatedResult<ReplyForPostDetailViewModel>?> GetRepliesForPostDetailsAsync(Guid? userId,
+    public async Task<PaginatedResult<ReplyForPostDetailViewModel>> GetRepliesForPostDetailsAsync(Guid? userId,
         Guid postId, bool canModerate, ReplySortBy sortBy,
         int pageNumber, int pageSize)
     {
@@ -96,7 +107,7 @@ public class ReplyService : IReplyService
             .CreateAsync(replies, pageNumber, pageSize);
     }
 
-    public async Task<ReplyDeleteViewModel?> GetReplyForDeleteAsync(Guid userId, Guid postId, Guid id)
+    public async Task<ReplyDeleteViewModel> GetReplyForDeleteAsync(Guid userId, Guid postId, Guid id)
     {
         Reply? reply = await replyRepository
             .SingleOrDefaultWithIncludeAsync(r => r.Id == id
@@ -105,14 +116,14 @@ public class ReplyService : IReplyService
                                                    .ThenInclude(p => p.Board)
                                                    .ThenInclude(b => b.BoardManagers));
 
-        if (reply == null || reply.Post == null || reply.Post.Board == null)
+        if (reply == null)
         {
-            return null;
+            throw new ArgumentException($"Reply not found. Id:{id} , post id: {postId}");
         }
 
         if (!await UserHasRights(reply, userId))
         {
-            return null;
+            throw new OperationCanceledException("User does not permission to delete reply");
         }
 
         return new ReplyDeleteViewModel
@@ -123,7 +134,7 @@ public class ReplyService : IReplyService
             CreatedAt = reply.CreatedAt.ToString(APPLICATION_DATE_TIME_FORMAT)
         };
     }
-    public async Task<bool> SoftDeleteReplyAsync(Guid userId, ReplyDeleteViewModel model)
+    public async Task SoftDeleteReplyAsync(Guid userId, ReplyDeleteViewModel model)
     {
         Reply? reply = await replyRepository
            .SingleOrDefaultWithIncludeAsync(r => r.Id == model.Id
@@ -131,22 +142,27 @@ public class ReplyService : IReplyService
                                             q => q.Include(r => r.Post.Board.BoardManagers),
                                             asNoTracking: false);
 
-        if (reply == null || reply.Post == null || reply.Post.Board == null)
+        if (reply == null)
         {
-            return false;
+            throw new ArgumentException($"Reply not found. Id:{model.Id} , post id: {model.PostId}");
         }
 
         if (!await UserHasRights(reply, userId))
         {
-            return false;
+            throw new OperationCanceledException("User does not permission to delete reply");
         }
 
-        reply.IsDeleted = true;
-        await replyRepository.SaveChangesAsync();
-
-        return true;
+        try
+        {
+            reply.IsDeleted = true;
+            await replyRepository.SaveChangesAsync();
+        }
+        catch (Exception e)
+        {
+            throw new Exception("Error occured while deleting reply", e);
+        }
     }
-    public async Task<ReplyEditInputModel?> GetReplyForEditAsync(Guid userId, Guid postId, Guid id)
+    public async Task<ReplyEditInputModel> GetReplyForEditAsync(Guid userId, Guid postId, Guid id)
     {
         Reply? reply = await replyRepository
             .SingleOrDefaultAsync(r => r.Id == id
@@ -154,7 +170,10 @@ public class ReplyService : IReplyService
                                   && r.ApplicationUserId == userId,
                                   asNoTracking: true);
 
-        if (reply == null) return null;
+        if (reply == null)
+        {
+            throw new ArgumentException($"Reply not found. Id:{id} , post id: {postId}");
+        }
 
         return new ReplyEditInputModel
         {
@@ -164,7 +183,7 @@ public class ReplyService : IReplyService
         };
     }
 
-    public async Task<bool> EditReplyAsync(Guid userId, ReplyEditInputModel model)
+    public async Task EditReplyAsync(Guid userId, ReplyEditInputModel model)
     {
         Reply? reply = await replyRepository
             .SingleOrDefaultAsync(r => r.Id == model.Id
@@ -172,12 +191,20 @@ public class ReplyService : IReplyService
                                   && r.ApplicationUserId == userId,
                                   asNoTracking: false);
 
-        if (reply == null) return false;
+        if (reply == null)
+        {
+            throw new ArgumentException($"Reply not found. Id:{model.Id} , post id: {model.PostId}");
+        }
 
-        reply.Content = model.Content;
-        await replyRepository.SaveChangesAsync();
-
-        return true;
+        try
+        {
+            reply.Content = model.Content;
+            await replyRepository.SaveChangesAsync();
+        }
+        catch (Exception e)
+        {
+            throw new Exception("Error occured while editing reply", e);
+        }
     }
 
     private async Task<bool> UserHasRights(Reply reply, Guid userId)
@@ -201,6 +228,6 @@ public class ReplyService : IReplyService
         }
 
         return await userManager
-            .IsInRoleAsync(user, "Admin");
+            .IsInRoleAsync(user, ADMIN_ROLE_NAME);
     }
 }
