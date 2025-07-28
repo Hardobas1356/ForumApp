@@ -1,27 +1,50 @@
 ﻿@using ForumApp.Data.Models
 @using Microsoft.AspNetCore.Identity
+@using static ForumApp.GCommon.GlobalConstants
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
 
+@{
+	ApplicationUser? currentUser = null;
+	string imageUrl = DEFAULT_PROFILE_PICTURE;
+
+	if (SignInManager.IsSignedIn(User))
+	{
+		currentUser = await UserManager.GetUserAsync(User);
+
+		if (!string.IsNullOrWhiteSpace(currentUser?.ImageUrl))
+		{
+			imageUrl = currentUser.ImageUrl;
+		}
+	}
+}
+
 <ul class="navbar-nav">
-@if (SignInManager.IsSignedIn(User))
-{
-    <li class="nav-item">
-        <a  class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello @User.Identity?.Name!</a>
-    </li>
-    <li class="nav-item">
-        <form  class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
-            <button  type="submit" class="nav-link btn btn-link text-dark">Logout</button>
-        </form>
-    </li>
-}
-else
-{
-    <li class="nav-item">
-        <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Register">Register</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Login">Login</a>
-    </li>
-}
+	@if (SignInManager.IsSignedIn(User))
+	{
+		<li class="nav-item d-flex align-items-center gap-2">
+			<img src="@imageUrl"
+				 onerror="this.onerror=null;this.src='@DEFAULT_PROFILE_PICTURE';"
+				 alt="Profile"
+				 class="rounded-circle"
+				 style="width: 32px; height: 32px; object-fit: cover;" />
+			<a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">
+				Hello @User.Identity?.Name!
+			</a>
+		</li>
+		<li class="nav-item">
+			<form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+				<button type="submit" class="nav-link btn btn-link text-dark">Logout</button>
+			</form>
+		</li>
+	}
+	else
+	{
+		<li class="nav-item">
+			<a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Register">Register</a>
+		</li>
+		<li class="nav-item">
+			<a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Login">Login</a>
+		</li>
+	}
 </ul>
