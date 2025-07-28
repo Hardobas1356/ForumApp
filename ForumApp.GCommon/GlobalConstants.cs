@@ -3,6 +3,7 @@
 public static class GlobalConstants
 {
     public static string APPLICATION_DATE_TIME_FORMAT = "yyyy-MM-dd";
+    public static string DEFAULT_PROFILE_PICTURE = "/images/defaultPic.jpg";
 
     public static class DeletedUser
     {

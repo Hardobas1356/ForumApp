@@ -1,10 +1,10 @@
 ﻿#nullable disable
 
-using System.ComponentModel.DataAnnotations;
 using ForumApp.Data.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using System.ComponentModel.DataAnnotations;
 
 using static ForumApp.GCommon.ValidationConstants.ApplicationUserConstants;
 
@@ -22,7 +22,7 @@ public class IndexModel : PageModel
         this.userManager = userManager;
         this.signInManager = signInManager;
     }
-
+    public string ImageUrl { get; set; }
     public string DisplayName { get; set; }
     public string Username { get; set; }
     [TempData]
@@ -36,19 +36,20 @@ public class IndexModel : PageModel
         [MinLength(DisplayNameMinLength)]
         [MaxLength(DisplayNameMaxLength)]
         public string DisplayName { get; set; } = null!;
+        [Url]
+        public string ImageUrl { get; set; }
     }
 
-    private async Task LoadAsync(ApplicationUser user)
+    private void LoadAsync(ApplicationUser user)
     {
-        string userName = await userManager.GetUserNameAsync(user);
-        string displayName = user.DisplayName;
-
-        Username = userName;
-        DisplayName = displayName;
+        Username = user.UserName;
+        DisplayName = user.DisplayName;
+        ImageUrl = user.ImageUrl;
 
         Input = new InputModel
         {
-            DisplayName = displayName
+            DisplayName = user.DisplayName,
+            ImageUrl = user.ImageUrl
         };
     }
 
@@ -60,12 +61,14 @@ public class IndexModel : PageModel
             return NotFound($"Unable to load user with ID '{userManager.GetUserId(User)}'.");
         }
 
-        await LoadAsync(user);
+        LoadAsync(user);
         return Page();
     }
 
     public async Task<IActionResult> OnPostAsync()
     {
+        bool changed = false;
+
         ApplicationUser user = await userManager.GetUserAsync(User);
         if (user == null)
         {
@@ -74,14 +77,39 @@ public class IndexModel : PageModel
 
         if (!ModelState.IsValid)
         {
-            await LoadAsync(user);
+            LoadAsync(user);
             return Page();
+        }
+
+        if (!String.IsNullOrWhiteSpace(Input.ImageUrl))
+        {
+            if (!Uri.TryCreate(Input.ImageUrl, UriKind.RelativeOrAbsolute, out Uri validatedUrl))
+            {
+                ModelState.AddModelError(nameof(Input.ImageUrl), "Invalid image URL format.");
+                LoadAsync(user);
+                return Page();
+            }
+
+            if (!string.Equals(user.ImageUrl, Input.ImageUrl))
+            {
+                user.ImageUrl = Input.ImageUrl;
+                changed = true;
+            }
+        }
+        else if (!String.IsNullOrWhiteSpace(user.ImageUrl))
+        {
+            user.ImageUrl = null;
+            changed = true;
         }
 
         if (!String.Equals(user.DisplayName, Input.DisplayName))
         {
             user.DisplayName = Input.DisplayName;
+            changed = true;
+        }
 
+        if (changed)
+        {
             IdentityResult updateResult = await userManager.UpdateAsync(user);
             if (!updateResult.Succeeded)
             {
@@ -89,13 +117,14 @@ public class IndexModel : PageModel
                 {
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
-                await LoadAsync(user);
+                LoadAsync(user);
                 return Page();
             }
         }
 
         await signInManager.RefreshSignInAsync(user);
         StatusMessage = "Your profile has been updated";
+
         return RedirectToPage();
     }
 }
