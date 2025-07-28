@@ -17,6 +17,7 @@ public class PostDetailsViewModel
     public Guid BoardId { get; set; }
     public string BoardName { get; set; } = null!;
     public bool IsPublisher { get; set; } = false;
+    public bool IsPinned { get; set; } = false;
     public bool CanModerate { get; set; }
     public PaginatedResult<ReplyForPostDetailViewModel>? Replies { get; set; }
     public ICollection<TagViewModel>? Tags { get; set; }

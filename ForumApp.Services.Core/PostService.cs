@@ -91,6 +91,7 @@ public class PostService : IPostService
                         ? DeletedUser.DELETED_DISPLAYNAME : p.ApplicationUser.DisplayName!,
                 Handle = p.ApplicationUser == null || p.ApplicationUser.IsDeleted
                         ? DeletedUser.DELETED_USERNAME : p.ApplicationUser.UserName!,
+                IsPinned = p.IsPinned,
                 Tags = p.PostTags
                         .Select(pt => new TagViewModel
                         {
@@ -225,6 +226,7 @@ public class PostService : IPostService
             BoardName = post.Board.Name,
             CanModerate = canModerate,
             IsPublisher = userId != null && post.ApplicationUserId == userId,
+            IsPinned = post.IsPinned,
             Tags = post.PostTags
                        .Select(pt => new TagViewModel
                        {

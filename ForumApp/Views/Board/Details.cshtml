@@ -94,14 +94,25 @@
     else
     {
         <div class="list-group">
-            @foreach (var post in Model.Posts.Items)
+           @foreach (var post in Model.Posts.Items)
             {
-                <a asp-controller="Post" asp-action="Details" asp-route-id="@post.Id"
-                   class="list-group-item list-group-item-action mb-3 p-3 shadow-sm rounded border-0 text-dark text-decoration-none">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="mb-1 fw-semibold">@post.Title</h5>
-                        <small class="text-muted ms-3">@post.CreatedAt</small>
+                <a asp-controller="Post"
+                   asp-action="Details"
+                   asp-route-id="@post.Id"
+                   class="list-group-item list-group-item-action mb-3 p-3 shadow-sm rounded text-dark text-decoration-none
+                          position-relative @(post.IsPinned ? "border border-success border-3 bg-white" : "border bg-light")">
+        
+                    <div class="d-flex justify-content-between align-items-start flex-wrap">
+                        <div class="d-flex align-items-center flex-wrap">
+                            <h5 class="mb-1 fw-semibold me-2">@post.Title</h5>
+                            @if (post.IsPinned)
+                            {
+                                <span class="badge bg-success">📌 Pinned</span>
+                            }
+                        </div>
+                        <small class="text-muted">@post.CreatedAt</small>
                     </div>
+
                     @if (post.Tags?.Any() == true)
                     {
                         <div class="mt-2">

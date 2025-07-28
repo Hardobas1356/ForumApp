@@ -57,7 +57,13 @@
 		</div>
 	}
 
-	<div class="border rounded p-3 mb-4 bg-light">
+	<div class="position-relative mb-4 p-3 rounded bg-white @(Model.IsPinned ? "border border-success border-3" : "border border-secondary")">
+		@if (Model.IsPinned)
+		{
+			<span class="badge bg-success position-absolute top-0 end-0 m-2">
+				📌 Pinned
+			</span>
+		}
 		<p class="text-break mb-0">@Model.Content</p>
 	</div>
 
