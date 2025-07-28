@@ -18,13 +18,7 @@
 			<i class="fas fa-arrow-left me-1"></i> Back to "@Model.BoardName"
 		</a>
 	</div>
-
-	<h2 class="mb-1">@Model.Title</h2>
-
-	<div class="text-muted mb-2">
-		<small>Posted in: <strong>@Model.BoardName</strong></small>
-	</div>
-
+	
 	@if (Model.Tags != null && Model.Tags.Any())
 	{
 		<div class="mb-2">
@@ -37,9 +31,17 @@
 			}
 		</div>
 	}
+	<div class="text-muted mb-1">
+		<small>Posted in: <strong>@Model.BoardName</strong></small>
+	</div>
+	<h2 class="mb-2">@Model.Title</h2>
 
-	<div class="text-muted mb-3">
-		<span><i class="far fa-user me-1"></i>@Model.Author</span> |
+	<div class="d-flex align-items-center text-muted mb-3 gap-2">
+		<img src="@Model.AuthorImageUrl" alt="@Model.Author" 
+			 class="rounded-circle" 
+			 style="width:24px; height:24px; object-fit:cover;" loading="lazy" />
+		<span><i class="far fa-user me-1"></i>@Model.Author</span>
+		<span>|</span>
 		<span><i class="far fa-calendar-alt me-1"></i>Created: @Model.CreatedAt</span>
 		@if (Model.ModifiedAt != Model.CreatedAt)
 		{

@@ -223,6 +223,9 @@ public class PostService : IPostService
             ModifiedAt = post.ModifiedAt.ToString(APPLICATION_DATE_TIME_FORMAT),
             Author = post.ApplicationUser == null || post.ApplicationUser.IsDeleted
                     ? DeletedUser.DELETED_DISPLAYNAME : post.ApplicationUser.DisplayName!,
+            AuthorImageUrl = post.ApplicationUser == null 
+                || post.ApplicationUser.IsDeleted || post.ApplicationUser.ImageUrl == null
+                        ? DEFAULT_PROFILE_PICTURE : post.ApplicationUser.ImageUrl,
             ImageUrl = post.ImageUrl,
             BoardId = post.BoardId,
             BoardName = post.Board.Name,

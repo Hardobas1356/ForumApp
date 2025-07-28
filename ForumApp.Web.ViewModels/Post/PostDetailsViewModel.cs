@@ -12,6 +12,7 @@ public class PostDetailsViewModel
     public string CreatedAt { get; set; } = null!;
     public string ModifiedAt { get; set; } = null!;
     public string Author { get; set; } = null!;
+    public string AuthorImageUrl { get; set; } = null!;
     public bool IsDeleted { get; set; } = false;
     public string? ImageUrl { get; set; }
     public Guid BoardId { get; set; }
