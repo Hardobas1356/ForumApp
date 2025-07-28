@@ -307,7 +307,7 @@ public class PostService : IPostService
 
         if (!canDelete)
         {
-            throw new OperationCanceledException("User does not have permission to remove post");
+            throw new UnauthorizedAccessException("User does not have permission to remove post");
         }
 
         PostDeleteViewModel? model = new PostDeleteViewModel
@@ -338,7 +338,7 @@ public class PostService : IPostService
 
         if (!canDelete)
         {
-            throw new OperationCanceledException("User does not have permission to remove post");
+            throw new UnauthorizedAccessException("User does not have permission to remove post");
         }
 
         post.IsDeleted = true;
@@ -352,6 +352,71 @@ public class PostService : IPostService
             throw new Exception($"Error occured while deleting post", e);
         }
     }
+
+    public async Task PinPostAsync(Guid userId, Guid id)
+    {
+        Post? post = await postRepository.GetByIdAsync(id, asNoTracking: false);
+
+        if (post == null)
+        {
+            throw new ArgumentException($"Post not found. Id {id}");
+        }
+
+        bool canManage = await permissionService.CanManagePostAsync(userId, id);
+
+        if (!canManage)
+        {
+            throw new UnauthorizedAccessException($"User does not have rigths to pin post. User id: {userId} Post id: {id}");
+        }
+
+        if (post.IsPinned)
+        {
+            throw new InvalidOperationException($"Post is already pinned. Id {id}");
+        }
+
+        try
+        {
+            post.IsPinned = true;
+            await postRepository.SaveChangesAsync();
+        }
+        catch (Exception e)
+        {
+            throw new Exception("Error occured while pinning post", e);
+        }
+    }
+
+    public async Task UnpinPostAsync(Guid userId, Guid id)
+    {
+        Post? post = await postRepository.GetByIdAsync(id, asNoTracking: false);
+
+        if (post == null)
+        {
+            throw new ArgumentException($"Post not found. Id {id}");
+        }
+
+        bool canManage = await permissionService.CanManagePostAsync(userId, id);
+
+        if (!canManage)
+        {
+            throw new UnauthorizedAccessException($"User does not have rigths to unpin post. User id: {userId} Post id: {id}");
+        }
+
+        if (!post.IsPinned)
+        {
+            throw new InvalidOperationException($"Post is not pinned. Id {id}");
+        }
+
+        try
+        {
+            post.IsPinned = false;
+            await postRepository.SaveChangesAsync();
+        }
+        catch (Exception e)
+        {
+            throw new Exception("Error occured while unpinning post", e);
+        }
+    }
+
 
     private bool IsValidImageUrl(string? url)
     {

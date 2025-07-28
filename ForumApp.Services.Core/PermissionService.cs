@@ -39,11 +39,6 @@ public class PermissionService : IPermissionService
             return false;
         }
 
-        if (post.ApplicationUserId == userId)
-        {
-            return true;
-        }
-
         bool isManager = await managerRepository
             .AnyAsync(m => m.ApplicationUserId == userId
                            && m.BoardId == post.BoardId);

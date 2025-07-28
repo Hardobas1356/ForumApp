@@ -114,7 +114,7 @@ public class PostController : BaseController
 
             model.AvailableTags = await tagService
                 .GetTagsAsync();
-             ModelState.AddModelError(string.Empty, "Unexpected error occurred while editing the post.");
+            ModelState.AddModelError(string.Empty, "Unexpected error occurred while editing the post.");
             return this.View(model);
         }
     }
@@ -228,5 +228,36 @@ public class PostController : BaseController
             logger.LogError(e, "Error occured while deleting post");
             return RedirectToAction("Details", "Board", new { Id = model.BoardId });
         }
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Pin(Guid id)
+    {
+        try
+        {
+            await postService.PinPostAsync((Guid)this.GetUserId()!, id);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Error occured while pinning post");
+        }
+
+        return RedirectToAction(nameof(Details), new { Id = id });
+    }
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Unpin(Guid id)
+    {
+        try
+        {
+            await postService.UnpinPostAsync((Guid)this.GetUserId()!, id);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Error occured while unpinning post");
+        }
+
+        return RedirectToAction(nameof(Details), new { Id = id });
     }
 }

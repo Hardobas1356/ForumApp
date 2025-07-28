@@ -15,4 +15,6 @@ public interface IPostService
     Task AddPostAsync(Guid userId, PostCreateInputModel model);
     Task<PostDeleteViewModel> GetPostForDeleteAsync(Guid userId, Guid id);
     Task DeletePostAsync(Guid userId, PostDeleteViewModel model);
+    Task PinPostAsync(Guid userId, Guid id);
+    Task UnpinPostAsync(Guid userId, Guid id);
 }

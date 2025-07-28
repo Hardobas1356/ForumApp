@@ -82,6 +82,29 @@
 					<i class="fas fa-trash-alt me-1"></i>Delete
 				</a>
 			}
+			@if (Model.CanModerate)
+			{
+				if (Model.IsPinned)
+				{
+				<form asp-controller="Post" asp-action="Unpin" method="post" class="d-inline">
+					@Html.AntiForgeryToken()
+					<input type="hidden" name="id" value="@Model.Id" />
+					<button type="submit" class="btn btn-warning">
+						<i class="fas fa-thumbtack me-1"></i>Unpin Post
+					</button>
+				</form>
+				}
+				else
+				{
+				<form asp-controller="Post" asp-action="Pin" method="post" class="d-inline">
+					@Html.AntiForgeryToken()
+					<input type="hidden" name="id" value="@Model.Id" />
+					<button type="submit" class="btn btn-success">
+						<i class="fas fa-thumbtack me-1"></i>Pin Post
+					</button>
+				</form>
+				}
+			}
 		</div>
 	}
 	<hr />
