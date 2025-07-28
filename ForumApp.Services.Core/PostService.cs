@@ -91,6 +91,8 @@ public class PostService : IPostService
                         ? DeletedUser.DELETED_DISPLAYNAME : p.ApplicationUser.DisplayName!,
                 Handle = p.ApplicationUser == null || p.ApplicationUser.IsDeleted
                         ? DeletedUser.DELETED_USERNAME : p.ApplicationUser.UserName!,
+                AuthorImage = p.ApplicationUser == null || p.ApplicationUser.IsDeleted || p.ApplicationUser.ImageUrl == null
+                        ? DEFAULT_PROFILE_PICTURE : p.ApplicationUser.ImageUrl,
                 IsPinned = p.IsPinned,
                 Tags = p.PostTags
                         .Select(pt => new TagViewModel

@@ -17,9 +17,6 @@
                  style="width: 64px; height: 64px; object-fit: cover; box-shadow: 0 0 6px rgba(0, 0, 0, 0.15);" />
         }
         <div>
-            <h1 class="fw-bold mb-1">@Model.Name</h1>
-            <small class="text-muted d-block mb-2">Created at: @Model.CreatedAt</small>
-
             @if (Model.Categories?.Any() == true)
             {
                 <div class="d-flex flex-wrap gap-2">
@@ -32,6 +29,8 @@
                     }
                 </div>
             }
+            <h1 class="fw-bold mb-1">@Model.Name</h1>
+            <small class="text-muted d-block mb-2">Created at: @Model.CreatedAt</small>
         </div>
     </div>
 
@@ -40,53 +39,57 @@
         <p class="text-muted fs-5 mb-4">@Model.Description</p>
     }
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h3 class="mb-0">Posts</h3>
-        @if (User?.Identity?.IsAuthenticated == true)
-        {
-            <a asp-controller="Post" asp-action="Create" asp-route-id="@Model.Id" class="btn btn-success btn-sm shadow-sm">
-                <i class="fas fa-plus me-1"></i>Create Post
-            </a>
-        }
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-0 gap-0">
+        <div class="d-flex align-items-center gap-3 flex-wrap">
+            <h3 class="mb-0">Posts</h3>
+            @if (User?.Identity?.IsAuthenticated == true)
+            {
+                <a asp-controller="Post" asp-action="Create" asp-route-id="@Model.Id" class="btn btn-success btn-sm shadow-sm">
+                    <i class="fas fa-plus me-1"></i>Create Post
+                </a>
+            }
+        </div>
+
+        <form asp-controller="Board"
+              asp-action="Details"
+              asp-route-id="@Model.Id"
+              method="get"
+              class="d-flex align-items-center gap-3 m-0">
+
+            <div class="d-flex flex-column" style="margin-bottom: 0;">
+                <label for="searchTerm" class="form-label fw-semibold mb-1">Search</label>
+                <input type="search"
+                       name="searchTerm"
+                       id="searchTerm"
+                       value="@Context.Request.Query["searchTerm"]"
+                       class="form-control form-control-sm"
+                       placeholder="Enter keywords..." />
+            </div>
+
+            <div class="d-flex flex-column" style="margin-bottom: 0;">
+                <label for="sortOrder" class="form-label fw-semibold mb-1">Sort by</label>
+                <select name="sortOrder"
+                        id="sortOrder"
+                        class="form-select form-select-sm"
+                        onchange="this.form.submit()">
+                    @foreach (PostSortBy sortOption in Enum.GetValues(typeof(PostSortBy)))
+                    {
+                        <option value="@sortOption"
+                                selected="@(Context.Request.Query["sortOrder"] == sortOption.ToString())">
+                            @sortOption.ToString().Replace("Ascending", " ↑").Replace("Descending", " ↓")
+                        </option>
+                    }
+                </select>
+            </div>
+
+            <div class="d-flex flex-column justify-content-end" style="margin-bottom: 0;">
+                <button type="submit" class="btn btn-primary btn-sm mt-auto">Apply</button>
+            </div>
+        </form>
     </div>
 
-    <form asp-controller="Board"
-          asp-action="Details"
-          asp-route-id="@Model.Id"
-          method="get"
-          class="row g-2 align-items-center justify-content-end mb-4">
 
-        <div class="col-auto">
-            <label for="searchTerm" class="form-label fw-semibold mb-0">Search</label>
-            <input type="search"
-                   name="searchTerm"
-                   id="searchTerm"
-                   value="@Context.Request.Query["searchTerm"]"
-                   class="form-control form-control-sm"
-                   placeholder="Enter keywords..." />
-        </div>
-
-        <div class="col-auto">
-            <label for="sortOrder" class="form-label fw-semibold mb-0">Sort by</label>
-            <select name="sortOrder"
-                    id="sortOrder"
-                    class="form-select form-select-sm"
-                    onchange="this.form.submit()">
-                @foreach (PostSortBy sortOption in Enum.GetValues(typeof(PostSortBy)))
-                {
-                    <option value="@sortOption"
-                            selected="@(Context.Request.Query["sortOrder"] == sortOption.ToString())">
-                        @sortOption.ToString().Replace("Ascending", " ↑").Replace("Descending", " ↓")
-                    </option>
-                }
-            </select>
-        </div>
-
-        <div class="col-auto d-flex align-items-end">
-            <button type="submit" class="btn btn-primary btn-sm">Apply</button>
-        </div>
-    </form>
-
+    <hr/>
     @if (Model.Posts == null || !Model.Posts.Items.Any())
     {
         <p class="text-muted fst-italic">No posts found.</p>
@@ -95,40 +98,48 @@
     {
         <div class="list-group">
            @foreach (var post in Model.Posts.Items)
-            {
-                <a asp-controller="Post"
-                   asp-action="Details"
-                   asp-route-id="@post.Id"
-                   class="list-group-item list-group-item-action mb-3 p-3 shadow-sm rounded text-dark text-decoration-none
-                          position-relative @(post.IsPinned ? "border border-success border-3 bg-white" : "border bg-light")">
-        
-                    <div class="d-flex justify-content-between align-items-start flex-wrap">
-                        <div class="d-flex align-items-center flex-wrap">
-                            <h5 class="mb-1 fw-semibold me-2">@post.Title</h5>
-                            @if (post.IsPinned)
-                            {
-                                <span class="badge bg-success">📌 Pinned</span>
-                            }
-                        </div>
-                        <small class="text-muted">@post.CreatedAt</small>
-                    </div>
+           {
+               <a asp-controller="Post"
+                  asp-action="Details"
+                  asp-route-id="@post.Id"
+                  class="list-group-item list-group-item-action mb-3 p-3 shadow-sm rounded text-dark text-decoration-none
+                         position-relative @(post.IsPinned ? "border border-success border-3 bg-white" : "border bg-light")">
 
-                    @if (post.Tags?.Any() == true)
-                    {
-                        <div class="mt-2">
-                            @foreach (var tag in post.Tags)
-                            {
-                                <span class="badge me-1"
-                                      style="background-color: @tag.ColorHex; color: @(tag.ColorHex.ToLower() == "#ffffff" ? "#000" : "#fff");">
-                                    @tag.Name
-                                </span>
-                            }
-                        </div>
-                    }
-                </a>
-            }
+                   <div class="d-flex justify-content-between align-items-start flex-wrap">
+                       <div style="width: 100%;">
+                           @if (post.Tags?.Any() == true)
+                           {
+                               <div class="mb-1">
+                                   @foreach (var tag in post.Tags)
+                                   {
+                                       <span class="badge me-1"
+                                             style="background-color: @tag.ColorHex; color: @(tag.ColorHex.ToLower() == "#ffffff" ? "#000" : "#fff");">
+                                           @tag.Name
+                                       </span>
+                                   }
+                               </div>
+                           }
+
+                            <h5 class="mb-2 fw-semibold">
+                                @post.Title
+                                @if (post.IsPinned)
+                                {
+                                    <span class="badge bg-success ms-1" title="Pinned post">📌 Pinned</span>
+                                }
+                            </h5>
+                            <div class="d-flex align-items-center gap-2">
+                                <img src="@post.AuthorImage" alt="@post.Author"
+                                     class="rounded-circle"
+                                     style="width:24px; height:24px; object-fit:cover;" loading="lazy" />
+                                <small class="text-muted">@post.Author</small>
+                                <small class="text-muted">@post.CreatedAt</small>
+                            </div>
+                       </div>
+                   </div>
+               </a>
+           }
         </div>
-        
+    
         @await Html.PartialAsync("_Pagination", Model.Posts)
     }
 </div>

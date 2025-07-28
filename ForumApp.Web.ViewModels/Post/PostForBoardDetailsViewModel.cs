@@ -8,6 +8,7 @@ public class PostForBoardDetailsViewModel
     public string Title { get; set; } = null!;
     public string CreatedAt { get; set; } = null!;
     public string Author { get; set; } = null!;
+    public string AuthorImage { get; set; } = null!;
     public string Handle { get; set; } = null!;
     public bool IsPinned { get; set; } = false;
     public ICollection<TagViewModel> Tags { get; set; }
