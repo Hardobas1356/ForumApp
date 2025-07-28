@@ -151,8 +151,13 @@
 				<li class="list-group-item">
 					<div class="d-flex justify-content-between align-items-start flex-wrap">
 						<div class="me-2">
+							<div class="d-flex align-items-center gap-2 mb-2">
+								<img src="@reply.AuthorImageUrl" alt="@reply.Author" 
+									 class="rounded-circle" 
+									 style="width:24px; height:24px; object-fit:cover;" loading="lazy" />
+								<small class="text-muted">By @reply.Author at @reply.CreatedAt</small>
+							</div>
 							<div class="reply-content text-break">@reply.Content</div>
-							<small class="text-muted">By @reply.Author at @reply.CreatedAt</small>
 						</div>
 						@if (User?.Identity?.IsAuthenticated == true && (reply.IsPublisher || reply.CanModerate))
 						{

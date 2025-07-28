@@ -98,6 +98,8 @@ public class ReplyService : IReplyService
                 Content = r.Content,
                 Author = r.ApplicationUser == null || r.ApplicationUser.IsDeleted
                         ? DeletedUser.DELETED_DISPLAYNAME : r.ApplicationUser.DisplayName!,
+                AuthorImageUrl = r.ApplicationUser == null || r.ApplicationUser.IsDeleted || r.ApplicationUser.ImageUrl == null
+                        ? DEFAULT_PROFILE_PICTURE : r.ApplicationUser.ImageUrl,
                 CreatedAt = r.CreatedAt.ToString(APPLICATION_DATE_TIME_FORMAT),
                 IsPublisher = userId != null && r.ApplicationUserId == userId,
                 CanModerate = canModerate
