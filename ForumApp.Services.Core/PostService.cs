@@ -252,9 +252,12 @@ public class PostService : IPostService
             throw new ArgumentException($"Board not found. Id:{model.BoardId}");
         }
 
-        if (!IsValidImageUrl(model.ImageUrl))
+        if (!String.IsNullOrWhiteSpace(model.ImageUrl))
         {
-            throw new ArgumentException("Image url is not valid or supported.", model.ImageUrl);
+            if (!IsValidImageUrl(model.ImageUrl))
+            {
+                throw new ArgumentException("Image url is not valid or supported.", model.ImageUrl);
+            }
         }
 
         Post post = new Post()
