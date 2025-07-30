@@ -2,6 +2,7 @@ using ForumApp.Data;
 using ForumApp.Data.Models;
 using ForumApp.Services.Core;
 using ForumApp.Services.Core.Interfaces;
+using ForumApp.Web.Infrastructure.Middleware;
 using ForumApp.Web.Seeders;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -103,6 +104,7 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseMiddleware<VerifyUserNotDeleted>();
 
 app.MapControllerRoute(
     name: "areas",
