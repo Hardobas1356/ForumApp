@@ -6,6 +6,7 @@ using ForumApp.Web.ViewModels.ApplicationUser;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
+using static ForumApp.GCommon.GlobalConstants.Roles;
 using static ForumApp.GCommon.Enums.SortEnums.UserSort;
 using static ForumApp.GCommon.GlobalConstants;
 
@@ -17,11 +18,15 @@ public class ApplicationUserService : IApplicationUserService
 
     private IGenericRepository<Board> boardRepository;
     private UserManager<ApplicationUser> userManager;
+    private SignInManager<ApplicationUser> signInManager;
 
-    public ApplicationUserService(IGenericRepository<Board> boardRepository, UserManager<ApplicationUser> userManager)
+    public ApplicationUserService(IGenericRepository<Board> boardRepository,
+        UserManager<ApplicationUser> userManager,
+        SignInManager<ApplicationUser> signInManager)
     {
         this.boardRepository = boardRepository;
         this.userManager = userManager;
+        this.signInManager = signInManager;
     }
     public async Task<ICollection<UserModeratorViewModel>?> SearchUsersByHandleFirstTenAsync(
         Guid boardId, string handle)
@@ -139,6 +144,8 @@ public class ApplicationUserService : IApplicationUserService
                         ? DeletedUser.DELETED_USERNAME : user.UserName,
         };
 
+        model.IsAdmin = await userManager.IsInRoleAsync(user, ADMIN_ROLE_NAME);
+
         return model;
     }
     public async Task SoftDeleteUserAsync(Guid id)
@@ -217,6 +224,51 @@ public class ApplicationUserService : IApplicationUserService
         if (displayNameChanged)
         {
             await SaveChangesForUser(user);
+        }
+    }
+    public async Task MakeAdminAsync(Guid id)
+    {
+        ApplicationUser user = await ValidateUserExists(id);
+
+        try
+        {
+            var result = await userManager.AddToRoleAsync(user, ADMIN_ROLE_NAME);
+            if (!result.Succeeded)
+            {
+                var errors = string.Join("; ", result.Errors.Select(e => e.Description));
+                throw new Exception($"Failed to add user to role: {errors}");
+            }
+        }
+        catch (Exception e)
+        {
+            throw new Exception($"Error occured making user admin. Id: {id}", e);
+        }
+    }
+    public async Task RemoveAdminAsync(Guid id, Guid actingUserId)
+    {
+        ApplicationUser user = await ValidateUserExists(id);
+
+        try
+        {
+            var result = await userManager.RemoveFromRoleAsync(user, ADMIN_ROLE_NAME);
+            if (!result.Succeeded)
+            {
+                var errors = string.Join("; ", result.Errors.Select(e => e.Description));
+                throw new Exception($"Failed to remove user from role: {errors}");
+            }
+
+            if (actingUserId == user.Id)
+            {
+                await signInManager.SignOutAsync();
+            }
+            else
+            {
+                await signInManager.RefreshSignInAsync(user);
+            }
+        }
+        catch (Exception e)
+        {
+            throw new Exception($"Error occured while demoting admin. Id: {id}", e);
         }
     }
 

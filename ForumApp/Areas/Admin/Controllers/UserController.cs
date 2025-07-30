@@ -8,7 +8,7 @@ using static ForumApp.GCommon.GlobalConstants.Pages;
 
 namespace ForumApp.Web.Areas.Admin.Controllers;
 
-public class UserController : BaseController
+public class UserController : BaseAdminController
 {
     private IApplicationUserService applicationUserService;
     private ILogger<UserController> logger;
@@ -112,5 +112,38 @@ public class UserController : BaseController
             ModelState.AddModelError(string.Empty, ex.Message);
             return View(model);
         }
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> MakeAdmin(Guid id)
+    {
+        try
+        {
+            await applicationUserService.MakeAdminAsync(id);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Error while making user admin");
+            ModelState.AddModelError(string.Empty, e.Message);
+        }
+
+        return RedirectToAction(nameof(Edit), new { id = id });
+    }
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> RemoveAdmin(Guid id)
+    {
+        try
+        {
+            await applicationUserService.RemoveAdminAsync(id,(Guid)GetUserId()!);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Error while demoting admin");
+            ModelState.AddModelError(string.Empty, e.Message);
+        }
+
+        return RedirectToAction(nameof(Edit), new { id = id });
     }
 }

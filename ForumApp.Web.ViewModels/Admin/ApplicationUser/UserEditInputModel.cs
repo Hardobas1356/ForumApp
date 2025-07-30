@@ -18,4 +18,5 @@ public class UserEditInputModel
     public string DisplayName { get; set; } = null!;
     [Required]
     public string Email { get; set; } = null!;
+    public bool IsAdmin { get; set; } = false;
 }

@@ -10,7 +10,7 @@ using static ForumApp.GCommon.Enums.SortEnums.PostSort;
 namespace ForumApp.Web.Areas.Admin.Controllers;
 
 [Area("Admin")]
-public class DashboardController : BaseController
+public class DashboardController : BaseAdminController
 {
     public IActionResult Index()
     {

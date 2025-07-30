@@ -16,4 +16,6 @@ public interface IApplicationUserService
     public Task SoftDeleteUserAsync(Guid id);
     public Task RestoreUserAsync(Guid id);
     public Task EditUserAsync(UserEditInputModel model);
+    public Task MakeAdminAsync(Guid id);
+    public Task RemoveAdminAsync(Guid id, Guid actingUserId);
 }

@@ -8,7 +8,7 @@ using static ForumApp.GCommon.GlobalConstants.Pages;
 
 namespace ForumApp.Web.Areas.Admin.Controllers;
 
-public class ModeratorController : BaseController
+public class ModeratorController : BaseAdminController
 {
     private readonly IBoardService boardService;
     private readonly IApplicationUserService applicationUserService;

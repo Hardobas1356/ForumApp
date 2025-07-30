@@ -10,7 +10,7 @@ using static ForumApp.GCommon.GlobalConstants.Pages;
 
 namespace ForumApp.Web.Areas.Admin.Controllers;
 
-public class BoardController : BaseController
+public class BoardController : BaseAdminController
 {
     private IBoardService boardService;
     private ILogger<BoardController> logger;
