@@ -170,17 +170,18 @@
 
 		@if (Model.Posts?.Items.Any() == true)
 		{
-			<ul class="list-group">
+			<div class="list-group mb-2">
 				@foreach (var post in Model.Posts.Items)
 				{
-					<li class="list-group-item">
+					<a asp-area="" asp-controller="Post" asp-action="Details" asp-route-id="@post.Id"
+					class="list-group-item list-group-item-action text-decoration-none shadow-1-strong mb-1"
+					style="transition: background-color 0.2s;">
 						<strong>@post.Title</strong> —
 						<span class="text-muted">by @post.Author (@post.Handle)</span><br />
 						<small class="text-muted">Posted: @post.CreatedAt</small>
-					</li>
+					</a>
 				}
-			</ul>
-
+			</div>
 			
 			@await Html.PartialAsync("_Pagination", Model.Posts)
 		}
