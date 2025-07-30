@@ -13,13 +13,15 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 string connectionString = builder
     .Configuration
-    .GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+    .GetConnectionString("DefaultConnection") 
+        ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
 builder.
     Services
     .AddDbContext<ForumAppDbContext>(options =>
-        options
-        .UseSqlServer(connectionString));
+    {
+        options.UseSqlServer(connectionString);
+    });
 
 builder
     .Services

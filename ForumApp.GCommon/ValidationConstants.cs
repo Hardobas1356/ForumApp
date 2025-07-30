@@ -42,7 +42,7 @@
         public static class ReplyConstants
         {
             public const int ContentMinLength = 3;
-            public const int ContentMaxLength = 150;
+            public const int ContentMaxLength = 256;
         }
 
         public static class ApplicationUserConstants

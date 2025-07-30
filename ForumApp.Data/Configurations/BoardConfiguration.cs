@@ -62,6 +62,56 @@ public class BoardConfiguration : IEntityTypeConfiguration<Board>
                 CreatedAt = DateTime.UtcNow,
                 IsDeleted = false,
                 IsApproved=true,
+            },
+            new()
+            {
+                Id = Guid.Parse("aa0a3c1e-1b6d-4a7c-a4d9-eee80b91b1a1"),
+                Name = "Gaming",
+                Description = "Discuss the latest games, platforms, and news.",
+                CreatedAt = DateTime.UtcNow,
+                IsDeleted = false,
+                IsApproved = true,
+                ImageUrl = null
+            },
+            new()
+            {
+                Id = Guid.Parse("bb2c4e8f-3f3d-49b3-8417-07de67b4b1b2"),
+                Name = "Programming",
+                Description = "Share code, ask questions, and learn programming.",
+                CreatedAt = DateTime.UtcNow,
+                IsDeleted = false,
+                IsApproved = true,
+                ImageUrl = null
+            },
+            new()
+            {
+                Id = Guid.Parse("cc3e7fa0-61f6-4a7a-bb4b-1fcda248c1c3"),
+                Name = "Science & Technology",
+                Description = "Talk about science, tech breakthroughs, and innovations.",
+                CreatedAt = DateTime.UtcNow,
+                IsDeleted = false,
+                IsApproved = true,
+                ImageUrl = null
+            },
+            new()
+            {
+                Id = Guid.Parse("dd4f9cb1-9a7e-4c5a-9c6b-3bba9e1d41d4"),
+                Name = "Art & Design",
+                Description = "Showcase your art, get feedback, and explore creativity.",
+                CreatedAt = DateTime.UtcNow,
+                IsDeleted = false,
+                IsApproved = true,
+                ImageUrl = null
+            },
+            new()
+            {
+                Id = Guid.Parse("ee510dc2-afbf-4a38-b97f-e6f3c4eb51e5"),
+                Name = "Off Topic",
+                Description = "Anything that doesn't fit elsewhere goes here.",
+                CreatedAt = DateTime.UtcNow,
+                IsDeleted = false,
+                IsApproved = true,
+                ImageUrl = null
             }
         };
 }

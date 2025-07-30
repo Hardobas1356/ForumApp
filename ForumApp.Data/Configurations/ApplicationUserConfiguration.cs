@@ -26,6 +26,7 @@ public class ApplicationUserConfiguration : IEntityTypeConfiguration<Application
             .HasData(Users);
     }
 
+    // All seeded users use the password: "Pass123!"
     public static List<ApplicationUser> Users => new()
     {
         new ApplicationUser
@@ -40,7 +41,7 @@ public class ApplicationUserConfiguration : IEntityTypeConfiguration<Application
             JoinDate = DateTime.UtcNow,
             SecurityStamp = Guid.NewGuid().ToString(),
             ConcurrencyStamp = Guid.NewGuid().ToString(),
-            PasswordHash = "AQAAAAIAAYagAAAAEC9bG6Y4LAGgT2Ih3qsFwL2zHcLv4RYK0zPWYtrsi0P6bq31sMQzmxkAghrUYZ9AIQ==",
+            PasswordHash = "AQAAAAIAAYagAAAAELI15kmFwvomcR/m7OSsm6WTA7kiMX9Ls/C+WNyXBIgHMNNylSLekYXdtP4QdUbOgw==",
             IsDeleted = false,
         },
         new ApplicationUser
@@ -55,8 +56,53 @@ public class ApplicationUserConfiguration : IEntityTypeConfiguration<Application
             JoinDate = DateTime.UtcNow,
             SecurityStamp = Guid.NewGuid().ToString(),
             ConcurrencyStamp = Guid.NewGuid().ToString(),
-            PasswordHash = "AQAAAAIAAYagAAAAEC9bG6Y4LAGgT2Ih3qsFwL2zHcLv4RYK0zPWYtrsi0P6bq31sMQzmxkAghrUYZ9AIQ==",
+            PasswordHash = "AQAAAAIAAYagAAAAELI15kmFwvomcR/m7OSsm6WTA7kiMX9Ls/C+WNyXBIgHMNNylSLekYXdtP4QdUbOgw==",
             IsDeleted = false,
-        }
+        },
+        new ApplicationUser
+        {
+            Id = Guid.Parse("f05ffb49-07c4-4b87-81a3-3ea2b479ed75"),
+            UserName = "charlie@example.com",
+            NormalizedUserName = "CHARLIE@EXAMPLE.COM",
+            Email = "charlie@example.com",
+            NormalizedEmail = "CHARLIE@EXAMPLE.COM",
+            EmailConfirmed = true,
+            DisplayName = "Charlie",
+            JoinDate = DateTime.UtcNow,
+            SecurityStamp = Guid.NewGuid().ToString(),
+            ConcurrencyStamp = Guid.NewGuid().ToString(),
+            PasswordHash = "AQAAAAIAAYagAAAAELI15kmFwvomcR/m7OSsm6WTA7kiMX9Ls/C+WNyXBIgHMNNylSLekYXdtP4QdUbOgw==",
+            IsDeleted = false,
+        },
+        new ApplicationUser
+        {
+            Id = Guid.Parse("b1e423d5-32fc-4e18-a2c4-d2a38b1b9a93"),
+            UserName = "diana@example.com",
+            NormalizedUserName = "DIANA@EXAMPLE.COM",
+            Email = "diana@example.com",
+            NormalizedEmail = "DIANA@EXAMPLE.COM",
+            EmailConfirmed = true,
+            DisplayName = "Diana",
+            JoinDate = DateTime.UtcNow,
+            SecurityStamp = Guid.NewGuid().ToString(),
+            ConcurrencyStamp = Guid.NewGuid().ToString(),
+            PasswordHash = "AQAAAAIAAYagAAAAELI15kmFwvomcR/m7OSsm6WTA7kiMX9Ls/C+WNyXBIgHMNNylSLekYXdtP4QdUbOgw==",
+            IsDeleted = false,
+        },
+        new ApplicationUser
+        {
+            Id = Guid.Parse("fe0fc445-3087-4a4e-8a7f-ff6d251f8a56"),
+            UserName = "eve@example.com",
+            NormalizedUserName = "EVE@EXAMPLE.COM",
+            Email = "eve@example.com",
+            NormalizedEmail = "EVE@EXAMPLE.COM",
+            EmailConfirmed = true,
+            DisplayName = "Eve",
+            JoinDate = DateTime.UtcNow,
+            SecurityStamp = Guid.NewGuid().ToString(),
+            ConcurrencyStamp = Guid.NewGuid().ToString(),
+            PasswordHash = "AQAAAAIAAYagAAAAELI15kmFwvomcR/m7OSsm6WTA7kiMX9Ls/C+WNyXBIgHMNNylSLekYXdtP4QdUbOgw==",
+            IsDeleted = false,
+        },
     };
 }

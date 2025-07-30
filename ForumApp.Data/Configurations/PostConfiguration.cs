@@ -79,6 +79,54 @@ public class PostConfiguration : IEntityTypeConfiguration<Post>
             IsDeleted = false,
             BoardId = Guid.Parse("f8385f75-481b-4b70-be0e-c975265e98ba"),
             ApplicationUserId = Guid.Parse("e43bb3f7-884a-437b-9a0c-b0d181f07634")
+        },
+        new Post
+        {
+            Id = Guid.Parse("ae12507f-cde2-42c3-94ae-3f7d012d7a7d"),
+            Title = "Introduce Yourself!",
+            Content = "Say hello and tell us a bit about yourself.",
+            CreatedAt = DateTime.UtcNow,
+            ModifiedAt = DateTime.UtcNow,
+            IsPinned = false,
+            IsDeleted = false,
+            BoardId = Guid.Parse("c5578431-7ae6-4ed9-a402-f1c3401c7100"),
+            ApplicationUserId = Guid.Parse("7d926fd2-1b4e-4ea7-a019-2bcb179db8f9")
+        },
+        new Post
+        {
+            Id = Guid.Parse("9829f11a-3d2e-4cb7-b2d6-44c35b3b7ae6"),
+            Title = "Forum Rules and Guidelines",
+            Content = "Please read the rules before posting. Be respectful!",
+            CreatedAt = DateTime.UtcNow,
+            ModifiedAt = DateTime.UtcNow,
+            IsPinned = true,
+            IsDeleted = false,
+            BoardId = Guid.Parse("c5578431-7ae6-4ed9-a402-f1c3401c7100"),
+            ApplicationUserId = Guid.Parse("7d926fd2-1b4e-4ea7-a019-2bcb179db8f9")
+        },
+        new Post
+        {
+            Id = Guid.Parse("ba6c3283-2f6a-4954-a02d-ecb19dd6e82e"),
+            Title = "Best cooling pads for laptops?",
+            Content = "Looking for a reliable cooling pad. Any recommendations?",
+            CreatedAt = DateTime.UtcNow,
+            ModifiedAt = DateTime.UtcNow,
+            IsPinned = false,
+            IsDeleted = false,
+            BoardId = Guid.Parse("f8385f75-481b-4b70-be0e-c975265e98ba"),
+            ApplicationUserId = Guid.Parse("e43bb3f7-884a-437b-9a0c-b0d181f07634")
+        },
+        new Post
+        {
+            Id = Guid.Parse("cc06d511-8b7f-49e4-bab0-3787e54a2a97"),
+            Title = "Update: Thermal paste worked!",
+            Content = "I applied new thermal paste and it helped a lot. Thanks all!",
+            CreatedAt = DateTime.UtcNow,
+            ModifiedAt = DateTime.UtcNow,
+            IsPinned = false,
+            IsDeleted = false,
+            BoardId = Guid.Parse("f8385f75-481b-4b70-be0e-c975265e98ba"),
+            ApplicationUserId = Guid.Parse("e43bb3f7-884a-437b-9a0c-b0d181f07634")
         }
     };
 }
