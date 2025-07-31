@@ -47,7 +47,7 @@ public class BoardService : IBoardService
             query = query
                 .Where(b => b.Name.ToLower().Contains(loweredTerm)
                             || (b.Description != null && b.Description.ToLower().Contains(loweredTerm))
-                            || b.BoardCategories.Any(bc => bc.Category.Name.ToLower().Contains(searchTerm)));
+                            || b.BoardCategories.Any(bc => bc.Category.Name.ToLower().Contains(loweredTerm)));
         }
 
         var projectedQuery = query
