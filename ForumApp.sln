@@ -27,6 +27,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ForumApp.Services.Common", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ForumApp.Services.Core", "ForumApp.Services.Core\ForumApp.Services.Core.csproj", "{FABE71D9-F237-4AC4-8036-A8F4A42E7AA2}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{7174E494-13F3-48DA-B278-EE6E6EAE8354}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ForumApp.Services.Tests", "ForumApp.Services.Tests\ForumApp.Services.Tests.csproj", "{F2A9C826-1337-455C-AF72-6E4DFE9FCADF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -69,6 +73,10 @@ Global
 		{FABE71D9-F237-4AC4-8036-A8F4A42E7AA2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FABE71D9-F237-4AC4-8036-A8F4A42E7AA2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FABE71D9-F237-4AC4-8036-A8F4A42E7AA2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F2A9C826-1337-455C-AF72-6E4DFE9FCADF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F2A9C826-1337-455C-AF72-6E4DFE9FCADF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F2A9C826-1337-455C-AF72-6E4DFE9FCADF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F2A9C826-1337-455C-AF72-6E4DFE9FCADF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -82,6 +90,7 @@ Global
 		{CAED4FEE-1BFD-4AA2-89AB-45F5EFABB83F} = {031B2478-83FA-4B6C-AE1C-C73106B71FDB}
 		{E666B707-3EE2-4EBC-8CE7-284F14F1E6DA} = {1C2BA873-36DE-4631-B05C-E6144D0F794C}
 		{FABE71D9-F237-4AC4-8036-A8F4A42E7AA2} = {1C2BA873-36DE-4631-B05C-E6144D0F794C}
+		{F2A9C826-1337-455C-AF72-6E4DFE9FCADF} = {7174E494-13F3-48DA-B278-EE6E6EAE8354}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F66DDD1E-2620-4D04-8A1D-A5D78128D4B0}
