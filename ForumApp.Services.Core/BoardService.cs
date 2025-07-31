@@ -308,7 +308,7 @@ public class BoardService : IBoardService
                           asNoTracking: false,
                           ignoreQueryFilters: true);
 
-        if (board == null)
+        if (board == null || board.Name == null)
         {
             throw new ArgumentException("Board not found", nameof(boardId));
         }
@@ -329,7 +329,7 @@ public class BoardService : IBoardService
             .GetByIdAsync(model.Id,
                           asNoTracking: false);
 
-        if (board == null)
+        if (board == null || board.Name == null)
         {
             throw new ArgumentException("Board not found", nameof(model.Id));
         }
