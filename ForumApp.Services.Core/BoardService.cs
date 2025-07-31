@@ -265,7 +265,6 @@ public class BoardService : IBoardService
             Id = boardId,
             Name = board.Name,
             ImageUrl = board.ImageUrl,
-
         };
 
         return model;
@@ -282,7 +281,7 @@ public class BoardService : IBoardService
                           asNoTracking: false,
                           ignoreQueryFilters: true);
 
-        if (board == null)
+        if (board == null || board.Name == null)
         {
             throw new ArgumentException("Board not found with Id", nameof(boardId));
         }
