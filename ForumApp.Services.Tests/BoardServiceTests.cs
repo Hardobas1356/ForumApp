@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Identity;
 using MockQueryable;
 using Moq;
 using System.Linq.Expressions;
-using System.Threading.Tasks;
+
 using static ForumApp.GCommon.Enums.FilterEnums;
 using static ForumApp.GCommon.Enums.SortEnums;
 
@@ -1300,7 +1300,7 @@ public class BoardServiceTests
         Assert.IsFalse(board.IsDeleted);
     }
     [Test]
-    public async Task RestoreBoardAsyncThrowsExceptionWhenBoardIsNotDeleted()
+    public void RestoreBoardAsyncThrowsExceptionWhenBoardIsNotDeleted()
     {
         Board board = CreateDummyBoardWithPostsAndCategories(CreateDummyPostsBoardViewModels(), CreateDummyCategoriesViewModels());
         board.IsDeleted = false;

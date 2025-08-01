@@ -223,7 +223,7 @@ public class PostService : IPostService
             ModifiedAt = post.ModifiedAt.ToString(APPLICATION_DATE_TIME_FORMAT),
             Author = post.ApplicationUser == null || post.ApplicationUser.IsDeleted
                     ? DeletedUser.DELETED_DISPLAYNAME : post.ApplicationUser.DisplayName!,
-            AuthorImageUrl = post.ApplicationUser == null 
+            AuthorImageUrl = post.ApplicationUser == null
                 || post.ApplicationUser.IsDeleted || post.ApplicationUser.ImageUrl == null
                         ? DEFAULT_PROFILE_PICTURE : post.ApplicationUser.ImageUrl,
             ImageUrl = post.ImageUrl,
@@ -363,7 +363,7 @@ public class PostService : IPostService
 
     public async Task PinPostAsync(Guid userId, Guid id)
     {
-        Post? post = await postRepository.GetByIdAsync(id, asNoTracking: false);
+        Post? post = await postRepository.SingleOrDefaultAsync(p => p.Id == id, asNoTracking: false);
 
         if (post == null)
         {
@@ -395,7 +395,7 @@ public class PostService : IPostService
 
     public async Task UnpinPostAsync(Guid userId, Guid id)
     {
-        Post? post = await postRepository.GetByIdAsync(id, asNoTracking: false);
+        Post? post = await postRepository.SingleOrDefaultAsync(p => p.Id == id, asNoTracking: false);
 
         if (post == null)
         {
