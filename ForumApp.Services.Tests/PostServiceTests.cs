@@ -1,13 +1,15 @@
 ﻿using ForumApp.Data.Models;
-using ForumApp.Services.Core.Interfaces;
-using Moq;
-using MockQueryable;
-using System.Linq.Expressions;
-using ForumApp.Web.ViewModels.Post;
 using ForumApp.Services.Core;
-
+using ForumApp.Services.Core.Interfaces;
+using ForumApp.Web.ViewModels.Post;
+using ForumApp.Web.ViewModels.Tag;
+using MockQueryable;
+using Moq;
+using System.Linq.Expressions;
+using System.Threading.Tasks;
 using static ForumApp.GCommon.Enums.FilterEnums;
 using static ForumApp.GCommon.Enums.SortEnums;
+using static System.Net.WebRequestMethods;
 
 namespace ForumApp.Services.Tests;
 
@@ -414,6 +416,179 @@ public class PostServiceTests
         Assert.That(model.Id, Is.EqualTo(post.Id));
         Assert.That(model.ImageUrl, Is.EqualTo(post.ImageUrl));
         Assert.That(model.BoardId, Is.EqualTo(post.BoardId));
+    }
+
+    //AddPostAsync
+    [Test]
+    public void AddPostAsyncThrowsExceptionWhenBoardNotFound()
+    {
+        boardRepositoryMock
+            .Setup(br => br.AnyAsync(It.IsAny<Expression<Func<Board, bool>>>(),
+                It.IsAny<bool>(), It.IsAny<bool>()))
+            .ReturnsAsync(false);
+
+        PostService service = new PostService(postRepositoryMock.Object,
+            boardRepositoryMock.Object,
+            postTagRepositoryMock.Object,
+            replyServiceMock.Object,
+            tagServiceMock.Object,
+            permissionServiceMock.Object);
+
+        ArgumentException ex = Assert.ThrowsAsync<ArgumentException>(() =>
+            service.AddPostAsync(Guid.NewGuid(), new PostCreateInputModel()));
+
+        Assert.That(ex.Message, Does.Contain("Board not found"));
+    }
+    [Test]
+    public void AddPostAsyncThrowsExceptionWhenImageUrlNotValid()
+    {
+        PostCreateInputModel model = new PostCreateInputModel();
+        model.ImageUrl = "notValid";
+
+        boardRepositoryMock
+            .Setup(br => br.AnyAsync(It.IsAny<Expression<Func<Board, bool>>>(),
+                It.IsAny<bool>(), It.IsAny<bool>()))
+            .ReturnsAsync(true);
+
+        PostService service = new PostService(postRepositoryMock.Object,
+            boardRepositoryMock.Object,
+            postTagRepositoryMock.Object,
+            replyServiceMock.Object,
+            tagServiceMock.Object,
+            permissionServiceMock.Object);
+
+        ArgumentException ex = Assert.ThrowsAsync<ArgumentException>(() =>
+            service.AddPostAsync(Guid.NewGuid(), model));
+
+        Assert.That(ex.Message, Does.Contain("Image url is not valid"));
+    }
+    [Test]
+    public async Task AddPostAsyncWorksCorrectly()
+    {
+        Post? returnedPost = null;
+        Post post = CreateDummyPosts(1, Guid.NewGuid(), Guid.NewGuid()).First();
+        PostCreateInputModel model = new PostCreateInputModel()
+        {
+            BoardName = "Test",
+            BoardId = post.BoardId,
+            Title = post.Title,
+            Content = post.Content,
+            ImageUrl = post.ImageUrl,
+        };
+
+
+        boardRepositoryMock
+            .Setup(br => br.AnyAsync(It.IsAny<Expression<Func<Board, bool>>>(),
+                It.IsAny<bool>(), It.IsAny<bool>()))
+            .ReturnsAsync(true);
+
+        postRepositoryMock
+            .Setup(br => br.AddAsync(It.IsAny<Post>()))
+            .Callback<Post>(p => returnedPost = p)
+            .Returns(Task.CompletedTask);
+
+        PostService service = new PostService(postRepositoryMock.Object,
+            boardRepositoryMock.Object,
+            postTagRepositoryMock.Object,
+            replyServiceMock.Object,
+            tagServiceMock.Object,
+            permissionServiceMock.Object);
+
+
+        await service.AddPostAsync((Guid)post.ApplicationUserId!, model);
+
+        Assert.IsNotNull(returnedPost);
+        Assert.IsNotNull(post);
+
+        Assert.That(returnedPost.Title, Is.EqualTo(post.Title));
+        Assert.That(returnedPost.Content, Is.EqualTo(post.Content));
+        Assert.That(returnedPost.ApplicationUserId, Is.EqualTo(post.ApplicationUserId));
+        Assert.That(returnedPost.BoardId, Is.EqualTo(post.BoardId));
+        Assert.That(returnedPost.ImageUrl, Is.EqualTo(post.ImageUrl));
+    }
+
+    //EditPostAsync
+    [Test]
+    public void EditPostAsyncThrowsExceptionWhenPostNotFound()
+    {
+        Post? post = null;
+
+        postRepositoryMock
+            .Setup(pr => pr.SingleOrDefaultWithIncludeAsync(It.IsAny<Expression<Func<Post, bool>>>(),
+                It.IsAny<Func<IQueryable<Post>, IQueryable<Post>>>(), It.IsAny<bool>(), It.IsAny<bool>()))
+            .ReturnsAsync(post);
+
+        PostService service = new PostService(postRepositoryMock.Object,
+            boardRepositoryMock.Object,
+            postTagRepositoryMock.Object,
+            replyServiceMock.Object,
+            tagServiceMock.Object,
+            permissionServiceMock.Object);
+
+        ArgumentException ex = Assert.ThrowsAsync<ArgumentException>(() =>
+            service.EditPostAsync(Guid.NewGuid(), new PostEditInputModel()));
+
+        Assert.That(ex.Message, Does.Contain("Post not found"));
+    }
+    [Test]
+    public void EditPostAsyncThrowsExceptionWhenImageUrlNotValid()
+    {
+        Post? post = new Post();
+        PostEditInputModel model = new PostEditInputModel();
+        model.ImageUrl = "NotValid";
+
+        postRepositoryMock
+            .Setup(pr => pr.SingleOrDefaultWithIncludeAsync(It.IsAny<Expression<Func<Post, bool>>>(),
+                It.IsAny<Func<IQueryable<Post>, IQueryable<Post>>>(), It.IsAny<bool>(), It.IsAny<bool>()))
+            .ReturnsAsync(post);
+
+        PostService service = new PostService(postRepositoryMock.Object,
+            boardRepositoryMock.Object,
+            postTagRepositoryMock.Object,
+            replyServiceMock.Object,
+            tagServiceMock.Object,
+            permissionServiceMock.Object);
+
+        ArgumentException ex = Assert.ThrowsAsync<ArgumentException>(() =>
+            service.EditPostAsync(Guid.NewGuid(), model));
+
+        Assert.That(ex.Message, Does.Contain("Image url is not valid"));
+    }
+    [Test]
+    public async Task EditPostAsyncWorksCorrectly()
+    {
+        Post post = CreateDummyPosts(1, Guid.NewGuid(), Guid.NewGuid()).First();
+        PostEditInputModel model = new PostEditInputModel()
+        {
+            BoardId = post.BoardId,
+            Title = "New title",
+            Content = "New content",
+            ImageUrl = "https://upload.wikimedia.org/wikipedia/commons/7/7a/SpongeBob_SquarePants_character.png",
+            Id = post.Id,
+        };
+
+        postRepositoryMock
+            .Setup(pr => pr.SingleOrDefaultWithIncludeAsync(It.IsAny<Expression<Func<Post, bool>>>(),
+                It.IsAny<Func<IQueryable<Post>, IQueryable<Post>>>(), It.IsAny<bool>(), It.IsAny<bool>()))
+            .ReturnsAsync(post);
+
+        PostService service = new PostService(postRepositoryMock.Object,
+            boardRepositoryMock.Object,
+            postTagRepositoryMock.Object,
+            replyServiceMock.Object,
+            tagServiceMock.Object,
+            permissionServiceMock.Object);
+
+
+        await service.EditPostAsync((Guid)post.ApplicationUserId!, model);
+
+        Assert.IsNotNull(post);
+
+        Assert.That(model.Id, Is.EqualTo(post.Id));
+        Assert.That(model.BoardId, Is.EqualTo(post.BoardId));
+
+        Assert.That(model.Title, Is.EqualTo(post.Title));
+        Assert.That(model.Content, Is.EqualTo(post.Content));
     }
 
     private List<Post> CreateDummyPosts(int count = 3, Guid? boardId = null, Guid? userId = null)

@@ -163,9 +163,12 @@ public class PostService : IPostService
             throw new ArgumentException($"Post not found. Id:{model.Id}");
         }
 
-        if (!IsValidImageUrl(model.ImageUrl))
+        if (!String.IsNullOrWhiteSpace(model.ImageUrl))
         {
-            throw new ArgumentException("Image url is not valid or supported.", model.ImageUrl);
+            if (!IsValidImageUrl(model.ImageUrl))
+            {
+                throw new ArgumentException("Image url is not valid or supported.", model.ImageUrl);
+            }
         }
 
         post.Title = model.Title;
