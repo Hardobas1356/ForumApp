@@ -353,7 +353,7 @@ public class BoardService : IBoardService
             throw new ArgumentNullException(nameof(model));
 
         if (string.IsNullOrWhiteSpace(model.Name))
-            throw new ArgumentException("Board name is required", nameof(model));
+            throw new ArgumentException("Board name is required", nameof(model.Name));
 
         if (!string.IsNullOrWhiteSpace(model.ImageUrl))
         {
@@ -423,7 +423,7 @@ public class BoardService : IBoardService
 
         Board? board = await boardRepository.GetByIdAsync(boardId, ignoreQueryFilters: true);
 
-        if (board == null)
+        if (board == null || board.Name == null)
         {
             throw new ArgumentException("Board not found", nameof(boardId));
         }

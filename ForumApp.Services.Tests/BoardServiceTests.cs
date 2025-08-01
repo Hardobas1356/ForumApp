@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Identity;
 using MockQueryable;
 using Moq;
 using System.Linq.Expressions;
+using System.Threading.Tasks;
 using static ForumApp.GCommon.Enums.FilterEnums;
 using static ForumApp.GCommon.Enums.SortEnums;
 
@@ -1052,8 +1053,8 @@ public class BoardServiceTests
     [Test]
     public async Task GetBoardDetailsAsyncReturnsCorrectResult()
     {
-        List<PostForBoardDetailsViewModel> dummyPosts = CreateDummyPosts();
-        List<CategoryViewModel> dummyCategories = CreateDummyCategories();
+        List<PostForBoardDetailsViewModel> dummyPosts = CreateDummyPostsBoardViewModels();
+        List<CategoryViewModel> dummyCategories = CreateDummyCategoriesViewModels();
         Board dummyBoard = CreateDummyBoardWithPostsAndCategories(dummyPosts, dummyCategories);
 
         boardRepositoryMock
@@ -1131,8 +1132,8 @@ public class BoardServiceTests
     [Test]
     public async Task GetBoardDetailsAdminAsyncReturnsCorrectResult()
     {
-        List<PostForBoardDetailsViewModel> dummyPosts = CreateDummyPosts();
-        List<CategoryViewModel> dummyCategories = CreateDummyCategories();
+        List<PostForBoardDetailsViewModel> dummyPosts = CreateDummyPostsBoardViewModels();
+        List<CategoryViewModel> dummyCategories = CreateDummyCategoriesViewModels();
         Board dummyBoard = CreateDummyBoardWithPostsAndCategories(dummyPosts, dummyCategories);
 
         boardRepositoryMock
@@ -1212,7 +1213,7 @@ public class BoardServiceTests
     [Test]
     public async Task GetBoardForDeletionReturnsCorrectBoard()
     {
-        Board board = CreateDummyBoardWithPostsAndCategories(CreateDummyPosts(), CreateDummyCategories());
+        Board board = CreateDummyBoardWithPostsAndCategories(CreateDummyPostsBoardViewModels(), CreateDummyCategoriesViewModels());
 
         boardRepositoryMock
             .Setup(br => br.GetByIdAsync(It.IsAny<Guid>(), true, false))
@@ -1279,7 +1280,7 @@ public class BoardServiceTests
     [Test]
     public async Task RestoreBoardAsyncWorksCorrectly()
     {
-        Board board = CreateDummyBoardWithPostsAndCategories(CreateDummyPosts(), CreateDummyCategories());
+        Board board = CreateDummyBoardWithPostsAndCategories(CreateDummyPostsBoardViewModels(), CreateDummyCategoriesViewModels());
 
         board.IsDeleted = true;
 
@@ -1301,7 +1302,7 @@ public class BoardServiceTests
     [Test]
     public async Task RestoreBoardAsyncThrowsExceptionWhenBoardIsNotDeleted()
     {
-        Board board = CreateDummyBoardWithPostsAndCategories(CreateDummyPosts(), CreateDummyCategories());
+        Board board = CreateDummyBoardWithPostsAndCategories(CreateDummyPostsBoardViewModels(), CreateDummyCategoriesViewModels());
         board.IsDeleted = false;
 
         boardRepositoryMock
@@ -1376,7 +1377,7 @@ public class BoardServiceTests
     [Test]
     public async Task ApproveBoardAsyncWorksCorrectly()
     {
-        Board board = CreateDummyBoardWithPostsAndCategories(CreateDummyPosts(), CreateDummyCategories());
+        Board board = CreateDummyBoardWithPostsAndCategories(CreateDummyPostsBoardViewModels(), CreateDummyCategoriesViewModels());
 
         board.IsApproved = false;
 
@@ -1447,7 +1448,7 @@ public class BoardServiceTests
     [Test]
     public async Task SoftDeleteBoardAsyncWorksCorrectly()
     {
-        Board board = CreateDummyBoardWithPostsAndCategories(CreateDummyPosts(), CreateDummyCategories());
+        Board board = CreateDummyBoardWithPostsAndCategories(CreateDummyPostsBoardViewModels(), CreateDummyCategoriesViewModels());
 
         board.IsDeleted = false;
 
@@ -1506,6 +1507,552 @@ public class BoardServiceTests
         Assert.That(ex.Message, Does.Contain("Board not found"));
     }
 
+    //CreateBoardAsync
+    [Test]
+    public async Task CreateBoardAsyncWorksCorrectly()
+    {
+        IEnumerable<CategoryViewModel> categories = CreateDummyCategoriesViewModels(2);
+
+        BoardCreateInputModel inputModel = new BoardCreateInputModel()
+        {
+            Name = "Valid name",
+            Description = "This description is long and valid",
+            SelectedCategoryIds = categories.Select(c => c.Id).ToList()
+        };
+
+        categoryServiceMock
+            .Setup(cs => cs.GetCategoriesAsync())
+            .ReturnsAsync(categories);
+
+        Board? addedBoard = null;
+
+        boardRepositoryMock
+            .Setup(br => br.AddAsync(It.IsAny<Board>()))
+            .Callback<Board>(b => addedBoard = b)
+            .Returns(Task.CompletedTask);
+
+        BoardService service = new BoardService(
+            boardManagerRepositoryMock.Object,
+            boardRepositoryMock.Object,
+            postServiceMock.Object,
+            categoryServiceMock.Object,
+            userManagerMock.Object);
+
+        Guid applicationUserId = Guid.NewGuid();
+
+        await service.CreateBoardAsync(applicationUserId, inputModel);
+
+        Assert.IsNotNull(addedBoard);
+        Assert.That(addedBoard!.Name, Is.EqualTo(inputModel.Name));
+        Assert.That(addedBoard.Description, Is.EqualTo(inputModel.Description));
+        Assert.That(addedBoard.BoardCategories.Select(bc => bc.CategoryId), Is.EquivalentTo(inputModel.SelectedCategoryIds));
+        Assert.That(addedBoard.BoardManagers.Any(bm => bm.ApplicationUserId == applicationUserId), Is.True);
+
+        boardRepositoryMock.Verify(br => br.AddAsync(It.IsAny<Board>()), Times.Once);
+    }
+    [Test]
+    public void CreateBoardAsyncThrowsExceptionWhenUserIdNull()
+    {
+        BoardCreateInputModel board = new BoardCreateInputModel();
+
+        BoardService service = new BoardService(
+            boardManagerRepositoryMock.Object,
+            boardRepositoryMock.Object,
+            postServiceMock.Object,
+            categoryServiceMock.Object,
+            userManagerMock.Object);
+
+        var ex = Assert.ThrowsAsync<ArgumentException>(() =>
+            service.CreateBoardAsync(Guid.Empty, board));
+
+        Assert.That(ex.ParamName, Is.EqualTo("userId"));
+        Assert.That(ex.Message, Does.Contain("User ID cannot be empty"));
+    }
+    [Test]
+    public void CreateBoardAsyncThrowsExceptionWhenBoardNameNull()
+    {
+        BoardCreateInputModel board = new BoardCreateInputModel()
+        {
+            Name = String.Empty
+        };
+
+        BoardService service = new BoardService(
+            boardManagerRepositoryMock.Object,
+            boardRepositoryMock.Object,
+            postServiceMock.Object,
+            categoryServiceMock.Object,
+            userManagerMock.Object);
+
+        var ex = Assert.ThrowsAsync<ArgumentException>(() =>
+            service.CreateBoardAsync(Guid.NewGuid(), board));
+
+        Assert.That(ex.ParamName, Is.EqualTo("Name"));
+        Assert.That(ex.Message, Does.Contain("Board name is required"));
+    }
+    [Test]
+    public void CreateBoardAsyncThrowsExceptionWhenImageUrlNotValid()
+    {
+        BoardCreateInputModel board = new BoardCreateInputModel()
+        {
+            Name = "Valid name",
+            ImageUrl = "notAnUrl",
+        };
+
+        BoardService service = new BoardService(
+            boardManagerRepositoryMock.Object,
+            boardRepositoryMock.Object,
+            postServiceMock.Object,
+            categoryServiceMock.Object,
+            userManagerMock.Object);
+
+        var ex = Assert.ThrowsAsync<ArgumentException>(() =>
+            service.CreateBoardAsync(Guid.NewGuid(), board));
+
+        Assert.That(ex.ParamName, Is.EqualTo("ImageUrl"));
+        Assert.That(ex.Message, Does.Contain("URL"));
+    }
+    [Test]
+    public void CreateBoardAsyncThrowsExceptionWhenCategoryIdNotValid()
+    {
+        IEnumerable<CategoryViewModel> categories = CreateDummyCategoriesViewModels(2);
+
+        BoardCreateInputModel board = new BoardCreateInputModel()
+        {
+            Name = "Valid name",
+            SelectedCategoryIds = new List<Guid>()
+            {
+                categories.First().Id,
+                Guid.NewGuid(),
+            }
+        };
+
+        categoryServiceMock
+            .Setup(cs => cs.GetCategoriesAsync())
+            .ReturnsAsync(categories);
+
+        BoardService service = new BoardService(
+            boardManagerRepositoryMock.Object,
+            boardRepositoryMock.Object,
+            postServiceMock.Object,
+            categoryServiceMock.Object,
+            userManagerMock.Object);
+
+        var ex = Assert.ThrowsAsync<ArgumentException>(() =>
+            service.CreateBoardAsync(Guid.NewGuid(), board));
+
+        Assert.That(ex.ParamName, Is.EqualTo("SelectedCategoryIds"));
+        Assert.That(ex.Message, Does.Contain("ID"));
+    }
+
+    //GetBoardNameByIdAsync
+    [Test]
+    public void GetBoardNameByIdAsyncThrowsExceptionWhenIdNull()
+    {
+        Board board = new Board();
+
+        boardRepositoryMock
+            .Setup(br => br.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<bool>(), It.IsAny<bool>()))
+            .ReturnsAsync(board);
+
+        BoardService service = new BoardService(
+            boardManagerRepositoryMock.Object,
+            boardRepositoryMock.Object,
+            postServiceMock.Object,
+            categoryServiceMock.Object,
+            userManagerMock.Object);
+
+        var ex = Assert.ThrowsAsync<ArgumentException>(() =>
+            service.GetBoardNameByIdAsync(Guid.Empty));
+
+        Assert.That(ex.ParamName, Is.EqualTo("boardId"));
+        Assert.That(ex.Message, Does.Contain("BoardId is null"));
+    }
+    [Test]
+    public void GetBoardNameByIdAsyncThrowsExceptionWhenBoardNotFound()
+    {
+        Board board = new Board();
+
+        boardRepositoryMock
+            .Setup(br => br.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<bool>(), It.IsAny<bool>()))
+            .ReturnsAsync(board);
+
+        BoardService service = new BoardService(
+            boardManagerRepositoryMock.Object,
+            boardRepositoryMock.Object,
+            postServiceMock.Object,
+            categoryServiceMock.Object,
+            userManagerMock.Object);
+
+        var ex = Assert.ThrowsAsync<ArgumentException>(() =>
+            service.GetBoardNameByIdAsync(Guid.NewGuid()));
+
+        Assert.That(ex.ParamName, Is.EqualTo("boardId"));
+        Assert.That(ex.Message, Does.Contain("Board not found"));
+    }
+    [Test]
+    public async Task GetBoardNameByIdAsyncCorrectlyReturnsName()
+    {
+        Board board = CreateDummyBoardWithPostsAndCategories();
+
+        boardRepositoryMock
+            .Setup(br => br.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<bool>(), It.IsAny<bool>()))
+            .ReturnsAsync(board);
+
+        BoardService service = new BoardService(
+            boardManagerRepositoryMock.Object,
+            boardRepositoryMock.Object,
+            postServiceMock.Object,
+            categoryServiceMock.Object,
+            userManagerMock.Object);
+
+        string name = await service.GetBoardNameByIdAsync(board.Id);
+
+        Assert.IsNotNull(name);
+        Assert.That(name, Is.EqualTo(board.Name));
+    }
+
+    //AddModeratorAsync
+    [Test]
+    public void AddModeratorAsyncThrowsExceptionWhenIdNull()
+    {
+        Board board = new Board();
+
+        boardRepositoryMock
+            .Setup(br => br
+                .SingleOrDefaultAsync(It.IsAny<Expression<Func<Board, bool>>>(),
+                    It.IsAny<bool>(), It.IsAny<bool>()))
+            .ReturnsAsync(board);
+
+        BoardService service = new BoardService(
+            boardManagerRepositoryMock.Object,
+            boardRepositoryMock.Object,
+            postServiceMock.Object,
+            categoryServiceMock.Object,
+            userManagerMock.Object);
+
+        var ex = Assert.ThrowsAsync<ArgumentException>(() =>
+            service.AddModeratorAsync(Guid.NewGuid(), Guid.Empty));
+
+        Assert.That(ex.ParamName, Is.EqualTo("boardId"));
+        Assert.That(ex.Message, Does.Contain("BoardId is null"));
+    }
+    [Test]
+    public void AddModeratorAsyncThrowsExceptionWhenBoardNotFound()
+    {
+        Board? board = null;
+
+        boardRepositoryMock
+            .Setup(br => br
+                .SingleOrDefaultAsync(It.IsAny<Expression<Func<Board, bool>>>(),
+                    It.IsAny<bool>(), It.IsAny<bool>()))
+            .ReturnsAsync(board);
+
+        BoardService service = new BoardService(
+            boardManagerRepositoryMock.Object,
+            boardRepositoryMock.Object,
+            postServiceMock.Object,
+            categoryServiceMock.Object,
+            userManagerMock.Object);
+
+        var ex = Assert.ThrowsAsync<ArgumentException>(() =>
+            service.AddModeratorAsync(Guid.NewGuid(), Guid.NewGuid()));
+
+        Assert.That(ex.ParamName, Is.EqualTo("boardId"));
+        Assert.That(ex.Message, Does.Contain("Board not found"));
+    }
+    [Test]
+    public void AddModeratorAsyncThrowsExceptionWhenApplicationUserNotFound()
+    {
+        Board board = CreateDummyBoardWithPostsAndCategories();
+        ApplicationUser user = null;
+
+        boardRepositoryMock
+            .Setup(br => br
+                .SingleOrDefaultAsync(It.IsAny<Expression<Func<Board, bool>>>(),
+                    It.IsAny<bool>(), It.IsAny<bool>()))
+            .ReturnsAsync(board);
+
+        userManagerMock
+            .Setup(um => um.FindByIdAsync(It.IsAny<string>()))
+            .ReturnsAsync(user);
+
+        BoardService service = new BoardService(
+            boardManagerRepositoryMock.Object,
+            boardRepositoryMock.Object,
+            postServiceMock.Object,
+            categoryServiceMock.Object,
+            userManagerMock.Object);
+
+        var ex = Assert.ThrowsAsync<ArgumentException>(() =>
+            service.AddModeratorAsync(Guid.NewGuid(), board.Id));
+
+        Assert.That(ex.ParamName, Is.EqualTo("userId"));
+        Assert.That(ex.Message, Does.Contain("User not found"));
+    }
+    [Test]
+    public void AddModeratorAsyncThrowsExceptionWhenBoardManagerExistsAndIsNotDeleted()
+    {
+        Board board = CreateDummyBoardWithPostsAndCategories();
+        BoardManager boardManager = new BoardManager
+        {
+            BoardId = board.Id,
+            ApplicationUserId = Guid.NewGuid(),
+            IsDeleted = false,
+        };
+        ApplicationUser user = new ApplicationUser
+        {
+            Id = boardManager.ApplicationUserId,
+        };
+
+        boardRepositoryMock
+            .Setup(br => br
+                .SingleOrDefaultAsync(It.IsAny<Expression<Func<Board, bool>>>(),
+                    It.IsAny<bool>(), It.IsAny<bool>()))
+            .ReturnsAsync(board);
+
+        boardManagerRepositoryMock
+            .Setup(bm => bm
+                .SingleOrDefaultAsync(It.IsAny<Expression<Func<BoardManager, bool>>>(),
+                    It.IsAny<bool>(), It.IsAny<bool>()))
+            .ReturnsAsync(boardManager);
+
+        userManagerMock
+            .Setup(um => um.FindByIdAsync(It.IsAny<string>()))
+            .ReturnsAsync(user);
+
+        BoardService service = new BoardService(
+            boardManagerRepositoryMock.Object,
+            boardRepositoryMock.Object,
+            postServiceMock.Object,
+            categoryServiceMock.Object,
+            userManagerMock.Object);
+
+        var ex = Assert.ThrowsAsync<InvalidOperationException>(() =>
+            service.AddModeratorAsync(user.Id, board.Id));
+
+        Assert.That(ex.Message, Does.Contain("Board manager already exists"));
+    }
+    [Test]
+    public async Task AddModeratorAsyncWorksCorrectlyAndRestoresDeletedBoardManager()
+    {
+        Board board = CreateDummyBoardWithPostsAndCategories();
+        BoardManager boardManager = new BoardManager
+        {
+            BoardId = board.Id,
+            ApplicationUserId = Guid.NewGuid(),
+            IsDeleted = true,
+        };
+        ApplicationUser user = new ApplicationUser
+        {
+            Id = boardManager.ApplicationUserId,
+        };
+
+        boardRepositoryMock
+            .Setup(br => br
+                .SingleOrDefaultAsync(It.IsAny<Expression<Func<Board, bool>>>(),
+                    It.IsAny<bool>(), It.IsAny<bool>()))
+            .ReturnsAsync(board);
+
+        boardManagerRepositoryMock
+            .Setup(bm => bm
+                .SingleOrDefaultAsync(It.IsAny<Expression<Func<BoardManager, bool>>>(),
+                    It.IsAny<bool>(), It.IsAny<bool>()))
+            .ReturnsAsync(boardManager);
+
+        userManagerMock
+            .Setup(um => um.FindByIdAsync(It.IsAny<string>()))
+            .ReturnsAsync(user);
+
+        BoardService service = new BoardService(
+            boardManagerRepositoryMock.Object,
+            boardRepositoryMock.Object,
+            postServiceMock.Object,
+            categoryServiceMock.Object,
+            userManagerMock.Object);
+
+        await service.AddModeratorAsync(user.Id, board.Id);
+
+        Assert.IsNotNull(boardManager);
+        Assert.That(boardManager.IsDeleted, Is.False);
+    }
+    [Test]
+    public async Task AddModeratorAsyncWorksCorrectlyAndCreatesNewBoardManager()
+    {
+        Board board = CreateDummyBoardWithPostsAndCategories();
+        BoardManager? newBoardManager = null;
+
+        ApplicationUser user = new ApplicationUser
+        {
+            Id = Guid.NewGuid(),
+        };
+
+        boardRepositoryMock
+            .Setup(br => br
+                .SingleOrDefaultAsync(It.IsAny<Expression<Func<Board, bool>>>(),
+                    It.IsAny<bool>(), It.IsAny<bool>()))
+            .ReturnsAsync(board);
+
+        boardManagerRepositoryMock
+            .Setup(br => br.AddAsync(It.IsAny<BoardManager>()))
+            .Callback<BoardManager>(bm => newBoardManager = bm)
+            .Returns(Task.CompletedTask);
+
+        userManagerMock
+            .Setup(um => um.FindByIdAsync(It.IsAny<string>()))
+            .ReturnsAsync(user);
+
+        BoardService service = new BoardService(
+            boardManagerRepositoryMock.Object,
+            boardRepositoryMock.Object,
+            postServiceMock.Object,
+            categoryServiceMock.Object,
+            userManagerMock.Object);
+
+        await service.AddModeratorAsync(user.Id, board.Id);
+
+        Assert.IsNotNull(newBoardManager);
+        Assert.That(newBoardManager.IsDeleted, Is.False);
+        Assert.That(newBoardManager.ApplicationUserId, Is.EqualTo(user.Id));
+        Assert.That(newBoardManager.BoardId, Is.EqualTo(board.Id));
+    }
+
+    //RemoveModeratorAsync
+    [Test]
+    public void RemoveModeratorAsyncThrowsExceptionWhenUserIdNull()
+    {
+        Board board = new Board();
+
+        boardRepositoryMock
+            .Setup(br => br
+                .SingleOrDefaultAsync(It.IsAny<Expression<Func<Board, bool>>>(),
+                    It.IsAny<bool>(), It.IsAny<bool>()))
+            .ReturnsAsync(board);
+
+        BoardService service = new BoardService(
+            boardManagerRepositoryMock.Object,
+            boardRepositoryMock.Object,
+            postServiceMock.Object,
+            categoryServiceMock.Object,
+            userManagerMock.Object);
+
+        var ex = Assert.ThrowsAsync<ArgumentException>(() =>
+            service.RemoveModeratorAsync(Guid.Empty, Guid.NewGuid()));
+
+        Assert.That(ex.Message, Does.Contain("ID"));
+    }
+    [Test]
+    public void RemoveModeratorAsyncThrowsExceptionWhenBoardIdNull()
+    {
+        Board board = new Board();
+
+        boardRepositoryMock
+            .Setup(br => br
+                .SingleOrDefaultAsync(It.IsAny<Expression<Func<Board, bool>>>(),
+                    It.IsAny<bool>(), It.IsAny<bool>()))
+            .ReturnsAsync(board);
+
+        BoardService service = new BoardService(
+            boardManagerRepositoryMock.Object,
+            boardRepositoryMock.Object,
+            postServiceMock.Object,
+            categoryServiceMock.Object,
+            userManagerMock.Object);
+
+        var ex = Assert.ThrowsAsync<ArgumentException>(() =>
+            service.RemoveModeratorAsync(Guid.NewGuid(), Guid.Empty));
+
+        Assert.That(ex.Message, Does.Contain("ID"));
+    }
+    [Test]
+    public void RemoveModeratorAsyncThrowsExceptionWhenBoardManagerNotFound()
+    {
+        Board board = CreateDummyBoardWithPostsAndCategories();
+        BoardManager? boardManager = null;
+
+        boardManagerRepositoryMock
+            .Setup(bm => bm
+                .SingleOrDefaultAsync(It.IsAny<Expression<Func<BoardManager, bool>>>(),
+                    It.IsAny<bool>(), It.IsAny<bool>()))
+            .ReturnsAsync(boardManager);
+
+        BoardService service = new BoardService(
+            boardManagerRepositoryMock.Object,
+            boardRepositoryMock.Object,
+            postServiceMock.Object,
+            categoryServiceMock.Object,
+            userManagerMock.Object);
+
+        var ex = Assert.ThrowsAsync<InvalidOperationException>(() =>
+            service.RemoveModeratorAsync(Guid.NewGuid(), Guid.NewGuid()));
+
+        Assert.That(ex.Message, Does.Contain("not found"));
+    }
+    [Test]
+    public void RemoveModeratorAsyncThrowsExceptionWhenBoardManagerDeleted()
+    {
+        Board board = CreateDummyBoardWithPostsAndCategories();
+        BoardManager boardManager = new BoardManager
+        {
+            BoardId = board.Id,
+            ApplicationUserId = Guid.NewGuid(),
+            IsDeleted = true,
+        };
+        ApplicationUser user = new ApplicationUser
+        {
+            Id = boardManager.ApplicationUserId,
+        };
+
+        boardManagerRepositoryMock
+            .Setup(bm => bm
+                .SingleOrDefaultAsync(It.IsAny<Expression<Func<BoardManager, bool>>>(),
+                    It.IsAny<bool>(), It.IsAny<bool>()))
+            .ReturnsAsync(boardManager);
+
+        BoardService service = new BoardService(
+            boardManagerRepositoryMock.Object,
+            boardRepositoryMock.Object,
+            postServiceMock.Object,
+            categoryServiceMock.Object,
+            userManagerMock.Object);
+
+        var ex = Assert.ThrowsAsync<InvalidOperationException>(() =>
+            service.RemoveModeratorAsync(Guid.NewGuid(), Guid.NewGuid()));
+
+        Assert.That(ex.Message, Does.Contain("already deleted"));
+    }
+    [Test]
+    public async Task RemoveModeratorAsyncWorksCorrectly()
+    {
+        Board board = CreateDummyBoardWithPostsAndCategories();
+        BoardManager boardManager = new BoardManager
+        {
+            BoardId = board.Id,
+            ApplicationUserId = Guid.NewGuid(),
+            IsDeleted = false,
+        };
+        ApplicationUser user = new ApplicationUser
+        {
+            Id = boardManager.ApplicationUserId,
+        };
+
+        boardManagerRepositoryMock
+            .Setup(bm => bm
+                .SingleOrDefaultAsync(It.IsAny<Expression<Func<BoardManager, bool>>>(),
+                    It.IsAny<bool>(), It.IsAny<bool>()))
+            .ReturnsAsync(boardManager);
+
+        BoardService service = new BoardService(
+            boardManagerRepositoryMock.Object,
+            boardRepositoryMock.Object,
+            postServiceMock.Object,
+            categoryServiceMock.Object,
+            userManagerMock.Object);
+
+        await service.RemoveModeratorAsync(user.Id, board.Id);
+
+        Assert.That(boardManager.IsDeleted, Is.True);
+    }
+
     private Board CreateDummyBoardWithPostsAndCategories(
         List<PostForBoardDetailsViewModel>? posts = null,
         List<CategoryViewModel>? categories = null)
@@ -1513,7 +2060,7 @@ public class BoardServiceTests
         posts ??= new List<PostForBoardDetailsViewModel>();
         categories ??= new List<CategoryViewModel>();
 
-        var board = new Board
+        Board board = new Board
         {
             Id = Guid.Parse("54bf50ab-5f31-4075-805a-cff51060e0f4"),
             Name = "General",
@@ -1544,13 +2091,13 @@ public class BoardServiceTests
 
         return board;
     }
-    private List<PostForBoardDetailsViewModel> CreateDummyPosts(int count = 2)
+    private List<PostForBoardDetailsViewModel> CreateDummyPostsBoardViewModels(int count = 2)
     {
         return Enumerable.Range(1, count)
             .Select(i => new PostForBoardDetailsViewModel { Id = Guid.NewGuid(), Title = $"Post {i}" })
             .ToList();
     }
-    private List<CategoryViewModel> CreateDummyCategories(int count = 2)
+    private List<CategoryViewModel> CreateDummyCategoriesViewModels(int count = 2)
     {
         return Enumerable.Range(1, count)
             .Select(i => new CategoryViewModel
@@ -1558,6 +2105,7 @@ public class BoardServiceTests
                 Id = Guid.NewGuid(),
                 Name = $"Category {i}",
                 ColorHex = i % 2 == 0 ? "#000000" : "#ffffff"
-            }).ToList();
+            })
+            .ToList();
     }
 }
