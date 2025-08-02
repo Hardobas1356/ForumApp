@@ -1,15 +1,14 @@
 ﻿using ForumApp.Data.Models;
+using ForumApp.GCommon;
 using ForumApp.Services.Core;
 using ForumApp.Services.Core.Interfaces;
 using ForumApp.Web.ViewModels.Post;
-using ForumApp.Web.ViewModels.Tag;
+using ForumApp.Web.ViewModels.Reply;
 using MockQueryable;
 using Moq;
 using System.Linq.Expressions;
-using System.Threading.Tasks;
-using static ForumApp.GCommon.Enums.FilterEnums;
+
 using static ForumApp.GCommon.Enums.SortEnums;
-using static System.Net.WebRequestMethods;
 
 namespace ForumApp.Services.Tests;
 
@@ -591,6 +590,141 @@ public class PostServiceTests
         Assert.That(model.Content, Is.EqualTo(post.Content));
     }
 
+    //GetPostDetails
+    [Test]
+    public void GetPostDetailsAsyncThrowsExceptionWhenPostNotFound()
+    {
+        const int index = 1;
+        const int pagesize = 10;
+        Post? post = null;
+
+        postRepositoryMock
+            .Setup(pr => pr.SingleOrDefaultWithIncludeAsync(It.IsAny<Expression<Func<Post, bool>>>(),
+                It.IsAny<Func<IQueryable<Post>, IQueryable<Post>>>(), It.IsAny<bool>(), It.IsAny<bool>()))
+            .ReturnsAsync(post);
+
+        PostService service = new PostService(postRepositoryMock.Object,
+            boardRepositoryMock.Object,
+            postTagRepositoryMock.Object,
+            replyServiceMock.Object,
+            tagServiceMock.Object,
+            permissionServiceMock.Object);
+
+        ArgumentException ex = Assert.ThrowsAsync<ArgumentException>(() =>
+            service.GetPostDetailsAsync(Guid.NewGuid(), Guid.NewGuid(), ReplySort.ReplySortBy.Default, index, pagesize));
+
+        Assert.That(ex.Message, Does.Contain("Post not found"));
+    }
+    [Test]
+    public async Task GetPostDetailsAsyncWorksCorrectly()
+    {
+        const int index = 1;
+        const int pagesize = 10;
+        Post? post = CreateDummyPosts(1).First();
+        CreateDummyTagsWithPostTags(post, 2);
+        post.Replies = CreateDummyReplies(3, post.Id, post.Id);
+
+        post.ApplicationUser!.DisplayName = "Test user";
+        post.Board.Name = "Test board";
+
+        postRepositoryMock
+            .Setup(pr => pr.SingleOrDefaultWithIncludeAsync(It.IsAny<Expression<Func<Post, bool>>>(),
+                It.IsAny<Func<IQueryable<Post>, IQueryable<Post>>>(), It.IsAny<bool>(), It.IsAny<bool>()))
+            .ReturnsAsync(post);
+
+        IQueryable<ReplyForPostDetailViewModel> repliesQuariable = post
+            .Replies
+            .Select(r => new ReplyForPostDetailViewModel
+            {
+                Id = r.Id,
+                Content = r.Content,
+            })
+            .ToArray()
+            .BuildMock();
+
+        replyServiceMock
+            .Setup(rs => rs.GetRepliesForPostDetailsAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<bool>(),
+            It.IsAny<ReplySort.ReplySortBy>(), It.IsAny<int>(), It.IsAny<int>()))
+            .ReturnsAsync(await PaginatedResult<ReplyForPostDetailViewModel>
+                .CreateAsync(repliesQuariable, index, pagesize));
+
+        PostService service = new PostService(postRepositoryMock.Object,
+            boardRepositoryMock.Object,
+            postTagRepositoryMock.Object,
+            replyServiceMock.Object,
+            tagServiceMock.Object,
+            permissionServiceMock.Object);
+
+        PostDetailsViewModel model = await service
+                .GetPostDetailsAsync(post.ApplicationUserId,
+                    post.Id, ReplySort.ReplySortBy.Default, index, pagesize);
+
+        Assert.That(model.Id, Is.EqualTo(post.Id));
+        Assert.That(model.Title, Is.EqualTo(post.Title));
+        Assert.That(model.Content, Is.EqualTo(post.Content));
+        Assert.That(model.BoardId, Is.EqualTo(post.BoardId));
+        Assert.That(model.IsPinned, Is.EqualTo(post.IsPinned));
+        Assert.That(model.Tags!.Select(t => t.Id).ToArray(),
+            Is.EqualTo(post.PostTags.Select(pt => pt.TagId).ToArray()));
+        Assert.That(model.Replies.Items.Select(r => r.Id).ToList(),
+            Is.EqualTo(post.Replies.Select(r => r.Id).ToList()));
+    }
+
+    //GetPostForEdit
+    [Test]
+    public void GetPostForEditAsyncThrowsExceptionWhenPostNotFound()
+    {
+        Post? post = null;
+
+        postRepositoryMock
+            .Setup(pr => pr.SingleOrDefaultWithIncludeAsync(It.IsAny<Expression<Func<Post, bool>>>(),
+                It.IsAny<Func<IQueryable<Post>, IQueryable<Post>>>(), It.IsAny<bool>(), It.IsAny<bool>()))
+            .ReturnsAsync(post);
+
+        PostService service = new PostService(postRepositoryMock.Object,
+            boardRepositoryMock.Object,
+            postTagRepositoryMock.Object,
+            replyServiceMock.Object,
+            tagServiceMock.Object,
+            permissionServiceMock.Object);
+
+        ArgumentException ex = Assert.ThrowsAsync<ArgumentException>(() =>
+            service.GetPostForEditAsync(Guid.NewGuid(), Guid.NewGuid()));
+
+        Assert.That(ex.Message, Does.Contain("Post not found"));
+    }
+    [Test]
+    public async Task GetPostForEditAsyncWorksCorrectly()
+    {
+        Post? post = CreateDummyPosts(1).First();
+        CreateDummyTagsWithPostTags(post, 2);
+
+        post.ApplicationUser!.DisplayName = "Test user";
+        post.Board.Name = "Test board";
+
+        postRepositoryMock
+            .Setup(pr => pr.SingleOrDefaultWithIncludeAsync(It.IsAny<Expression<Func<Post, bool>>>(),
+                It.IsAny<Func<IQueryable<Post>, IQueryable<Post>>>(), It.IsAny<bool>(), It.IsAny<bool>()))
+            .ReturnsAsync(post);
+
+        PostService service = new PostService(postRepositoryMock.Object,
+            boardRepositoryMock.Object,
+            postTagRepositoryMock.Object,
+            replyServiceMock.Object,
+            tagServiceMock.Object,
+            permissionServiceMock.Object);
+
+        PostEditInputModel model = await service
+                .GetPostForEditAsync((Guid)post.ApplicationUserId!, post.Id);
+
+        Assert.That(model.Id, Is.EqualTo(post.Id));
+        Assert.That(model.Title, Is.EqualTo(post.Title));
+        Assert.That(model.Content, Is.EqualTo(post.Content));
+        Assert.That(model.BoardId, Is.EqualTo(post.BoardId));
+        Assert.That(model.Tags!.Select(t => t.Id).ToArray(),
+            Is.EqualTo(post.PostTags.Select(pt => pt.TagId).ToArray()));
+    }
+
     private List<Post> CreateDummyPosts(int count = 3, Guid? boardId = null, Guid? userId = null)
     {
         var posts = new List<Post>();
@@ -612,11 +746,63 @@ public class PostServiceTests
                 BoardId = fixedBoardId,
                 Board = new Board(),
                 ApplicationUserId = fixedUserId,
+                ApplicationUser = new ApplicationUser(),
                 Replies = new List<Reply>(),
                 PostTags = new List<PostTag>()
             });
         }
 
         return posts;
+    }
+    private List<Reply> CreateDummyReplies(int count = 2, Guid? postId = null, Guid? userId = null)
+    {
+        var replies = new List<Reply>();
+        var fixedPostId = postId ?? Guid.NewGuid();
+        var fixedUserId = userId ?? Guid.NewGuid();
+
+        for (int i = 1; i <= count; i++)
+        {
+            replies.Add(new Reply
+            {
+                Id = Guid.NewGuid(),
+                Content = $"This is reply {i} to post.",
+                CreatedAt = DateTime.UtcNow.AddHours(-i),
+                IsDeleted = false,
+                PostId = fixedPostId,
+                Post = new Post(),
+                ApplicationUserId = fixedUserId,
+                ApplicationUser = new ApplicationUser()
+            });
+        }
+
+        return replies;
+    }
+
+    private (List<Tag> Tags, List<PostTag> PostTags) CreateDummyTagsWithPostTags(Post post, int tagCount = 2)
+    {
+        var tags = new List<Tag>();
+        var postTags = new List<PostTag>();
+
+        for (int i = 1; i <= tagCount; i++)
+        {
+            var tag = new Tag
+            {
+                Id = Guid.NewGuid(),
+                Name = $"Tag{i}",
+                ColorHex = "ffffff"
+            };
+
+            tags.Add(tag);
+
+            postTags.Add(new PostTag
+            {
+                PostId = post.Id,
+                Post = post,
+                TagId = tag.Id,
+                Tag = tag
+            });
+        }
+
+        return (tags, postTags);
     }
 }
