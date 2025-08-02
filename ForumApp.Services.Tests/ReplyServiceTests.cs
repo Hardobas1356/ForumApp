@@ -27,7 +27,7 @@ public class ReplyServiceTests
         replyRepositoryMock = new Mock<IGenericRepository<Reply>>();
         postRepositoryMock = new Mock<IGenericRepository<Post>>();
         userManagerMock = new Mock<UserManager<ApplicationUser>>(
-            Mock.Of<IUserStore<ApplicationUser>>(), null, null, null, null, null, null, null, null
+            Mock.Of<IUserStore<ApplicationUser>>(), null!, null!, null!, null!, null!, null!, null!, null!
         );
 
         user = new ApplicationUser { Id = userId, DisplayName = "TestUser" };
