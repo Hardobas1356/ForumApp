@@ -56,14 +56,16 @@ public class PostController : BaseController
     {
         try
         {
-            var model = await postService
-                .GetPostForEditAsync((Guid)this.GetUserId()!, id);
+            Guid userId = (Guid)this.GetUserId()!;
 
-            if (!await permissionService.CanManagePostAsync((Guid)this.GetUserId()!, id))
+            if (!await permissionService.IsOwnerOfPost(userId, id))
             {
-                logger.LogWarning("User does not permission to edit");
-                return RedirectToAction("Index", "Board");
+                logger.LogError("User does not have rights to edit post");
+                return RedirectToAction(nameof(Details), new { Id = id });
             }
+
+            PostEditInputModel model = await postService
+                .GetPostForEditAsync((Guid)this.GetUserId()!, id);
 
             return View(model);
         }
@@ -80,10 +82,12 @@ public class PostController : BaseController
     {
         try
         {
-            if (!await permissionService.CanManagePostAsync((Guid)this.GetUserId()!, model.Id))
+            Guid userId = (Guid)this.GetUserId()!;
+
+            if (!await permissionService.IsOwnerOfPost(userId, model.Id))
             {
-                logger.LogWarning("User does not permission to edit");
-                return RedirectToAction("Index", "Board");
+                logger.LogError("User does not have rights to edit post");
+                return RedirectToAction(nameof(Details), new { Id = model.Id });
             }
 
             if (!this.ModelState.IsValid)
@@ -95,7 +99,7 @@ public class PostController : BaseController
                 return this.View(model);
             }
 
-            await postService.EditPostAsync((Guid)this.GetUserId()!, model);
+            await postService.EditPostAsync(userId, model);
 
             return RedirectToAction("Details", new { Id = model.Id });
         }
@@ -188,14 +192,17 @@ public class PostController : BaseController
     {
         try
         {
-            if (!await permissionService.CanManagePostAsync((Guid)this.GetUserId()!, id))
+            Guid userId = (Guid)this.GetUserId()!;
+
+            if (!await permissionService.IsOwnerOfPost(userId, id)
+                && !await permissionService.CanManagePostAsync(userId, id))
             {
                 logger.LogWarning("User does not rights to delete");
                 return RedirectToAction("Index", "Board");
             }
 
             PostDeleteViewModel? model = await postService
-                .GetPostForDeleteAsync((Guid)this.GetUserId()!, id);
+                .GetPostForDeleteAsync(userId, id);
 
             return View(model);
         }
@@ -212,14 +219,17 @@ public class PostController : BaseController
     {
         try
         {
-            if (!await permissionService.CanManagePostAsync((Guid)this.GetUserId()!, model.Id))
+            Guid userId = (Guid)this.GetUserId()!;
+
+            if (!await permissionService.IsOwnerOfPost(userId, model.Id)
+                && !await permissionService.CanManagePostAsync(userId, model.Id))
             {
                 logger.LogWarning("User does not rights to delete");
                 return RedirectToAction("Index", "Board");
             }
 
             await postService
-                .DeletePostAsync((Guid)this.GetUserId()!, model);
+                .DeletePostAsync(userId, model);
 
             return RedirectToAction("Index", "Board");
         }

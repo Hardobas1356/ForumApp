@@ -314,13 +314,6 @@ public class PostService : IPostService
             throw new ArgumentException($"Post not found. Post id: {id}");
         }
 
-        bool canDelete = await permissionService.CanManagePostAsync(userId, post.Id);
-
-        if (!canDelete)
-        {
-            throw new UnauthorizedAccessException("User does not have permission to remove post");
-        }
-
         PostDeleteViewModel? model = new PostDeleteViewModel
         {
             Id = post.Id,
@@ -343,13 +336,6 @@ public class PostService : IPostService
         if (post == null)
         {
             throw new ArgumentException($"Post not found. Id: {model.Id}");
-        }
-
-        bool canDelete = await permissionService.CanManagePostAsync(userId, post.Id);
-
-        if (!canDelete)
-        {
-            throw new UnauthorizedAccessException("User does not have permission to remove post");
         }
 
         post.IsDeleted = true;

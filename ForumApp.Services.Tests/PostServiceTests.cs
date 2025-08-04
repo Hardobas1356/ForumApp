@@ -279,32 +279,6 @@ public class PostServiceTests
         Assert.That(ex.Message, Does.Contain("Post not found"));
     }
     [Test]
-    public void DeletePostAsyncThrowsExceptionWhenNoPermission()
-    {
-        Post? post = new Post();
-
-        postRepositoryMock
-            .Setup(pr => pr.SingleOrDefaultAsync(It.IsAny<Expression<Func<Post, bool>>>(),
-                It.IsAny<bool>(), It.IsAny<bool>()))
-            .ReturnsAsync(post);
-
-        permissionServiceMock
-            .Setup(ps => ps.CanManagePostAsync(It.IsAny<Guid>(), It.IsAny<Guid>()))
-            .ReturnsAsync(false);
-
-        PostService service = new PostService(postRepositoryMock.Object,
-            boardRepositoryMock.Object,
-            postTagRepositoryMock.Object,
-            replyServiceMock.Object,
-            tagServiceMock.Object,
-            permissionServiceMock.Object);
-
-        UnauthorizedAccessException ex = Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
-            service.DeletePostAsync(Guid.NewGuid(), new PostDeleteViewModel()));
-
-        Assert.That(ex.Message, Is.EqualTo("User does not have permission to remove post"));
-    }
-    [Test]
     public async Task DeletePostAsyncWorksCorrectly()
     {
         Post? post = new Post()
@@ -356,32 +330,6 @@ public class PostServiceTests
             service.GetPostForDeleteAsync(Guid.NewGuid(), Guid.NewGuid()));
 
         Assert.That(ex.Message, Does.Contain("Post not found"));
-    }
-    [Test]
-    public void GetPostForDeleteAsyncThrowsExceptionWhenNoPermission()
-    {
-        Post? post = new Post();
-
-        postRepositoryMock
-            .Setup(pr => pr.SingleOrDefaultWithIncludeAsync(It.IsAny<Expression<Func<Post, bool>>>(),
-                It.IsAny<Func<IQueryable<Post>, IQueryable<Post>>>(), It.IsAny<bool>(), It.IsAny<bool>()))
-            .ReturnsAsync(post);
-
-        permissionServiceMock
-            .Setup(ps => ps.CanManagePostAsync(It.IsAny<Guid>(), It.IsAny<Guid>()))
-            .ReturnsAsync(false);
-
-        PostService service = new PostService(postRepositoryMock.Object,
-            boardRepositoryMock.Object,
-            postTagRepositoryMock.Object,
-            replyServiceMock.Object,
-            tagServiceMock.Object,
-            permissionServiceMock.Object);
-
-        UnauthorizedAccessException ex = Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
-            service.GetPostForDeleteAsync(Guid.NewGuid(), Guid.NewGuid()));
-
-        Assert.That(ex.Message, Is.EqualTo("User does not have permission to remove post"));
     }
     [Test]
     public async Task GetPostForDeleteAsyncWorksCorrectly()

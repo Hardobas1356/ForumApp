@@ -25,6 +25,25 @@ public class PermissionService : IPermissionService
         this.userManager = userManager;
     }
 
+    public async Task<bool> IsOwnerOfPost(Guid userId, Guid postId)
+    {
+        Post? post = await postRepository
+            .SingleOrDefaultWithIncludeAsync(p => p.Id == postId,
+                                             q => q.Include(p => p.Board),
+                                             asNoTracking: true);
+        if (post == null)
+        {
+            return false;
+        }
+
+        if (post.ApplicationUserId == userId)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
     public async Task<bool> CanManagePostAsync(Guid userId, Guid postId)
     {
         if (await IsAdminAsync(userId))
