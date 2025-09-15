@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>aspnet-ForumApp-59f32cd1-c15f-4a6c-aaa5-cd2e7af02f31</UserSecretsId>
+    <UserSecretsId>88498394-21bc-45a3-aadc-d48a3d824d13</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
